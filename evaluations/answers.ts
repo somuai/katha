@@ -73,7 +73,7 @@ const identity = {
   implementationHash: engineHash.digest("hex"),
   models,
   temperature: 0,
-  maxOutputTokens: 700,
+  maxOutputTokens: 1000,
   node: process.versions.node,
 };
 await mkdir(output, { recursive: true });
