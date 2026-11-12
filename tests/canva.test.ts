@@ -388,3 +388,25 @@ test("Canva service throttling preserves 503 and caps Retry-After", async () => 
     f.close();
   }
 });
+
+test("Canva search accepts the deployed items and design_id response shape", async () => {
+  const f = setup({
+    searchText: JSON.stringify({
+      items: [{ design_id: "DESIGN_1", page_count: 1 }],
+      continuation: "next-page",
+    }),
+  });
+  try {
+    await f.connect();
+    const listing = await f.connector.list("");
+    assert.equal(listing.resources[0].id, "DESIGN_1");
+    assert.equal(listing.resources[0].title, "Untitled design");
+    const receipt = await f.connector.importDesign("DESIGN_1");
+    assert.match(
+      (await f.app.evidence.inspect(receipt.sourceId)).content,
+      /20 seats/,
+    );
+  } finally {
+    f.close();
+  }
+});

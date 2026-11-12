@@ -358,20 +358,24 @@ export function createCanvaConnector(options: Options) {
           );
         await check();
         const resources = rows.slice(0, 20).map((row) => {
+          const id = object(row) ? (row.design_id ?? row.id) : undefined;
           if (
             !object(row) ||
-            !selectionId(row.id) ||
-            typeof row.title !== "string"
+            !selectionId(id) ||
+            (row.title != null && typeof row.title !== "string")
           )
             throw new CanvaError(
               "CANVA_RESPONSE_UNSUPPORTED",
               "Canva returned an unreadable design result.",
               422,
             );
-          const title = row.title.slice(0, 500);
-          selected.set(row.id, { title, listedAt: now(), revision });
+          const title =
+            typeof row.title === "string" && row.title.trim()
+              ? row.title.slice(0, 500)
+              : "Untitled design";
+          selected.set(id, { title, listedAt: now(), revision });
           return {
-            id: row.id,
+            id,
             title,
             summary:
               typeof row.text === "string"
