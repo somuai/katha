@@ -55,6 +55,24 @@ const terms = (text: string) =>
     (x) => x.length > 2 && !stopWords.has(x),
   );
 
+function shortlistedVendors(texts: string[]) {
+  const group = texts
+    .map(
+      (t) =>
+        t.match(/\bshortlisted\s+([^.!?\n]+?)(?=\s+for\b|[.!?\n]|$)/i)?.[1],
+    )
+    .find(Boolean);
+  const names = [
+    ...new Set(
+      group
+        ?.split(/\s*,\s*|\s+and\s+/i)
+        .map((n) => n.trim())
+        .filter((n) => /^[A-Z][A-Za-z0-9 .&-]{0,35}$/.test(n)) || [],
+    ),
+  ];
+  return names.length >= 2 && names.length <= 10 ? names : [];
+}
+
 export function createKatha(options: KathaOptions) {
   mkdirSync(options.directory, { recursive: true });
   mkdirSync(join(options.directory, "sources"), { recursive: true });
@@ -1488,17 +1506,40 @@ export function createKatha(options: KathaOptions) {
         event(id, "sources", { sources: [...local, ...web] });
       }
       if (verification && !web.length) {
+        const names = shortlistedVendors([
+          input.text,
+          ...local.map((s) => s.content),
+        ]);
+        if (names.length)
+          trace.vendorCoverage = {
+            requested: names.length,
+            individuallyCompared: 0,
+            unresolved: names,
+          };
         const answer =
           "I could not obtain current web evidence, so I cannot verify whether the recorded information changed. Your historical sources remain available below. Please retry web search or provide a dated source.";
         update(id, {
           answer,
-          comparisons: local.map((s) => ({
-            claim: compact(s.content, 160),
-            status: "UNVERIFIED",
-            baselineSourceIds: [s.id],
-            evidenceSourceIds: [],
-            explanation: "No current web evidence was obtained.",
-          })),
+          trace,
+          comparisons: names.length
+            ? names.map((name) => ({
+                claim: name + " verification",
+                status: "UNVERIFIED",
+                baselineSourceIds: local
+                  .filter((s) =>
+                    s.content.toLowerCase().includes(name.toLowerCase()),
+                  )
+                  .map((s) => s.id),
+                evidenceSourceIds: [],
+                explanation: "No current web evidence was obtained.",
+              }))
+            : local.map((s) => ({
+                claim: compact(s.content, 160),
+                status: "UNVERIFIED",
+                baselineSourceIds: [s.id],
+                evidenceSourceIds: [],
+                explanation: "No current web evidence was obtained.",
+              })),
         });
         saveAnswer(
           id,
@@ -1686,35 +1727,50 @@ export function createKatha(options: KathaOptions) {
       }
       // Do not let a multi-vendor answer silently omit shortlisted entities.
       if (verification) {
-        const texts = [input.text, ...local.map((s) => s.content)];
-        const group = texts
-          .map(
-            (t) =>
-              t.match(
-                /\bshortlisted\s+([^.!?\n]+?)(?=\s+for\b|[.!?\n]|$)/i,
-              )?.[1],
-          )
-          .find(Boolean);
-        const names =
-          group
-            ?.split(/\s*,\s*|\s+and\s+/i)
-            .map((n) => n.trim())
-            .filter((n) => /^[A-Z][A-Za-z0-9 .&-]{0,35}$/.test(n)) || [];
+        const names = shortlistedVendors([
+          input.text,
+          ...local.map((s) => s.content),
+        ]);
         if (names.length >= 2 && names.length <= 10) {
+          const mentions = (claim: string, name: string) =>
+            new RegExp(
+              "(?:^|[^A-Za-z0-9])" +
+                name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
+                "(?:$|[^A-Za-z0-9])",
+              "i",
+            ).test(claim);
+          // A grouped assertion cannot substitute for individual vendor evidence.
+          for (let i = comparisons.length - 1; i >= 0; i--)
+            if (
+              names.filter((n) => mentions(comparisons[i].claim, n)).length > 1
+            )
+              comparisons.splice(i, 1);
           const omitted = names.filter(
-            (name) =>
-              !comparisons.some((c) =>
-                new RegExp(
-                  "(?:^|[^A-Za-z0-9])" +
-                    name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
-                    "(?:$|[^A-Za-z0-9])",
-                  "i",
-                ).test(c.claim),
-              ),
+            (name) => !comparisons.some((c) => mentions(c.claim, name)),
           );
-          if (omitted.length)
-            result.answer +=
-              "\n\nNot individually verified: " + omitted.join(", ") + ".";
+          for (const name of omitted) {
+            comparisons.push({
+              claim: name + " verification",
+              status: "UNVERIFIED",
+              baselineSourceIds: local
+                .filter((s) => mentions(s.content, name))
+                .map((s) => s.id),
+              evidenceSourceIds: [],
+              explanation:
+                "No individual evidence comparison was established for this vendor. Search completion alone does not establish unchanged pricing or releases.",
+            });
+          }
+          trace.vendorCoverage = {
+            requested: names.length,
+            individuallyCompared: names.length - omitted.length,
+            unresolved: omitted,
+          };
+          result.answer = comparisons
+            .map(
+              (c) =>
+                `**${c.claim}** — ${c.status.replaceAll("_", " ").toLowerCase()}. ${c.explanation}`,
+            )
+            .join("\n\n");
         }
       }
       const answer = result.answer?.trim();

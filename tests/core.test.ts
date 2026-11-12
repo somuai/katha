@@ -1807,8 +1807,15 @@ test("shortlist verification explicitly reports vendors omitted by the model as 
       timezone: "UTC",
     });
     const t = await wait(app, r.turnId);
-    for (const name of ["Attio", "HubSpot", "Close", "Pipedrive", "Folk"])
+    assert.equal(t.comparisons.length, 5);
+    for (const name of ["Attio", "HubSpot", "Close", "Pipedrive", "Folk"]) {
       assert.match(t.answer, new RegExp(name, "i"));
+      assert.ok(t.comparisons.some((c: any) => c.claim.startsWith(name)));
+    }
+    assert.equal(
+      t.comparisons.find((c: any) => c.claim.startsWith("Folk"))?.status,
+      "UNVERIFIED",
+    );
   } finally {
     cleanup();
   }
@@ -1835,6 +1842,15 @@ test("a named shortlist supplied in the current message can be used to check dat
         return {
           answer: "Cedar launched a feature on 10 November.",
           citations: [{ sourceId: web.id }],
+          comparisons: [
+            {
+              claim: "Cedar release",
+              status: "CHANGED_WITH_DATED_EVIDENCE",
+              baselineSourceIds: [c.baseline[0].id],
+              evidenceSourceIds: [web.id],
+              explanation: "Cedar launched a feature on 10 November.",
+            },
+          ],
         };
       },
     },
@@ -1938,6 +1954,95 @@ test("dated recall excludes a cross-chat answer completed after its acceptance c
   } finally {
     aGate.resolve();
     bGate.resolve();
+    cleanup();
+  }
+});
+
+test("a grouped vendor claim cannot mark every shortlisted vendor individually checked", async () => {
+  const { app, cleanup } = setup({
+    search: {
+      async search() {
+        return [
+          {
+            title: "Vendor summary",
+            url: "https://example.com",
+            content: "Unrelated summary.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        return {
+          answer: "All stable.",
+          comparisons: [
+            {
+              claim: "Alder and Birch are unchanged",
+              status: "CURRENTLY_MATCHES",
+              baselineSourceIds: [c.baseline[0].id],
+              evidenceSourceIds: [
+                c.evidence.find((s: any) => s.kind === "web").id,
+              ],
+              explanation: "Combined assertion.",
+            },
+          ],
+        };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Shortlist",
+      content: "We shortlisted Alder and Birch.",
+    });
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "group",
+      expectedTailId: null,
+      text: "We shortlisted Alder and Birch. Has anything changed?",
+    });
+    const turn = await wait(app, receipt.turnId);
+    assert.equal(turn.comparisons.length, 2);
+    assert.ok(turn.comparisons.every((c: any) => c.status === "UNVERIFIED"));
+    assert.doesNotMatch(turn.answer, /All stable/);
+    assert.deepEqual((turn.trace.vendorCoverage as any).unresolved, [
+      "Alder",
+      "Birch",
+    ]);
+  } finally {
+    cleanup();
+  }
+});
+
+test("failed search leaves an explicit unverified result for every shortlisted vendor", async () => {
+  const { app, cleanup } = setup({
+    search: {
+      async search() {
+        throw Error("Search is unavailable");
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Shortlist",
+      content: "We shortlisted Alder and Birch.",
+    });
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "no-web",
+      expectedTailId: null,
+      text: "We shortlisted Alder and Birch. Has anything changed?",
+    });
+    const turn = await wait(app, receipt.turnId);
+    assert.equal(turn.status, "PARTIAL");
+    assert.equal(turn.comparisons.length, 2);
+    assert.deepEqual(
+      turn.comparisons.map((c: any) => c.claim),
+      ["Alder verification", "Birch verification"],
+    );
+  } finally {
     cleanup();
   }
 });

@@ -21,6 +21,7 @@
     "@fastify/static": "latest",
     "@huggingface/transformers": "latest",
     "@js-temporal/polyfill": "latest",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@napi-rs/canvas": "^1.1.0",
     "@phosphor-icons/react": "^2.1.10",
     "better-sqlite3": "latest",
@@ -33,7 +34,8 @@
     "react-dom": "latest",
     "react-markdown": "latest",
     "sharp": "latest",
-    "vite": "latest"
+    "vite": "latest",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

@@ -23,3 +23,9 @@ This is not a general-purpose database engine: decimals, complex group-by questi
 In a live Monday-shortlist check, five search queries completed, but the generated answer covered only three of five vendors and could not establish like-for-like historical prices. Comprehensive per-vendor coverage and the hand-reviewed 90% supported-claim gate remain open. Live result logs and the synthetic test harness are local; no user's real records were used.
 
 Evaluation note: the older `answers-reviewed` manifest listed a 700-token output limit; the answer adapter actually requested 1000. The historical result is retained, and the runner now records the correct value for future runs. The latest five-vendor live check used five search queries and explicitly labeled two vendors as not individually verified; stronger evidence coverage and an independent claim review remain open.
+
+## Connections and image audit
+
+The owner confirmed VoiceOver, the privacy dialog and physical microphone transcription. The local Connections panel now manages explicitly selected HTTPS MCP servers and imports advertised text resources through the official MCP SDK. Credentials stay in the local private configuration; source provenance is retained. This is resource import, not arbitrary agent tool access. Generic OAuth, a Codex-style provider catalog, and live Canva/CRM adapters are not implemented. Public or bearer-authenticated resource servers are the supported scope; tools-only services give an explicit unsupported error.
+
+Image normalization now applies a white matte to transparent inputs. Short extractable PDFs no longer require a vision key. Multi-vendor verification now gives every named entity an individual structured result; missing or grouped-only assessments remain explicitly unverified. Protocol fixtures cover MCP selection, imports, authorization failures, unsupported resources, size limits and credentials not appearing in responses.

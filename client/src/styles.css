@@ -1911,3 +1911,54 @@ body {
   align-items: center;
   gap: 6px;
 }
+
+.connections {
+  color: #37352f;
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+.connections p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.connections label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  margin: 14px 0;
+}
+.connections input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d5d4d0;
+  border-radius: 7px;
+  background: #fff;
+}
+.connections button:not(.icon) {
+  padding: 9px 12px;
+  border-radius: 6px;
+  margin: 8px 5px 8px 0;
+  background: #ededea;
+  color: #37352f;
+  font-size: 12px;
+}
+.connections small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.connection-item {
+  border-top: 1px solid #ddd;
+  padding-top: 14px;
+  margin-top: 14px;
+}
+.connection-note {
+  padding: 12px;
+  background: #f4f4f1;
+  border-radius: 8px;
+}

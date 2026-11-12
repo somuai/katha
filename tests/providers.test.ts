@@ -529,3 +529,80 @@ test("a large CSV follow-up receives complete counts for low-cardinality attenda
   assert.match(result.answer, /present.*63/);
   assert.match(result.answer, /absent.*37/);
 });
+
+test("transparent diagrams retain a light readable background during image normalization", async () => {
+  const { extractAttachment } = await import("../src/ingestion/index.ts");
+  const { default: sharp } = await import("sharp");
+  const image = await sharp({
+    create: {
+      width: 32,
+      height: 24,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .png()
+    .toBuffer();
+  const providers = createProviders({
+    groqKey: "fixture",
+    fetcher: (async (_url, init) => {
+      const request = JSON.parse(String(init?.body));
+      const url = request.messages[1].content[0].image_url.url;
+      const stats = await sharp(
+        Buffer.from(url.split(",")[1], "base64"),
+      ).stats();
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  text: stats.channels.every((c) => c.mean > 245)
+                    ? "Light background"
+                    : "Dark background",
+                }),
+              },
+            },
+          ],
+        }),
+      );
+    }) as typeof fetch,
+  });
+  const extracted = await extractAttachment(image, "diagram.png", "image/png", {
+    providers,
+  });
+  assert.equal(extracted.content, "Light background");
+});
+
+test("a short text PDF is extracted without requiring a vision provider", async () => {
+  const { extractAttachment } = await import("../src/ingestion/index.ts");
+  const stream = "BT /F1 12 Tf 20 100 Td (USD 20) Tj ET";
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+    `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((o, i) => {
+    offsets.push(Buffer.byteLength(pdf));
+    pdf += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const start = Buffer.byteLength(pdf);
+  pdf += `xref\n0 6\n0000000000 65535 f \n${offsets
+    .slice(1)
+    .map((n) => String(n).padStart(10, "0") + " 00000 n ")
+    .join(
+      "\n",
+    )}\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${start}\n%%EOF`;
+  const result = await extractAttachment(
+    Buffer.from(pdf),
+    "short.pdf",
+    "application/pdf",
+    { providers: createProviders({}) },
+  );
+  assert.equal(result.method, "pdf-text-extraction");
+  assert.match(result.content, /USD 20/);
+});

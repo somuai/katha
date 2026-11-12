@@ -39,6 +39,7 @@ export async function extractAttachment(
         fit: "inside",
         withoutEnlargement: true,
       })
+      .flatten({ background: "#ffffff" })
       .jpeg({ quality: 85 })
       .toBuffer();
     const content = await options.providers.describeImage(
@@ -112,7 +113,7 @@ export async function extractAttachment(
         let content = text.items
           .map((item) => ("str" in item ? item.str : ""))
           .join(" ");
-        if (content.trim().length < 20) {
+        if (!content.trim()) {
           const { createCanvas } = await import("@napi-rs/canvas");
           const natural = page.getViewport({ scale: 1 }),
             scale = Math.min(2, 1536 / Math.max(natural.width, natural.height));

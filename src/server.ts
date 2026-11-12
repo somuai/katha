@@ -1,3 +1,4 @@
+import { registerConnections } from "./connectors/routes.js";
 import "dotenv/config";
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
@@ -171,6 +172,7 @@ app.post("/api/sources", async (req) => {
     throw error;
   }
 });
+await registerConnections(app, katha.evidence, directory);
 const vite = await createViteServer({
   configFile: path.resolve("vite.config.ts"),
   appType: "spa",

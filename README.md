@@ -27,3 +27,7 @@ This copy lives on an APFS image on the owner's SSD to avoid filling the laptop.
 Set keys in the root `.env` file, using the names in `.env.example`. The desktop copy's convenient path is `/Users/soumyajitghosh/Downloads/files/katha/.env`; a judge uses their own clone's `.env`. Do not paste keys in chat or add them to Git. Restart `npm run dev` after changing keys.
 
 `npm run test:browser` uses a Playwright-installed Chromium (`npx playwright install chromium`). Optionally set `CHROME_PATH` to a local Chrome executable, or `BROWSER=webkit` after installing WebKit. Browser tests use isolated temporary history and blank provider credentials. `npm run lint` checks formatting. CI defines Node 24 checks for macOS, Windows and Linux; those jobs must actually run before declaring platform support verified.
+
+## External sources
+
+Use **Connections** in the sidebar, or type **@** and choose **Connect a source**. Supported MCP resource imports are described in [MCP.md](docs/MCP.md). This local app supports advertised text resources over HTTPS, optionally with bearer authentication; a saved URL is configuration, not proof of account access. OAuth and tools-only Canva/CRM providers require additional adapters and are not claimed as working. The agent itself still exposes only web search.

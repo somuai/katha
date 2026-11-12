@@ -1,3 +1,4 @@
+import { Connections } from "./Connections.js";
 import { AnimatedTitleWord } from "./AnimatedTitle.js";
 import { PaperclipIcon as Paperclip } from "@phosphor-icons/react/dist/icons/Paperclip";
 import { ImageIcon as ImageIcon } from "@phosphor-icons/react/dist/icons/Image";
@@ -98,6 +99,7 @@ const Icon = ({ name }: { name: string }) => (
 );
 
 export default function App() {
+  const [showConnections, setShowConnections] = useState(false);
   const [conversations, setConversations] = useState<Item[]>([]),
     [sources, setSources] = useState<Item[]>([]),
     [configured, setConfigured] = useState<any>({}),
@@ -714,6 +716,7 @@ export default function App() {
           )}
         </div>
         <div className="side-footer">
+          <button onClick={() => setShowConnections(true)}>Connections</button>
           <button
             className={tab === "trash" ? "selected" : ""}
             onClick={() => setTab("trash")}
@@ -937,6 +940,10 @@ export default function App() {
                 value={draft}
                 onChange={(e) => {
                   setDraft(e.target.value);
+                  if (/(?:^|\s)@[\p{L}\p{N}_-]*$/u.test(e.target.value))
+                    document
+                      .getElementById("saved-source-picker")
+                      ?.setAttribute("open", "");
                   e.target.style.height = "auto";
                   e.target.style.height =
                     Math.min(e.target.scrollHeight, 180) + "px";
@@ -1003,6 +1010,7 @@ export default function App() {
                     <ImageIcon aria-hidden="true" />
                   </button>
                   <details
+                    id="saved-source-picker"
                     className="composer-popover"
                     onKeyDown={(e) => {
                       if (e.key === "Escape") {
@@ -1019,6 +1027,17 @@ export default function App() {
                     </summary>
                     <div className="composer-menu">
                       <strong>Add a source</strong>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.currentTarget
+                            .closest("details")
+                            ?.removeAttribute("open");
+                          setShowConnections(true);
+                        }}
+                      >
+                        Connect a source…
+                      </button>
                       {sources.filter((s) => !s.deletedAt).length ? (
                         sources
                           .filter((s) => !s.deletedAt)
@@ -1038,6 +1057,9 @@ export default function App() {
                                         ...old,
                                         { ...s, name: s.title || s.name },
                                       ],
+                                );
+                                setDraft((old) =>
+                                  old.replace(/(?:^|\s)@[\p{L}\p{N}_-]*$/u, ""),
                                 );
                                 e.currentTarget
                                   .closest("details")
@@ -1228,6 +1250,14 @@ export default function App() {
           )}
         </section>
       </main>
+      {showConnections && (
+        <Connections
+          onClose={() => setShowConnections(false)}
+          onImported={() => {
+            void refresh();
+          }}
+        />
+      )}
       {(inspection || showAudit) && (
         <div
           className="inspector-backdrop"

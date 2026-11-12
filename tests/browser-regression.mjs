@@ -57,6 +57,34 @@ try {
   await page.getByRole("heading", { name: "Ask Katha", exact: true }).waitFor();
   await mkdir("qa", { recursive: true });
   await page.screenshot({ path: "qa/composer-reference.png" });
+  await page.getByRole("button", { name: "Connections", exact: true }).click();
+  await page.getByRole("dialog", { name: "Connections" }).waitFor();
+  await page
+    .getByLabel("HTTPS MCP server URL")
+    .fill("https://fixture.example/mcp");
+  const connectionViolations = (
+    await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+      .analyze()
+  ).violations;
+  assert.deepEqual(
+    connectionViolations.map((v) => v.id),
+    [],
+  );
+  await page.screenshot({ path: "qa/connections.png" });
+  await page.keyboard.press("Escape");
+  await page.getByRole("textbox", { name: "Message Katha" }).fill("@");
+  assert.equal(
+    await page.locator("#saved-source-picker").getAttribute("open"),
+    "",
+  );
+  await page
+    .getByRole("button", { name: "Connect a source…", exact: true })
+    .click();
+  await page.getByRole("dialog", { name: "Connections" }).waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("textbox", { name: "Message Katha" }).fill("");
+
   await page.getByLabel("Memory and attachment settings").click();
   await page.getByLabel("Memory scope").selectOption("conversation");
   await page.getByLabel("Memory scope").selectOption("workspace");

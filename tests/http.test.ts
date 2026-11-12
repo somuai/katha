@@ -48,6 +48,28 @@ test("HTTP persists a turn and exposes complete replay without configured provid
     };
     const workspace = await api("/api/workspace");
     assert.deepEqual(workspace.conversations, []);
+    assert.deepEqual((await api("/api/connections")).connections, []);
+    const added = await api("/api/connections", {
+      label: "Fixture resource server",
+      url: "https://fixture.example/mcp",
+      token: "private-fixture-token",
+    });
+    const listing = await api("/api/connections");
+    assert.equal(listing.connections[0].id, added.id);
+    assert.ok(!JSON.stringify(listing).includes("private-fixture-token"));
+    const removed = await fetch(
+      `http://localhost:${port}/api/connections/${added.id}`,
+      { method: "DELETE" },
+    );
+    assert.ok(removed.ok);
+    assert.deepEqual((await api("/api/connections")).connections, []);
+    const invalid = await fetch(`http://localhost:${port}/api/connections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label: "Bad", url: "http://localhost:1234/mcp" }),
+    });
+    assert.equal(invalid.status, 400);
+    assert.deepEqual((await api("/api/connections")).connections, []);
     const c = await api("/api/conversations", { title: "HTTP fixture" });
     const input = {
       clientRequestId: "one",
