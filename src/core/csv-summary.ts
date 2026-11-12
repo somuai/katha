@@ -46,6 +46,35 @@ export function summarizeCsv(text: string, question: string) {
         ? [`${name}: ${numbers.length} integer values, sum ${sum}`]
         : [];
     });
+    // Exact categorical frequencies cover common attendance and CRM stage questions.
+    // High-cardinality columns (e.g. names or IDs) are intentionally omitted.
+    const categories = headers
+      .flatMap((name, i) => {
+        const counts = new Map<string, number>();
+        for (const row of data) {
+          const value = row[i].trim() || "(empty)";
+          counts.set(value, (counts.get(value) || 0) + 1);
+          if (counts.size > 12) return [];
+        }
+        if ([...counts.keys()].every((value) => /^-?\d+$/.test(value)))
+          return [];
+        const entries = [...counts].map(
+          ([value, count]) => `${JSON.stringify(value)}: ${count}`,
+        );
+        const score = terms.some(
+          (term) =>
+            name.toLowerCase().includes(term) ||
+            [...counts.keys()].some((value) => value.toLowerCase() === term),
+        )
+          ? 1
+          : 0;
+        return [{ name, entries, score }];
+      })
+      .sort((a, b) => b.score - a.score)
+      .map(
+        ({ name, entries }) =>
+          `${name} counts across all rows: ${entries.join(", ")}`,
+      );
     const matched = data
       .filter((row) =>
         row.some(
@@ -55,16 +84,25 @@ export function summarizeCsv(text: string, question: string) {
         ),
       )
       .slice(0, 5);
-    return [
-      `Complete CSV: ${data.length} data rows.`,
-      ...stats,
+    const lines = [
+      `Complete CSV: ${data.length} data rows. Whole-number sums and low-cardinality counts below are computed across all rows; other analyses may require more evidence.`,
       ...matched.map(
         (row) =>
           "Matching row: " + headers.map((h, i) => `${h}=${row[i]}`).join(", "),
       ),
-    ]
-      .join("\n")
-      .slice(0, 1200);
+      ...categories,
+      ...stats,
+    ];
+    const included: string[] = [];
+    let used = 0;
+    for (const line of lines) {
+      if (used + line.length + 1 > 1120) continue;
+      included.push(line);
+      used += line.length + 1;
+    }
+    if (included.length < lines.length)
+      included.push("Additional summary fields were omitted due to size.");
+    return included.join("\n");
   } catch {
     return undefined;
   }

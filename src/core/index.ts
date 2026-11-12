@@ -1177,6 +1177,30 @@ export function createKatha(options: KathaOptions) {
       let local: Source[] = recalled.sources.filter(
         (s) => s.id !== own.id && s.kind !== "web",
       );
+      // Date-specific questions about what was asked refer to original user
+      // messages, rather than every attachment or unrelated answer on that day.
+      if (
+        historical &&
+        /\bwhat did i ask\b|\bwhat (?:was|were) my questions?\b/i.test(
+          input.text,
+        )
+      ) {
+        local = local.filter((s) => s.kind === "message" && s.role === "user");
+      }
+      // The visitor can provide the shortlist in the question itself. This is
+      // evidence of their present statement, not evidence of historical prices.
+      if (historical && verification && !local.length) {
+        const group = input.text.match(
+          /\bshortlisted\s+([^.!?\n]+?)(?=\s+for\b|[.!?\n]|$)/i,
+        )?.[1];
+        const names =
+          group
+            ?.split(/\s*,\s*|\s+and\s+/i)
+            .map((n) => n.trim())
+            .filter((n) => /^[A-Z][A-Za-z0-9 .&-]{0,35}$/.test(n)) || [];
+        if (names.length >= 2 && names.length <= 10)
+          local.push(source(requireSource(own.id)));
+      }
       let previousObservationIds: string[] = [];
       if (
         verification &&
@@ -1250,9 +1274,9 @@ export function createKatha(options: KathaOptions) {
           if (s.role !== "user" || !s.turnId) continue;
           const answer = db
             .prepare(
-              "SELECT s.* FROM sources s JOIN turns t ON t.id=s.turn_id WHERE s.turn_id=? AND s.role='assistant' AND s.deleted_at IS NULL AND s.invalidated=0 AND t.status='COMPLETED'",
+              "SELECT s.* FROM sources s JOIN turns t ON t.id=s.turn_id WHERE s.turn_id=? AND s.role='assistant' AND s.deleted_at IS NULL AND s.invalidated=0 AND t.status='COMPLETED' AND (s.ordinal<=? OR (s.conversation_id=? AND t.seq<?))",
             )
-            .get(s.turnId) as any;
+            .get(s.turnId, row.cutoff, input.conversationId, row.seq) as any;
           if (answer && !local.some((x) => x.id === answer.id))
             local.push(source(answer));
         }
@@ -1659,6 +1683,39 @@ export function createKatha(options: KathaOptions) {
               `**${c.claim}** — ${c.status.replaceAll("_", " ").toLowerCase()}. ${c.explanation}`,
           )
           .join("\n\n");
+      }
+      // Do not let a multi-vendor answer silently omit shortlisted entities.
+      if (verification) {
+        const texts = [input.text, ...local.map((s) => s.content)];
+        const group = texts
+          .map(
+            (t) =>
+              t.match(
+                /\bshortlisted\s+([^.!?\n]+?)(?=\s+for\b|[.!?\n]|$)/i,
+              )?.[1],
+          )
+          .find(Boolean);
+        const names =
+          group
+            ?.split(/\s*,\s*|\s+and\s+/i)
+            .map((n) => n.trim())
+            .filter((n) => /^[A-Z][A-Za-z0-9 .&-]{0,35}$/.test(n)) || [];
+        if (names.length >= 2 && names.length <= 10) {
+          const omitted = names.filter(
+            (name) =>
+              !comparisons.some((c) =>
+                new RegExp(
+                  "(?:^|[^A-Za-z0-9])" +
+                    name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
+                    "(?:$|[^A-Za-z0-9])",
+                  "i",
+                ).test(c.claim),
+              ),
+          );
+          if (omitted.length)
+            result.answer +=
+              "\n\nNot individually verified: " + omitted.join(", ") + ".";
+        }
       }
       const answer = result.answer?.trim();
       if (!answer)

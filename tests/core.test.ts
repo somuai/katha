@@ -1761,3 +1761,183 @@ test("a follow-up about an attached CSV keeps the earlier attachment in context"
     cleanup();
   }
 });
+
+test("shortlist verification explicitly reports vendors omitted by the model as unverified", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-12T12:00:00Z"),
+    search: {
+      async search() {
+        return [
+          {
+            title: "Pricing",
+            url: "https://example.com",
+            content: "Pricing page.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        const web = c.evidence.find((s: any) => s.kind === "web");
+        return {
+          answer: "Attio and HubSpot require verification.",
+          comparisons: ["Attio", "HubSpot"].map((claim) => ({
+            claim: claim + " pricing",
+            status: "UNVERIFIED",
+            baselineSourceIds: [c.baseline[0].id],
+            evidenceSourceIds: [web.id],
+            explanation: "Missing past terms.",
+          })),
+        };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Shortlist",
+      content: "We shortlisted Attio, HubSpot, Close, Pipedrive and Folk.",
+      occurredAt: "2026-11-09",
+    });
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "shortlist",
+      expectedTailId: null,
+      text: "On Monday we shortlisted Attio, HubSpot, Close, Pipedrive and Folk. Has pricing changed since?",
+      timezone: "UTC",
+    });
+    const t = await wait(app, r.turnId);
+    for (const name of ["Attio", "HubSpot", "Close", "Pipedrive", "Folk"])
+      assert.match(t.answer, new RegExp(name, "i"));
+  } finally {
+    cleanup();
+  }
+});
+
+test("a named shortlist supplied in the current message can be used to check dated launches even without older history", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-12T12:00:00Z"),
+    search: {
+      async search() {
+        return [
+          {
+            title: "Launch",
+            url: "https://example.com/release",
+            content: "Effective 2026-11-10, Cedar launched a new feature.",
+            effectiveAt: "2026-11-10T00:00:00Z",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        const web = c.evidence.find((s: any) => s.kind === "web");
+        return {
+          answer: "Cedar launched a feature on 10 November.",
+          citations: [{ sourceId: web.id }],
+        };
+      },
+    },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "inline",
+      expectedTailId: null,
+      text: "On Monday we shortlisted Alder, Birch, Cedar, Dogwood and Elm. Has any shipped a major release since?",
+      timezone: "UTC",
+    });
+    const t = await wait(app, r.turnId);
+    assert.match(t.answer, /Cedar launched/);
+    assert.ok(t.citations.length);
+  } finally {
+    cleanup();
+  }
+});
+
+test("what did I ask on a date returns original questions, not unrelated uploaded documents", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-03T12:00:00Z"),
+    model: {
+      async generate() {
+        return { answer: "The first answer." };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Unrelated invoice",
+      content: "Invoice: buy twelve office chairs.",
+      occurredAt: "2026-11-03",
+    });
+    const chat = await app.workspace.createConversation();
+    const first = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "first",
+      expectedTailId: null,
+      text: "Why did we choose Cedar?",
+    });
+    await wait(app, first.turnId);
+    const next = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "recall",
+      expectedTailId: first.chatTail,
+      text: "What did I ask you on 3 November?",
+      timezone: "UTC",
+    });
+    const result = await wait(app, next.turnId);
+    assert.match(result.answer, /Why did we choose Cedar/);
+    assert.match(result.answer, /The first answer/);
+    assert.doesNotMatch(result.answer, /office chairs/);
+  } finally {
+    cleanup();
+  }
+});
+
+test("dated recall excludes a cross-chat answer completed after its acceptance cutoff", async () => {
+  const aGate = deferred(),
+    bGate = deferred(),
+    entered: string[] = [];
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-03T12:00:00Z"),
+    model: {
+      async generate(c: any) {
+        entered.push(c.question);
+        if (c.question === "Other question?") {
+          await aGate.promise;
+          return { answer: "LATE PRIVATE ANSWER" };
+        }
+        if (c.question === "Hold current chat") {
+          await bGate.promise;
+          return { answer: "Ready" };
+        }
+        return { answer: "Done" };
+      },
+    },
+  });
+  try {
+    const a = await app.workspace.createConversation(),
+      b = await app.workspace.createConversation();
+    const first = await app.turns.start(
+      input(a.id, "other", "Other question?"),
+    );
+    const hold = await app.turns.start(
+      input(b.id, "hold", "Hold current chat"),
+    );
+    await until(() => entered.length === 2);
+    const recall = await app.turns.start(
+      input(b.id, "recall", "What did I ask on 3 November?", hold.chatTail),
+    );
+    aGate.resolve();
+    await wait(app, first.turnId);
+    bGate.resolve();
+    const result = await wait(app, recall.turnId);
+    assert.match(result.answer, /Other question/);
+    assert.doesNotMatch(result.answer, /LATE PRIVATE ANSWER/);
+  } finally {
+    aGate.resolve();
+    bGate.resolve();
+    cleanup();
+  }
+});

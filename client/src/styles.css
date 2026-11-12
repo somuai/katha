@@ -1875,3 +1875,39 @@ body {
 .welcome h1.binary-title .title-word--name.is-active {
   color: #efd960;
 }
+
+/* A restrained system sans for conversation text, matching the reference's writing style. */
+.composer textarea,
+.in-chat .composer textarea,
+.message-content,
+.message--user .message-content,
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  letter-spacing: 0;
+}
+.message-content {
+  line-height: 1.7;
+  color: #37352f;
+}
+.message--user .message-content {
+  color: #37352f;
+}
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+  font-size: 1.12em;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

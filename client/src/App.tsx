@@ -1105,6 +1105,8 @@ export default function App() {
                       </small>
                     </div>
                   </details>
+                </div>
+                <div className="composer-actions">
                   <button
                     type="button"
                     className={"icon " + (recording ? "recording" : "")}
@@ -1119,36 +1121,36 @@ export default function App() {
                   >
                     <Microphone aria-hidden="true" />
                   </button>
+                  {turn ? (
+                    <button
+                      type="button"
+                      className="stop-button"
+                      onClick={() =>
+                        api("/api/turns/" + turn + "/cancel", {
+                          method: "POST",
+                        }).catch((e) => setError(e.message))
+                      }
+                    >
+                      <i />
+                      Stop
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="send-button"
+                      aria-label="Send message"
+                      disabled={
+                        busy ||
+                        uploading ||
+                        recording ||
+                        transcribing ||
+                        (!draft.trim() && !attachments.length)
+                      }
+                    >
+                      <ArrowUp aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
-                {turn ? (
-                  <button
-                    type="button"
-                    className="stop-button"
-                    onClick={() =>
-                      api("/api/turns/" + turn + "/cancel", {
-                        method: "POST",
-                      }).catch((e) => setError(e.message))
-                    }
-                  >
-                    <i />
-                    Stop
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="send-button"
-                    aria-label="Send message"
-                    disabled={
-                      busy ||
-                      uploading ||
-                      recording ||
-                      transcribing ||
-                      (!draft.trim() && !attachments.length)
-                    }
-                  >
-                    <ArrowUp aria-hidden="true" />
-                  </button>
-                )}
               </div>
               {(uploading || transcribing || recording) && (
                 <div className="input-status" role="status">

@@ -469,3 +469,63 @@ test("a large CSV answer receives a complete integer aggregate and the requested
   assert.match(result.answer, /sum 5050/);
   assert.match(result.answer, /Customer100.*amount=100/);
 });
+
+test("a large CSV follow-up receives complete counts for low-cardinality attendance values", async () => {
+  const { createKathaAdapters } = await import("../src/providers/index.ts");
+  const { model } = createKathaAdapters({
+    groqKey: "fixture",
+    fetcher: (async (_url, init) => {
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  text: context.baseline[0].csvSummary,
+                  citations: ["csv"],
+                  comparisons: [],
+                }),
+              },
+            },
+          ],
+        }),
+      );
+    }) as typeof fetch,
+  });
+  const content =
+    "name,attendance_monday\n" +
+    Array.from(
+      { length: 100 },
+      (_, i) => `Person${i + 1},${i < 63 ? "present" : "absent"}`,
+    ).join("\n");
+  const source = {
+    id: "csv",
+    kind: "attachment" as const,
+    role: "document" as const,
+    conversationId: null,
+    turnId: null,
+    title: "attendance.csv",
+    content,
+    recordedAt: "2026-11-03T00:00:00Z",
+    occurredAt: null,
+    occurredEnd: null,
+    dateProvenance: "recorded",
+    version: 1,
+    deletedAt: null,
+    invalidated: false,
+    metadata: {},
+  };
+  const result = await model.generate({
+    question: "How many were present and absent on Monday?",
+    history: [],
+    baseline: [source],
+    evidence: [source],
+    verification: false,
+    signal: new AbortController().signal,
+  });
+  assert.match(result.answer, /present.*63/);
+  assert.match(result.answer, /absent.*37/);
+});
