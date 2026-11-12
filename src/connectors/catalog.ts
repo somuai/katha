@@ -2,6 +2,8 @@
  * Unimplemented integrations remain explicit; catalog entries are not authorization.
  */
 export function providerCatalog(options: {
+  hubspotMcpConfigured?: boolean;
+  hubspotMcpConnected?: boolean;
   gmailConfigured: boolean;
   gmailConnected: boolean;
   hubspotConfigured?: boolean;
@@ -11,6 +13,24 @@ export function providerCatalog(options: {
   canvaConnected?: boolean;
 }) {
   return [
+    {
+      id: "hubspot-mcp",
+      name: "HubSpot MCP",
+      integration: "Official MCP",
+      documentation:
+        "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server",
+      description:
+        "Search and import selected CRM records. Katha uses read tools; HubSpot's consent may include write access, so review the grant.",
+      available: !!options.hubspotMcpConfigured,
+      connected: !!options.hubspotMcpConnected,
+      status: options.hubspotMcpConfigured
+        ? options.hubspotMcpConnected
+          ? "connected"
+          : "ready"
+        : "owner_setup_required",
+      setup:
+        "Register a HubSpot MCP Auth App and configure HUBSPOT_MCP_CLIENT_ID and HUBSPOT_MCP_CLIENT_SECRET.",
+    },
     {
       id: "notion",
       name: "Notion",

@@ -2138,3 +2138,41 @@ body {
 .provider-setup small {
   margin-top: 8px;
 }
+/* Compact assistant presence and source marks. */
+.thinking-state {
+  min-height: 38px;
+  gap: 10px;
+  margin: 12px 0;
+}
+.thinking-doodle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f4f4ef;
+  border: 1px solid #d9ded4;
+}
+.thinking-doodle img {
+  width: 34px;
+  height: 34px;
+}
+.thinking-sources {
+  gap: 5px;
+  margin-top: 5px;
+}
+.thinking-sources > span {
+  border: 0;
+  padding: 0 4px 0 0;
+  font-size: 11px;
+}
+.thinking-sources img,
+.source-service-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f4f4ef;
+  border: 1px solid #d9ded4;
+  display: inline-grid;
+  place-items: center;
+  object-fit: contain;
+}

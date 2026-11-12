@@ -228,3 +228,27 @@ test("external CRM pricing still searches when the shortlist is an attachment", 
     "Attio official pricing",
   );
 });
+
+test("latest stock price searches even if planner mistakenly says general", async () => {
+  const turn = await run("What is the latest stock price of Nvidia?", {
+    model: {
+      plan: async () => ({ mode: "general", queries: [] }),
+      generate: async (c: any) => ({
+        answer: c.evidence.some((s: any) => s.kind === "web")
+          ? "Quote evidence found."
+          : "No quote.",
+      }),
+    },
+    search: {
+      search: async () => [
+        {
+          title: "Quote",
+          url: "https://example.com/nvda",
+          content: "NVDA quote timestamp.",
+        },
+      ],
+    },
+  });
+  assert.equal(turn.answer, "Quote evidence found.");
+  assert.equal((turn.trace.searches as any[]).length, 1);
+});

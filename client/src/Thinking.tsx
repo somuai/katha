@@ -30,7 +30,7 @@ export function Thinking({ sources }: { sources: Source[] }) {
     else if (sourceUrl && /^https?:\/\//i.test(sourceUrl)) {
       try {
         const host = new URL(sourceUrl).hostname.replace(/^www\./, "");
-        labels.set(host, { name: host, glyph: "↗" });
+        labels.set(host, { name: host, glyph: host.charAt(0).toUpperCase() });
       } catch {
         /* Invalid source URL is never a destination. */
       }

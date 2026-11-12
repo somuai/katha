@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { createMcpImports, type McpConnectionConfig } from "./mcp-import.js";
 import { createMcpOAuthManager } from "./oauth.js";
+import { createHubspotMcp } from "./hubspot-mcp.js";
 import { createNotionConnector } from "./notion.js";
 import { createCanvaConnector } from "./canva.js";
 import { createGmailConnector } from "./gmail.js";
@@ -22,19 +23,27 @@ export async function registerConnections(
     directory: join(directory, "mcp-oauth"),
     callbackUrl: origin + "/api/connections/oauth/callback",
     clientFor: (id) =>
-      id === "official-canva" &&
-      process.env.CANVA_CLIENT_ID &&
-      process.env.CANVA_CLIENT_SECRET
+      id === "official-hubspot" &&
+      process.env.HUBSPOT_MCP_CLIENT_ID &&
+      process.env.HUBSPOT_MCP_CLIENT_SECRET
         ? {
-            client_id: process.env.CANVA_CLIENT_ID,
-            client_secret: process.env.CANVA_CLIENT_SECRET,
+            client_id: process.env.HUBSPOT_MCP_CLIENT_ID,
+            client_secret: process.env.HUBSPOT_MCP_CLIENT_SECRET,
           }
-        : undefined,
+        : id === "official-canva" &&
+            process.env.CANVA_CLIENT_ID &&
+            process.env.CANVA_CLIENT_SECRET
+          ? {
+              client_id: process.env.CANVA_CLIENT_ID,
+              client_secret: process.env.CANVA_CLIENT_SECRET,
+            }
+          : undefined,
     scopeFor: (id) =>
       id === "official-canva"
         ? "profile:read design:meta:read design:content:read"
         : undefined,
   });
+  const hubspotMcp = createHubspotMcp({ oauth, evidence });
   const notion = createNotionConnector({ oauth, evidence });
   const canva = createCanvaConnector({ oauth, evidence });
   const gmail = createGmailConnector({
@@ -61,6 +70,10 @@ export async function registerConnections(
   }
   app.get("/api/connections/providers", async () => ({
     providers: providerCatalog({
+      hubspotMcpConfigured:
+        !!process.env.HUBSPOT_MCP_CLIENT_ID &&
+        !!process.env.HUBSPOT_MCP_CLIENT_SECRET,
+      hubspotMcpConnected: hubspotMcp.status().connected,
       gmailConfigured: gmail.status().configured,
       gmailConnected: gmail.status().connected,
       hubspotConfigured: hubspot.status().configured,
@@ -73,6 +86,49 @@ export async function registerConnections(
     hubspotKinds: hubspot.status().kinds,
     localWorkspace: true,
   }));
+  app.post("/api/connections/hubspot-mcp/authorize", async () => {
+    if (
+      !process.env.HUBSPOT_MCP_CLIENT_ID ||
+      !process.env.HUBSPOT_MCP_CLIENT_SECRET
+    )
+      throw Object.assign(Error("Configure the HubSpot MCP Auth App first."), {
+        status: 503,
+      });
+    operations.limit("hubspot-mcp:auth", 6);
+    operations.invalidate("hubspot-mcp");
+    return hubspotMcp.start();
+  });
+  app.get("/api/connections/hubspot-mcp/records", async (req) => {
+    operations.limit("hubspot-mcp:list", 30);
+    const q = req.query as any;
+    if (
+      !["contacts", "companies", "deals"].includes(q.kind) ||
+      typeof (q.q || "") !== "string" ||
+      (q.q || "").length > 500 ||
+      (q.cursor && typeof q.cursor !== "string")
+    )
+      throw Error("Invalid record search.");
+    return operations.cached(
+      "hubspot-mcp",
+      JSON.stringify([q.kind, q.q, q.cursor]),
+      () => hubspotMcp.list(q.kind, q.q || "", q.cursor),
+    );
+  });
+  app.post("/api/connections/hubspot-mcp/import", async (req) => {
+    operations.limit("hubspot-mcp:import", 6);
+    const b = req.body as any;
+    if (
+      !["contacts", "companies", "deals"].includes(b?.kind) ||
+      typeof b?.id !== "string"
+    )
+      throw Error("Choose a CRM record.");
+    return hubspotMcp.importRecord(b.kind, b.id);
+  });
+  app.delete("/api/connections/hubspot-mcp", async () => {
+    hubspotMcp.disconnect();
+    operations.invalidate("hubspot-mcp");
+    return { removed: true };
+  });
   for (const id of ["notion", "canva"] as const) {
     const connector = id === "notion" ? notion : canva;
     app.post(`/api/connections/${id}/authorize`, async () => {
@@ -213,7 +269,11 @@ export async function registerConnections(
           "Authorization was cancelled or incomplete. Return to Katha and reconnect.",
       });
     const result = await oauth.finish(q.state, q.code);
-    operations.invalidate(result.connectionId.replace(/^official-/, ""));
+    operations.invalidate(
+      result.connectionId === "official-hubspot"
+        ? "hubspot-mcp"
+        : result.connectionId.replace(/^official-/, ""),
+    );
     return callbackResult(reply);
   });
   let configs: Saved[] = [];

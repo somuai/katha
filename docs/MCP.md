@@ -77,3 +77,7 @@ Additional primary references:
 Local provider icons also come from official first-party assets: Notion `https://www.notion.so/images/favicon.ico`, Canva `https://static.canva.com/static/images/favicon-1.ico`. No private query or source title is sent to a remote logo service.
 
 POSIX private-file mode checks apply on macOS/Linux. Windows does not implement these mode bits as per-user ACLs; use a user-private workspace directory with appropriate Windows permissions. The local token store is not an encrypted multi-user credential vault.
+
+## Official HubSpot MCP
+
+The provider picker includes HubSpot’s official MCP endpoint. Register a HubSpot MCP Auth App and set `HUBSPOT_MCP_CLIENT_ID` and `HUBSPOT_MCP_CLIENT_SECRET` in `.env`. HubSpot determines the permissions in its consent flow, which may include writes; Katha invokes only its fixed read tools. The integration has protocol fixture coverage, but its authenticated live schemas and account access remain unverified. See [research](research/official-crm-mcp.md).

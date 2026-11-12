@@ -1371,7 +1371,14 @@ export function createKatha(options: KathaOptions) {
         !!input.attachmentIds?.length;
       // Freshness language is not permission to export a private register to
       // search. A public product/market question is a distinct evidence need.
+      const liveMarketQuote =
+        /\b(?:latest|current|today|now|live)\b/i.test(input.text) &&
+        /\b(?:stock|share|ticker|equity|nvidia|nvda)\b/i.test(input.text) &&
+        !/\b(?:inventory|warehouse|in stock|my shares|my portfolio)\b/i.test(
+          input.text,
+        );
       const publicFactQuestion =
+        liveMarketQuote ||
         /\b(?:pricing|subscription|release(?:s| notes)?|hosting|vendor|product updates?|market|official (?:plans?|documentation)|CRM (?:tools?|software|options?))\b/i.test(
           input.text,
         );
@@ -1437,6 +1444,8 @@ export function createKatha(options: KathaOptions) {
           currentQuestion = verification;
         else if (plan.queries.length) currentQuestion = true;
       }
+      if (liveMarketQuote && !sourcesOnly && !privateFileTask)
+        currentQuestion = true;
       if (sourcesOnly) currentQuestion = false;
       trace.routing = {
         sourcesOnly,
@@ -1493,6 +1502,7 @@ export function createKatha(options: KathaOptions) {
               );
               if (
                 outputs[n].error &&
+                !/retry after|rate.limit/i.test(outputs[n].error) &&
                 /network|timeout|timed out|temporar|429|502|503|504/i.test(
                   outputs[n].error,
                 ) &&

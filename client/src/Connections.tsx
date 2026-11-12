@@ -75,14 +75,16 @@ export function Connections({
       const params = new URLSearchParams({
         q: query,
         ...(next ? { cursor: next } : {}),
-        ...(id === "hubspot" ? { kind: recordKind } : {}),
+        ...(id === "hubspot" || id === "hubspot-mcp"
+          ? { kind: recordKind }
+          : {}),
       });
       const data = await request(
         "/" +
           id +
           (id === "gmail"
             ? "/messages?"
-            : id === "hubspot"
+            : id === "hubspot" || id === "hubspot-mcp"
               ? "/records?"
               : "/resources?") +
           params,
@@ -309,7 +311,7 @@ export function Connections({
             <h3>
               {provider === "gmail"
                 ? "Choose messages"
-                : provider === "hubspot"
+                : provider === "hubspot" || provider === "hubspot-mcp"
                   ? "Choose CRM records"
                   : provider === "notion"
                     ? "Choose Notion pages"
@@ -328,7 +330,7 @@ export function Connections({
                 browseProvider(provider);
               }}
             >
-              {provider === "hubspot" && (
+              {(provider === "hubspot" || provider === "hubspot-mcp") && (
                 <label>
                   Record type
                   <select
@@ -339,7 +341,10 @@ export function Connections({
                       setProviderCursor(undefined);
                     }}
                   >
-                    {authorizedKinds.map((k) => (
+                    {(provider === "hubspot-mcp"
+                      ? ["contacts", "companies", "deals"]
+                      : authorizedKinds
+                    ).map((k) => (
                       <option key={k}>{k}</option>
                     ))}
                   </select>
@@ -348,7 +353,7 @@ export function Connections({
               <label>
                 {provider === "gmail"
                   ? "Search mail (optional)"
-                  : provider === "hubspot"
+                  : provider === "hubspot" || provider === "hubspot-mcp"
                     ? "Search records (optional)"
                     : "Search sources"}
                 <input
@@ -361,7 +366,7 @@ export function Connections({
                 Search{" "}
                 {provider === "gmail"
                   ? "messages"
-                  : provider === "hubspot"
+                  : provider === "hubspot" || provider === "hubspot-mcp"
                     ? "records"
                     : "sources"}
               </button>
@@ -375,7 +380,7 @@ export function Connections({
                   Import selected{" "}
                   {provider === "gmail"
                     ? "message"
-                    : provider === "hubspot"
+                    : provider === "hubspot" || provider === "hubspot-mcp"
                       ? "record"
                       : "source"}
                 </button>

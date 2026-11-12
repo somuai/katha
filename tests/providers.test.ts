@@ -606,3 +606,41 @@ test("a short text PDF is extracted without requiring a vision provider", async 
   assert.equal(result.method, "pdf-text-extraction");
   assert.match(result.content, /USD 20/);
 });
+
+test("fresh searches bypass cache without excluding older source pages", async () => {
+  const bodies: any[] = [];
+  const p = createProviders({
+    tavilyKey: "test",
+    fetcher: (async (_url, init) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response(
+        JSON.stringify({
+          results: [
+            { url: "https://example.com", content: "Older official pricing" },
+          ],
+        }),
+      );
+    }) as typeof fetch,
+  });
+  await p.search([{ query: "pricing" }]);
+  const current = await p.search([{ query: "pricing" }], undefined, true);
+  assert.equal(bodies.length, 2);
+  assert.equal("max_age_hours" in bodies[1], false);
+  assert.equal(current[0].evidence[0].text, "Older official pricing");
+});
+test("provider rate limiting reports retry-after without an early retry", async () => {
+  let calls = 0;
+  const p = createProviders({
+    tavilyKey: "test",
+    fetcher: (async () => {
+      calls++;
+      return new Response("slow down", {
+        status: 429,
+        headers: { "Retry-After": "30" },
+      });
+    }) as typeof fetch,
+  });
+  const result = await p.search([{ query: "pricing" }]);
+  assert.equal(calls, 1);
+  assert.match(result[0].error!, /retry after 30/i);
+});
