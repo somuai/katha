@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { createMcpImports, type McpConnectionConfig } from "./mcp-import.js";
 import { createMcpOAuthManager } from "./oauth.js";
+import { createSalesforceConnector } from "./salesforce.js";
 import { createHubspotMcp } from "./hubspot-mcp.js";
 import { createNotionConnector } from "./notion.js";
 import { createCanvaConnector } from "./canva.js";
@@ -23,26 +24,34 @@ export async function registerConnections(
     directory: join(directory, "mcp-oauth"),
     callbackUrl: origin + "/api/connections/oauth/callback",
     clientFor: (id) =>
-      id === "official-hubspot" &&
-      process.env.HUBSPOT_MCP_CLIENT_ID &&
-      process.env.HUBSPOT_MCP_CLIENT_SECRET
+      id === "official-salesforce" &&
+      process.env.SALESFORCE_CLIENT_ID &&
+      process.env.SALESFORCE_CLIENT_SECRET
         ? {
-            client_id: process.env.HUBSPOT_MCP_CLIENT_ID,
-            client_secret: process.env.HUBSPOT_MCP_CLIENT_SECRET,
+            client_id: process.env.SALESFORCE_CLIENT_ID,
+            client_secret: process.env.SALESFORCE_CLIENT_SECRET,
           }
-        : id === "official-canva" &&
-            process.env.CANVA_CLIENT_ID &&
-            process.env.CANVA_CLIENT_SECRET
+        : id === "official-hubspot" &&
+            process.env.HUBSPOT_MCP_CLIENT_ID &&
+            process.env.HUBSPOT_MCP_CLIENT_SECRET
           ? {
-              client_id: process.env.CANVA_CLIENT_ID,
-              client_secret: process.env.CANVA_CLIENT_SECRET,
+              client_id: process.env.HUBSPOT_MCP_CLIENT_ID,
+              client_secret: process.env.HUBSPOT_MCP_CLIENT_SECRET,
             }
-          : undefined,
+          : id === "official-canva" &&
+              process.env.CANVA_CLIENT_ID &&
+              process.env.CANVA_CLIENT_SECRET
+            ? {
+                client_id: process.env.CANVA_CLIENT_ID,
+                client_secret: process.env.CANVA_CLIENT_SECRET,
+              }
+            : undefined,
     scopeFor: (id) =>
       id === "official-canva"
         ? "profile:read design:meta:read design:content:read"
         : undefined,
   });
+  const salesforce = createSalesforceConnector({ oauth, evidence });
   const hubspotMcp = createHubspotMcp({ oauth, evidence });
   const notion = createNotionConnector({ oauth, evidence });
   const canva = createCanvaConnector({ oauth, evidence });
@@ -70,6 +79,10 @@ export async function registerConnections(
   }
   app.get("/api/connections/providers", async () => ({
     providers: providerCatalog({
+      salesforceConfigured:
+        !!process.env.SALESFORCE_CLIENT_ID &&
+        !!process.env.SALESFORCE_CLIENT_SECRET,
+      salesforceConnected: salesforce.status().connected,
       hubspotMcpConfigured:
         !!process.env.HUBSPOT_MCP_CLIENT_ID &&
         !!process.env.HUBSPOT_MCP_CLIENT_SECRET,
@@ -86,6 +99,45 @@ export async function registerConnections(
     hubspotKinds: hubspot.status().kinds,
     localWorkspace: true,
   }));
+  app.post("/api/connections/salesforce/authorize", async () => {
+    if (
+      !process.env.SALESFORCE_CLIENT_ID ||
+      !process.env.SALESFORCE_CLIENT_SECRET
+    )
+      throw Object.assign(
+        Error("Configure the Salesforce External Client App first."),
+        { status: 503 },
+      );
+    operations.limit("salesforce:auth", 6);
+    operations.invalidate("salesforce");
+    return salesforce.start();
+  });
+  app.get("/api/connections/salesforce/records", async (req) => {
+    operations.limit("salesforce:list", 30);
+    const q = req.query as any;
+    if (!["contacts", "companies", "deals"].includes(q.kind) || q.q)
+      throw Error(
+        "Choose a record type; only recently viewed records are supported.",
+      );
+    return operations.cached("salesforce", q.kind, () =>
+      salesforce.list(q.kind),
+    );
+  });
+  app.post("/api/connections/salesforce/import", async (req) => {
+    operations.limit("salesforce:import", 6);
+    const b = req.body as any;
+    if (
+      !["contacts", "companies", "deals"].includes(b?.kind) ||
+      typeof b?.id !== "string"
+    )
+      throw Error("Choose a CRM record.");
+    return salesforce.importRecord(b.kind, b.id);
+  });
+  app.delete("/api/connections/salesforce", async () => {
+    salesforce.disconnect();
+    operations.invalidate("salesforce");
+    return { removed: true };
+  });
   app.post("/api/connections/hubspot-mcp/authorize", async () => {
     if (
       !process.env.HUBSPOT_MCP_CLIENT_ID ||

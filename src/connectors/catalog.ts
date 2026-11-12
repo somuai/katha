@@ -4,6 +4,8 @@
 export function providerCatalog(options: {
   hubspotMcpConfigured?: boolean;
   hubspotMcpConnected?: boolean;
+  salesforceConfigured?: boolean;
+  salesforceConnected?: boolean;
   gmailConfigured: boolean;
   gmailConnected: boolean;
   hubspotConfigured?: boolean;
@@ -84,12 +86,21 @@ export function providerCatalog(options: {
     {
       id: "salesforce",
       name: "Salesforce",
-      description: "CRM record import",
-      available: false,
-      connected: false,
-      status: "not_implemented",
+      integration: "Official MCP",
+      documentation:
+        "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/references/reference/sobject-reads.html",
+      description:
+        "Import IDs and names from recently viewed contacts, companies and deals. Production org only. Salesforce hosted MCP may incur Flex Credit charges.",
+      available: !!options.salesforceConfigured,
+      connected:
+        !!options.salesforceConfigured && !!options.salesforceConnected,
+      status: options.salesforceConfigured
+        ? options.salesforceConnected
+          ? "connected"
+          : "ready"
+        : "owner_setup_required",
       setup:
-        "A verified read-only provider integration and OAuth app are not configured.",
+        "An administrator must enable the read-only MCP server and register an External Client App. Configure SALESFORCE_CLIENT_ID and SALESFORCE_CLIENT_SECRET.",
     },
     {
       id: "canva",

@@ -37,3 +37,7 @@ The provider picker now exposes official Notion/Canva MCP integrations plus expl
 The planner's mode is no longer discarded. Public current questions can search automatically, sources-only instructions are enforced, and private attendance/account-file correctness questions stay local. A visible routing audit and query safeguards are included; semantic detection of all possible private data in arbitrary mixed queries is not guaranteed. Live account data is imported by explicit user action, not silently refreshed for every question.
 
 The thinking state uses the supplied doodle and actual selected-evidence service badges. The updated evaluation summarizer separates execution completion, task success, reviewed factual precision, evidence-review coverage and latency/quota. Existing unreviewed live outputs remain NOT_REVIEWED; no 90% support claim is made.
+
+## Continuation — 13 November
+
+The official HubSpot MCP adapter now reports 429/503 retry delays without retrying early. A narrow Salesforce official MCP adapter was added for selected recently viewed record IDs and names, subject to Salesforce administrator setup and potential Flex Credit charges. Both use deterministic protocol fixtures; neither has had its authenticated live account and schemas verified. The latest qualitative answer review covers 15 captured answers across both models; it is not the full claim-level evaluation and does not establish 90% support. See `docs/evaluations/manual-review-sample.md`.

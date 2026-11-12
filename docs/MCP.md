@@ -1,6 +1,6 @@
 # Connections: named consent, selected imports
 
-Open **Connections** in the sidebar, or type **@** → **Connect a source**. The default view is a provider picker, not a URL form. Notion and Canva implement official MCP connections. Gmail and HubSpot additionally implement named API-based OAuth adapters, explicitly labeled as such. Salesforce is unavailable. A Codex connection is never reused implicitly.
+Open **Connections** in the sidebar, or type **@** → **Connect a source**. The default view is a provider picker, not a URL form. Notion, Canva, HubSpot and Salesforce have official MCP adapters. Gmail and HubSpot additionally have named API-based OAuth adapters, explicitly labeled as such. HubSpot and Salesforce live account flows remain unverified. A Codex connection is never reused implicitly.
 
 This is a **single-user local workspace**, bound to loopback, with one connection per named provider. It is not a hosted multi-user account system. A hosted version needs sessions, per-user token isolation, encrypted secret storage and registered HTTPS callbacks before sharing access.
 
@@ -81,3 +81,9 @@ POSIX private-file mode checks apply on macOS/Linux. Windows does not implement 
 ## Official HubSpot MCP
 
 The provider picker includes HubSpot’s official MCP endpoint. Register a HubSpot MCP Auth App and set `HUBSPOT_MCP_CLIENT_ID` and `HUBSPOT_MCP_CLIENT_SECRET` in `.env`. HubSpot determines the permissions in its consent flow, which may include writes; Katha invokes only its fixed read tools. The integration has protocol fixture coverage, but its authenticated live schemas and account access remain unverified. See [research](research/official-crm-mcp.md).
+
+## Salesforce official MCP
+
+The Salesforce card targets Salesforce's official production SObject Reads MCP server. An org administrator must enable it and register an External Client App; configure `SALESFORCE_CLIENT_ID` and `SALESFORCE_CLIENT_SECRET`. Salesforce states that hosted MCP can require Flex Credits and incur charges. Katha currently lists recently viewed contacts, companies, and deals and imports only the selected record's ID and name. It does not support free-text CRM search or sandbox orgs. OAuth consent and real account response schemas have not been verified; fixture tests do not establish live compatibility.
+
+[Salesforce SObject Reads](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/references/reference/sobject-reads.html) · [Connection setup](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/client-connection-overview.html) · [Hosted MCP usage](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html)

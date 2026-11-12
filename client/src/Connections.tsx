@@ -75,7 +75,7 @@ export function Connections({
       const params = new URLSearchParams({
         q: query,
         ...(next ? { cursor: next } : {}),
-        ...(id === "hubspot" || id === "hubspot-mcp"
+        ...(id === "hubspot" || id === "hubspot-mcp" || id === "salesforce"
           ? { kind: recordKind }
           : {}),
       });
@@ -84,7 +84,7 @@ export function Connections({
           id +
           (id === "gmail"
             ? "/messages?"
-            : id === "hubspot" || id === "hubspot-mcp"
+            : id === "hubspot" || id === "hubspot-mcp" || id === "salesforce"
               ? "/records?"
               : "/resources?") +
           params,
@@ -311,7 +311,9 @@ export function Connections({
             <h3>
               {provider === "gmail"
                 ? "Choose messages"
-                : provider === "hubspot" || provider === "hubspot-mcp"
+                : provider === "hubspot" ||
+                    provider === "hubspot-mcp" ||
+                    provider === "salesforce"
                   ? "Choose CRM records"
                   : provider === "notion"
                     ? "Choose Notion pages"
@@ -330,7 +332,9 @@ export function Connections({
                 browseProvider(provider);
               }}
             >
-              {(provider === "hubspot" || provider === "hubspot-mcp") && (
+              {(provider === "hubspot" ||
+                provider === "hubspot-mcp" ||
+                provider === "salesforce") && (
                 <label>
                   Record type
                   <select
@@ -341,7 +345,7 @@ export function Connections({
                       setProviderCursor(undefined);
                     }}
                   >
-                    {(provider === "hubspot-mcp"
+                    {(provider === "hubspot-mcp" || provider === "salesforce"
                       ? ["contacts", "companies", "deals"]
                       : authorizedKinds
                     ).map((k) => (
@@ -350,25 +354,33 @@ export function Connections({
                   </select>
                 </label>
               )}
-              <label>
-                {provider === "gmail"
-                  ? "Search mail (optional)"
-                  : provider === "hubspot" || provider === "hubspot-mcp"
-                    ? "Search records (optional)"
-                    : "Search sources"}
-                <input
-                  value={query}
-                  maxLength={500}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </label>
+              {provider !== "salesforce" && (
+                <label>
+                  {provider === "gmail"
+                    ? "Search mail (optional)"
+                    : provider === "hubspot" ||
+                        provider === "hubspot-mcp" ||
+                        provider === "salesforce"
+                      ? "Search records (optional)"
+                      : "Search sources"}
+                  <input
+                    value={query}
+                    maxLength={500}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
+                </label>
+              )}
               <button disabled={busy}>
-                Search{" "}
-                {provider === "gmail"
-                  ? "messages"
-                  : provider === "hubspot" || provider === "hubspot-mcp"
-                    ? "records"
-                    : "sources"}
+                {provider === "salesforce" ? "Show recently viewed" : "Search"}{" "}
+                {provider === "salesforce"
+                  ? ""
+                  : provider === "gmail"
+                    ? "messages"
+                    : provider === "hubspot" ||
+                        provider === "hubspot-mcp" ||
+                        provider === "salesforce"
+                      ? "records"
+                      : "sources"}
               </button>
             </form>
             {providerRows.map((row) => (
@@ -380,7 +392,9 @@ export function Connections({
                   Import selected{" "}
                   {provider === "gmail"
                     ? "message"
-                    : provider === "hubspot" || provider === "hubspot-mcp"
+                    : provider === "hubspot" ||
+                        provider === "hubspot-mcp" ||
+                        provider === "salesforce"
                       ? "record"
                       : "source"}
                 </button>

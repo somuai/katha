@@ -88,3 +88,36 @@ test("official HubSpot MCP imports only selected records using fixed read tools"
   c.disconnect();
   await assert.rejects(c.importRecord("companies", "12"), /select a record/);
 });
+
+test("HubSpot MCP reports provider throttling without retrying early", async () => {
+  let calls = 0;
+  const oauth = {
+    hasTokens: () => true,
+    providerFor: () => ({
+      tokens: async () => ({ access_token: "fixture", token_type: "Bearer" }),
+      redirectUrl: "http://localhost:3000/callback",
+      clientMetadata: { redirect_uris: ["http://localhost:3000/callback"] },
+    }),
+  } as any;
+  const adapter = createHubspotMcp({
+    oauth,
+    evidence: {
+      async import() {
+        throw Error("must not import");
+      },
+    },
+    fetcher: async () => {
+      calls++;
+      return new Response("busy", {
+        status: 429,
+        headers: { "retry-after": "60" },
+      });
+    },
+  });
+  await assert.rejects(adapter.list("contacts", "sample"), {
+    status: 429,
+    retryAfter: 60,
+    code: "HUBSPOT_MCP_RATE_LIMITED",
+  });
+  assert.equal(calls, 1);
+});

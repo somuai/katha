@@ -39,6 +39,29 @@ export function createHubspotMcp(options: Opts) {
         AbortSignal.timeout(12000),
       ]),
     });
+    if ([429, 503].includes(res.status)) {
+      const raw = res.headers.get("retry-after");
+      const delay =
+        raw && /^\d+$/.test(raw)
+          ? Number(raw)
+          : raw && Number.isFinite(Date.parse(raw))
+            ? (Date.parse(raw) - now()) / 1000
+            : 30;
+      await res.body?.cancel();
+      throw Object.assign(
+        new Error(
+          "HubSpot is temporarily unavailable. Try again after the indicated delay.",
+        ),
+        {
+          code:
+            res.status === 429
+              ? "HUBSPOT_MCP_RATE_LIMITED"
+              : "HUBSPOT_MCP_UNAVAILABLE",
+          status: res.status,
+          retryAfter: Math.max(1, Math.min(120, Math.ceil(delay))),
+        },
+      );
+    }
     if (Number(res.headers.get("content-length") || 0) > 2 * LIMIT)
       throw Error("HubSpot response exceeds the size limit.");
     if (!res.body) return res;
