@@ -41,12 +41,12 @@ export function AnimatedTitleWord({
     <span
       className={`title-word title-word--${variant}${active ? " is-active" : ""}`}
       tabIndex={0}
-      aria-label={text}
       onMouseEnter={() => animate(true)}
       onMouseLeave={() => animate(false)}
       onFocus={() => animate(true)}
       onBlur={() => animate(false)}
     >
+      <span className="title-accessible">{text}</span>
       {Array.from(text, (letter, i) => (
         <span className="title-character" aria-hidden="true" key={i}>
           <span className="title-spacer">{letter}</span>

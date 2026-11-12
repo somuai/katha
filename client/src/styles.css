@@ -1852,3 +1852,26 @@ body {
 .brand-with-doodle .katha-doodle img {
   mix-blend-mode: multiply;
 }
+
+.welcome h1.binary-title .title-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.brand-with-doodle .katha-doodle {
+  mix-blend-mode: multiply;
+}
+.welcome h1.binary-title span {
+  color: inherit;
+}
+.welcome h1.binary-title .title-word--greeting.is-active {
+  color: #a7cdd0;
+}
+.welcome h1.binary-title .title-word--name.is-active {
+  color: #efd960;
+}
