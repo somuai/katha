@@ -1,5 +1,8 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
+import {
+  type OAuthClientProvider,
+  UnauthorizedError,
+} from "@modelcontextprotocol/sdk/client/auth.js";
 import {
   StreamableHTTPError,
   StreamableHTTPClientTransport,
@@ -29,6 +32,7 @@ interface EvidenceImporter {
 interface ImportOptions {
   clock?: () => Date;
   fetcher?: typeof fetch;
+  authProvider?: (id: string) => OAuthClientProvider | undefined;
 }
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 const MAX_TEXT_BYTES = 1024 * 1024;
@@ -162,7 +166,7 @@ export function createMcpImports(
     operation: (client: Client) => Promise<T>,
   ): Promise<T> {
     const token = config.tokenEnv ? process.env[config.tokenEnv] : undefined;
-    if (config.tokenEnv && !token)
+    if (config.tokenEnv && !token && !options.authProvider)
       throw new McpImportError(
         "MCP_AUTH_REQUIRED",
         "This connection needs a server-side credential.",
@@ -174,6 +178,7 @@ export function createMcpImports(
     );
     const transport = new StreamableHTTPClientTransport(new URL(config.url), {
       fetch: boundedFetch,
+      authProvider: options.authProvider?.(config.id),
       requestInit: token
         ? { headers: { Authorization: `Bearer ${token}` } }
         : undefined,
@@ -196,7 +201,7 @@ export function createMcpImports(
       )
         throw new McpImportError(
           "MCP_AUTH_REQUIRED",
-          "This server requires authorization, or rejected its credential. Configure a server-side credential or provider OAuth adapter.",
+          "This server requires authorization, or rejected its credential. Choose Sign in to authorize this connection.",
           401,
         );
       throw new McpImportError(

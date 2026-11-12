@@ -6,3 +6,7 @@
 - **Observation:** evidence obtained at a known time, not proof of a change date.
 - **Correction:** a new source that clarifies a past record or changes it from now.
 - **Verification:** a source-backed comparison of a baseline with current evidence.
+
+- **Connection**: a user's authorization for Katha to read selected material from an external provider.
+- **Import selection**: the particular external records a user chooses to retain as sources; distinct from the broader permission granted by the provider.
+- **Routing**: choosing retained evidence, current external evidence, or both for a question.

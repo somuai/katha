@@ -1,3 +1,4 @@
+import { Thinking } from "./Thinking.js";
 import { Connections } from "./Connections.js";
 import { AnimatedTitleWord } from "./AnimatedTitle.js";
 import { PaperclipIcon as Paperclip } from "@phosphor-icons/react/dist/icons/Paperclip";
@@ -846,11 +847,7 @@ export default function App() {
                         <Markdown>{stream}</Markdown>
                       </div>
                     ) : (
-                      <div className="working">
-                        <span />
-                        <span />
-                        <span />
-                      </div>
+                      <Thinking sources={evidence} />
                     )}
                     <p className="progress" role="status">
                       {statusText || "Picking up the thread…"}

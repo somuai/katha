@@ -59,6 +59,27 @@ try {
   await page.screenshot({ path: "qa/composer-reference.png" });
   await page.getByRole("button", { name: "Connections", exact: true }).click();
   await page.getByRole("dialog", { name: "Connections" }).waitFor();
+  await page.getByRole("heading", { name: "Notion", exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Connect Notion", exact: true })
+    .waitFor();
+  await page.screenshot({ path: "qa/provider-picker.png" });
+  await page.setViewportSize({ width: 375, height: 812 });
+  assert.equal(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+    false,
+    "provider picker overflows on mobile",
+  );
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("heading", { name: "Gmail", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "HubSpot", exact: true }).waitFor();
+  assert.equal(
+    await page.getByLabel("HTTPS MCP server URL").isVisible(),
+    false,
+  );
+  await page.getByText("Advanced: custom MCP server", { exact: true }).click();
   await page
     .getByLabel("HTTPS MCP server URL")
     .fill("https://fixture.example/mcp");

@@ -3,6 +3,13 @@ import { readFile, writeFile, rename } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { createMcpImports, type McpConnectionConfig } from "./mcp-import.js";
+import { createMcpOAuthManager } from "./oauth.js";
+import { createNotionConnector } from "./notion.js";
+import { createCanvaConnector } from "./canva.js";
+import { createGmailConnector } from "./gmail.js";
+import { createHubspotConnector, type HubspotObjectKind } from "./hubspot.js";
+import { providerCatalog } from "./catalog.js";
+import { createConnectionOperations } from "./operations.js";
 type Saved = McpConnectionConfig & { token?: string };
 export async function registerConnections(
   app: FastifyInstance,
@@ -10,6 +17,205 @@ export async function registerConnections(
   directory: string,
 ) {
   const path = join(directory, "mcp-connections.json");
+  const origin = `http://localhost:${Number(process.env.PORT || 3000)}`;
+  const oauth = createMcpOAuthManager({
+    directory: join(directory, "mcp-oauth"),
+    callbackUrl: origin + "/api/connections/oauth/callback",
+    clientFor: (id) =>
+      id === "official-canva" &&
+      process.env.CANVA_CLIENT_ID &&
+      process.env.CANVA_CLIENT_SECRET
+        ? {
+            client_id: process.env.CANVA_CLIENT_ID,
+            client_secret: process.env.CANVA_CLIENT_SECRET,
+          }
+        : undefined,
+    scopeFor: (id) =>
+      id === "official-canva"
+        ? "profile:read design:meta:read design:content:read"
+        : undefined,
+  });
+  const notion = createNotionConnector({ oauth, evidence });
+  const canva = createCanvaConnector({ oauth, evidence });
+  const gmail = createGmailConnector({
+    directory: join(directory, "provider-oauth"),
+    redirectUri: origin + "/api/connections/gmail/callback",
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  });
+  const hubspot = createHubspotConnector({
+    directory: join(directory, "provider-oauth"),
+    redirectUri: origin + "/api/connections/hubspot/callback",
+    clientId: process.env.HUBSPOT_CLIENT_ID,
+    clientSecret: process.env.HUBSPOT_CLIENT_SECRET,
+  });
+  const operations = createConnectionOperations();
+  function callbackResult(reply: any) {
+    return reply
+      .header("Cache-Control", "no-store")
+      .header("Referrer-Policy", "no-referrer")
+      .type("text/html")
+      .send(
+        '<!doctype html><html lang="en"><meta charset="utf-8"><title>Connected to Katha</title><body><h1>Connection authorized</h1><p>You can return to Katha and select what to import.</p><a href="/">Return to Katha</a></body></html>',
+      );
+  }
+  app.get("/api/connections/providers", async () => ({
+    providers: providerCatalog({
+      gmailConfigured: gmail.status().configured,
+      gmailConnected: gmail.status().connected,
+      hubspotConfigured: hubspot.status().configured,
+      hubspotConnected: hubspot.status().connected,
+      notionConnected: notion.status().connected,
+      canvaConfigured:
+        !!process.env.CANVA_CLIENT_ID && !!process.env.CANVA_CLIENT_SECRET,
+      canvaConnected: canva.status().connected,
+    }),
+    hubspotKinds: hubspot.status().kinds,
+    localWorkspace: true,
+  }));
+  for (const id of ["notion", "canva"] as const) {
+    const connector = id === "notion" ? notion : canva;
+    app.post(`/api/connections/${id}/authorize`, async () => {
+      if (
+        id === "canva" &&
+        (!process.env.CANVA_CLIENT_ID || !process.env.CANVA_CLIENT_SECRET)
+      )
+        throw Object.assign(
+          Error("The owner must register Katha's Canva MCP application first."),
+          { status: 503, code: "CANVA_NOT_CONFIGURED" },
+        );
+      operations.limit(id + ":auth", 6);
+      operations.invalidate(id);
+      return connector.start();
+    });
+    app.get(`/api/connections/${id}/resources`, async (req) => {
+      operations.limit(id + ":list", 30);
+      const q = req.query as any;
+      if (
+        (q.q && (typeof q.q !== "string" || q.q.length > 500)) ||
+        (q.cursor && (typeof q.cursor !== "string" || q.cursor.length > 2048))
+      )
+        throw Error("Invalid source search.");
+      return operations.cached(id, JSON.stringify([q.q || "", q.cursor]), () =>
+        connector.list(q.q || "", q.cursor),
+      );
+    });
+    app.post(`/api/connections/${id}/import`, async (req) => {
+      operations.limit(id + ":import", 6);
+      const item = (req.body as any)?.id;
+      if (typeof item !== "string") throw Error("Choose a source.");
+      return id === "notion"
+        ? notion.importPage(item)
+        : canva.importDesign(item);
+    });
+    app.delete(`/api/connections/${id}`, async () => {
+      connector.disconnect();
+      operations.invalidate(id);
+      return { removed: true };
+    });
+  }
+  app.post("/api/connections/gmail/authorize", async () => {
+    operations.limit("gmail:auth", 6);
+    operations.invalidate("gmail");
+    return gmail.start();
+  });
+  app.get("/api/connections/gmail/callback", async (req, reply) => {
+    operations.limit("gmail:callback", 12);
+    const q = req.query as any;
+    if (typeof q.state !== "string" || typeof q.code !== "string")
+      return reply.code(400).send({
+        error:
+          "Google authorization was cancelled or incomplete. Return to Katha and reconnect.",
+      });
+    await gmail.finish(q.state, q.code);
+    operations.invalidate("gmail");
+    return callbackResult(reply);
+  });
+  app.get("/api/connections/gmail/messages", async (req) => {
+    operations.limit("gmail:list", 30);
+    const q = req.query as any;
+    if (
+      (q.q && (typeof q.q !== "string" || q.q.length > 500)) ||
+      (q.cursor && (typeof q.cursor !== "string" || q.cursor.length > 2048))
+    )
+      throw Error("Invalid mail search.");
+    return operations.cached(
+      "gmail",
+      JSON.stringify([q.q || "", q.cursor]),
+      () => gmail.list(q.q || "", q.cursor),
+    );
+  });
+  app.post("/api/connections/gmail/import", async (req) => {
+    operations.limit("gmail:import", 6);
+    const id = (req.body as any)?.id;
+    if (typeof id !== "string") throw Error("Choose a message.");
+    return gmail.importMessage(id, evidence);
+  });
+  app.delete("/api/connections/gmail", async () => {
+    gmail.disconnect();
+    operations.invalidate("gmail");
+    return { removed: true };
+  });
+  app.post("/api/connections/hubspot/authorize", async (req) => {
+    operations.limit("hubspot:auth", 6);
+    operations.invalidate("hubspot");
+    const kinds = (req.body as any)?.kinds;
+    return hubspot.start(kinds);
+  });
+  app.get("/api/connections/hubspot/callback", async (req, reply) => {
+    operations.limit("hubspot:callback", 12);
+    const q = req.query as any;
+    if (typeof q.state !== "string" || typeof q.code !== "string")
+      return reply.code(400).send({
+        error:
+          "HubSpot authorization was cancelled or incomplete. Return to Katha and reconnect.",
+      });
+    await hubspot.finish(q.state, q.code);
+    operations.invalidate("hubspot");
+    return callbackResult(reply);
+  });
+  app.get("/api/connections/hubspot/records", async (req) => {
+    operations.limit("hubspot:list", 30);
+    const q = req.query as any;
+    if (
+      !["contacts", "companies", "deals"].includes(q.kind) ||
+      (q.q && (typeof q.q !== "string" || q.q.length > 500)) ||
+      (q.cursor && (typeof q.cursor !== "string" || q.cursor.length > 2048))
+    )
+      throw Error("Choose a CRM object and valid search.");
+    return operations.cached(
+      "hubspot",
+      JSON.stringify([q.kind, q.q || "", q.cursor]),
+      () => hubspot.list(q.kind, q.q || "", q.cursor),
+    );
+  });
+  app.post("/api/connections/hubspot/import", async (req) => {
+    operations.limit("hubspot:import", 6);
+    const b = req.body as any;
+    if (
+      !["contacts", "companies", "deals"].includes(b?.kind) ||
+      typeof b?.id !== "string"
+    )
+      throw Error("Choose a CRM record.");
+    return hubspot.importRecord(b.kind as HubspotObjectKind, b.id, evidence);
+  });
+  app.delete("/api/connections/hubspot", async () => {
+    hubspot.disconnect();
+    operations.invalidate("hubspot");
+    return { removed: true };
+  });
+  app.get("/api/connections/oauth/callback", async (req, reply) => {
+    const q = req.query as any;
+    operations.limit("mcp:auth", 12);
+    if (typeof q.state !== "string" || typeof q.code !== "string")
+      return reply.code(400).send({
+        error:
+          "Authorization was cancelled or incomplete. Return to Katha and reconnect.",
+      });
+    const result = await oauth.finish(q.state, q.code);
+    operations.invalidate(result.connectionId.replace(/^official-/, ""));
+    return callbackResult(reply);
+  });
   let configs: Saved[] = [];
   try {
     configs = JSON.parse(await readFile(path, "utf8"));
@@ -20,24 +226,30 @@ export async function registerConnections(
   function create(next: Saved[]) {
     for (const c of next)
       if (c.tokenEnv) process.env[c.tokenEnv] = c.token || "";
-    return createMcpImports(next, {
-      async import(input) {
-        const expected = next.find((c) => c.id === input.metadata?.connectorId);
-        const current = configs.find(
-          (c) => c.id === input.metadata?.connectorId,
-        );
-        if (
-          !expected ||
-          !current ||
-          expected.url !== current.url ||
-          expected.token !== current.token
-        )
-          throw Error(
-            "Connection changed or was removed before import finished.",
+    return createMcpImports(
+      next,
+      {
+        async import(input) {
+          const expected = next.find(
+            (c) => c.id === input.metadata?.connectorId,
           );
-        return evidence.import(input);
+          const current = configs.find(
+            (c) => c.id === input.metadata?.connectorId,
+          );
+          if (
+            !expected ||
+            !current ||
+            expected.url !== current.url ||
+            expected.token !== current.token
+          )
+            throw Error(
+              "Connection changed or was removed before import finished.",
+            );
+          return evidence.import(input);
+        },
       },
-    });
+      { authProvider: (id) => oauth.providerFor(id) },
+    );
   }
   importer = create(configs);
   let tail = Promise.resolve();
@@ -62,7 +274,7 @@ export async function registerConnections(
       .connections()
       .map((c) => ({ ...c, url: configs.find((x) => x.id === c.id)?.url })),
     capability:
-      "Read-only MCP resources. OAuth and tool-only SaaS connectors require a provider adapter.",
+      "Read-only selected imports. Named providers use their own consent screens; custom MCP supports compatible OAuth resource servers.",
   }));
   app.post("/api/connections", async (req) =>
     mutate(async () => {
@@ -100,14 +312,29 @@ export async function registerConnections(
       const id = (req.params as any).id;
       const old = configs.find((c) => c.id === id);
       await save(configs.filter((c) => c.id !== id));
+      oauth.disconnect(id);
+      operations.invalidate(id);
       if (old?.tokenEnv) delete process.env[old.tokenEnv];
       return { removed: true };
     }),
   );
-  app.get("/api/connections/:id/resources", async (req) =>
-    importer.list((req.params as any).id, (req.query as any)?.cursor),
-  );
+  app.post("/api/connections/:id/authorize", async (req) => {
+    const id = (req.params as any).id,
+      config = configs.find((c) => c.id === id);
+    if (!config) throw Error("Choose a saved connection.");
+    operations.limit(id + ":auth", 6);
+    operations.invalidate(id);
+    return oauth.start(id, config.url);
+  });
+  app.get("/api/connections/:id/resources", async (req) => {
+    const id = (req.params as any).id,
+      cursor = (req.query as any)?.cursor;
+    if (cursor && typeof cursor !== "string") throw Error("Invalid cursor.");
+    operations.limit(id + ":list", 30);
+    return operations.cached(id, cursor || "", () => importer.list(id, cursor));
+  });
   app.post("/api/connections/:id/import", async (req) => {
+    operations.limit((req.params as any).id + ":import", 6);
     const uri = (req.body as any)?.uri;
     if (typeof uri !== "string" || uri.length > 4096)
       throw Error("Choose an advertised resource.");

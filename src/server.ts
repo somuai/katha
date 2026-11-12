@@ -39,11 +39,12 @@ app.addHook("onRequest", async (req, reply) => {
   )
     return reply.code(403).send({ error: "Origin not allowed" });
 });
-app.setErrorHandler((e: any, req, reply) =>
+app.setErrorHandler((e: any, req, reply) => {
+  if (e.retryAfter) reply.header("Retry-After", String(e.retryAfter));
   reply
     .code(e.status || e.statusCode || 400)
-    .send({ error: e.message, code: e.code || "REQUEST_FAILED" }),
-);
+    .send({ error: e.message, code: e.code || "REQUEST_FAILED" });
+});
 app.get("/api/workspace", async () => ({
   conversations: await katha.workspace.listConversations(),
   sources: [

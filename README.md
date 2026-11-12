@@ -30,4 +30,8 @@ Set keys in the root `.env` file, using the names in `.env.example`. The desktop
 
 ## External sources
 
-Use **Connections** in the sidebar, or type **@** and choose **Connect a source**. Supported MCP resource imports are described in [MCP.md](docs/MCP.md). This local app supports advertised text resources over HTTPS, optionally with bearer authentication; a saved URL is configuration, not proof of account access. OAuth and tools-only Canva/CRM providers require additional adapters and are not claimed as working. The agent itself still exposes only web search.
+Use **Connections** in the sidebar, or type **@** → **Connect a source**. Notion and Canva use their official MCP servers with OAuth. Notion dynamically registers this client; Canva requires the owner's registered MCP application credentials. Gmail and HubSpot additionally offer read-only API adapters after OAuth app setup. Visitors authorize their own account and explicitly choose imports. Custom MCP resources are under Advanced. See [connection setup and permissions](docs/MCP.md). This remains a single local workspace, not a shared multi-user service. Salesforce is not implemented; Gmail/HubSpot API adapters are explicitly distinguished from official MCP integrations. The agent itself still exposes only web search.
+
+Katha chooses retained evidence versus web search automatically. Explicit sources-only requests stay local; current public information can search without a special keyword. The answer audit shows the routing decision. Private-source freshness questions are not a reason to export their content into web queries.
+
+`npx tsx evaluations/metrics.ts INPUT.json OUTPUT.json evaluations/answer-cases.json` reports completion, reviewed factual precision, task success, evidence-review coverage and latency separately. The 90% gate cannot pass with missing cases or unreviewed claims. Existing live outputs still need human claim review; retrieval scores are not answer-support scores.

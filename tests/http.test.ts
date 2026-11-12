@@ -15,6 +15,10 @@ test("HTTP persists a turn and exposes complete replay without configured provid
       KATHA_EMBEDDINGS: "off",
       GROQ_API_KEY: "",
       TAVILY_API_KEY: "",
+      GOOGLE_CLIENT_ID: "",
+      GOOGLE_CLIENT_SECRET: "",
+      HUBSPOT_CLIENT_ID: "",
+      HUBSPOT_CLIENT_SECRET: "",
     },
     stdio: "pipe",
   });
@@ -49,6 +53,28 @@ test("HTTP persists a turn and exposes complete replay without configured provid
     const workspace = await api("/api/workspace");
     assert.deepEqual(workspace.conversations, []);
     assert.deepEqual((await api("/api/connections")).connections, []);
+    const catalog = await api("/api/connections/providers");
+    assert.equal(catalog.localWorkspace, true);
+    assert.deepEqual(
+      catalog.providers
+        .filter((p: any) => ["gmail", "hubspot"].includes(p.id))
+        .map((p: any) => p.status),
+      ["owner_setup_required", "owner_setup_required"],
+    );
+    const callback = await fetch(
+      `http://localhost:${port}/api/connections/gmail/callback?state=invalid&code=invalid`,
+    );
+    assert.equal(callback.status, 503);
+    for (let i = 0; i < 7; i++) {
+      const authorization = await fetch(
+        `http://localhost:${port}/api/connections/gmail/authorize`,
+        { method: "POST" },
+      );
+      assert.equal(authorization.status, i < 6 ? 503 : 429);
+      if (i === 6)
+        assert.ok(Number(authorization.headers.get("retry-after")) > 0);
+    }
+
     const added = await api("/api/connections", {
       label: "Fixture resource server",
       url: "https://fixture.example/mcp",

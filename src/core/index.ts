@@ -1149,7 +1149,7 @@ export function createKatha(options: KathaOptions) {
           "That date or timezone is invalid. Please clarify.",
         );
       }
-      const verification =
+      let verification =
         /\b(changed?|still (?:correct|true|accurate|valid|right|available|supported|include|offer|provide|allow|require|exist|work|use|match(?:es)?|costs?|the same)|correct|current|pricing|latest|since|verify|update[ds]?)\b/i.test(
           input.text,
         ) &&
@@ -1362,55 +1362,88 @@ export function createKatha(options: KathaOptions) {
         .map(source);
       let web: Source[] = [],
         searches: any[] = [];
+      const sourcesOnly =
+        /\b(?:only|solely|exclusively)\s+(?:from\s+|using\s+|use\s+)?(?:my\s+|the\s+|our\s+)?(?:uploaded\s+|saved\s+|provided\s+)?(?:sources?|files?|documents?|data|records?)\b|\b(?:sources?|files?|documents?)\s+only\b|\b(?:do not|don't|without)\s+(?:use\s+|using\s+|search\s+|searching\s+)?(?:the\s+)?(?:web|internet|online)\b/i.test(
+          input.text,
+        );
       const personalMemory =
         /\b(my|our|we|remember|i said|i told|i asked)\b/i.test(input.text) ||
         !!input.attachmentIds?.length;
-      const currentQuestion =
-        verification ||
-        (/\b(latest|current|today|news|pricing|price|search|web|recent|release|what is|who is)\b/i.test(
+      // Freshness language is not permission to export a private register to
+      // search. A public product/market question is a distinct evidence need.
+      const publicFactQuestion =
+        /\b(?:pricing|subscription|release(?:s| notes)?|hosting|vendor|product updates?|market|official (?:plans?|documentation)|CRM (?:tools?|software|options?))\b/i.test(
           input.text,
-        ) &&
-          !personalMemory);
-      if (currentQuestion) {
+        );
+      const privateRecordQuestion =
+        /\b(?:attendance|accounts?|account balances?|customers?|leads?|invoices?|payroll|employees?|students?|rows?|columns?|register|spreadsheet)\b/i.test(
+          input.text,
+        );
+      const hasPrivateSources =
+        !!input.attachmentIds?.length ||
+        local.some((s) => s.kind === "attachment");
+      const privateFileTask =
+        !publicFactQuestion &&
+        ((hasPrivateSources && (!verification || privateRecordQuestion)) ||
+          (personalMemory && privateRecordQuestion));
+      if (privateFileTask || sourcesOnly) verification = false;
+      let currentQuestion =
+        !sourcesOnly &&
+        !privateFileTask &&
+        (verification ||
+          (/\b(latest|current|today|news|pricing|price|search|web|recent|release|what is|who is)\b/i.test(
+            input.text,
+          ) &&
+            !personalMemory));
+      let queries: string[] = [];
+      if (options.model?.plan && !sourcesOnly && !privateFileTask) {
         event(id, "progress", {
           stage: "planning",
-          label: "Planning web verification",
+          label:
+            "Choosing sources and checking whether fresh evidence is needed",
         });
-        let queries: string[] = [];
-        if (options.model?.plan) {
-          const plan = await withQuota(() =>
-            options.model!.plan!({
-              question: input.text,
-              history,
-              evidence: local,
-              baseline: local,
-              timezone: input.timezone,
-              now: row.created_at,
-              verification,
-              signal: controller.signal,
-            }),
+        const plan = await withQuota(() =>
+          options.model!.plan!({
+            question: input.text,
+            history,
+            evidence: local,
+            baseline: local,
+            timezone: input.timezone,
+            now: row.created_at,
+            verification,
+            signal: controller.signal,
+          }),
+        );
+        valid();
+        if (plan.clarification?.trim()) {
+          update(id, {
+            answer: plan.clarification.trim(),
+            sourceIds: local.map((s) => s.id),
+            trace: { ...trace, clarification: true },
+          });
+          saveAnswer(
+            id,
+            plan.clarification.trim(),
+            local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
           );
-          valid();
-          if (plan.clarification?.trim()) {
-            update(id, {
-              answer: plan.clarification.trim(),
-              sourceIds: local.map((s) => s.id),
-              trace: { ...trace, clarification: true },
-            });
-            saveAnswer(
-              id,
-              plan.clarification.trim(),
-              local.flatMap((s) => [
-                s.id,
-                ...(s.interpretationSourceIds || []),
-              ]),
-            );
-            setStatus(id, "COMPLETED");
-            event(id, "complete", getTurn(id));
-            return;
-          }
-          queries = plan.queries;
+          setStatus(id, "COMPLETED");
+          event(id, "complete", getTurn(id));
+          return;
         }
+        queries = plan.queries;
+        if (plan.mode === "current" || plan.mode === "verify")
+          currentQuestion = true;
+        else if (plan.mode === "general" || plan.mode === "recall")
+          currentQuestion = verification;
+        else if (plan.queries.length) currentQuestion = true;
+      }
+      if (sourcesOnly) currentQuestion = false;
+      trace.routing = {
+        sourcesOnly,
+        privateFileTask,
+        usesWeb: currentQuestion,
+      };
+      if (currentQuestion) {
         if (!queries.length)
           queries = [
             input.text.replace(/what did i ask.*?\?/i, "").trim() || input.text,
@@ -1419,7 +1452,16 @@ export function createKatha(options: KathaOptions) {
           ...new Set(
             queries
               .filter((q) => typeof q === "string" && q.trim())
-              .map((q) => q.trim().slice(0, 400)),
+              .map((q) => q.trim().slice(0, 400))
+              .filter(
+                (q) =>
+                  !/[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:gsk_|AIza|tvly-)[A-Za-z0-9_-]{12,}/i.test(
+                    q,
+                  ) &&
+                  !(q.match(/\+?\d[\d ().-]{7,}\d/g) || []).some(
+                    (value) => (value.match(/\d/g) || []).length >= 10,
+                  ),
+              ),
           ),
         ].slice(0, Math.min(options.searchAttempts || 12, 12));
         const outputs: any[] = new Array(queries.length);
@@ -1505,7 +1547,7 @@ export function createKatha(options: KathaOptions) {
         update(id, { sourceIds: [...local, ...web].map((s) => s.id), trace });
         event(id, "sources", { sources: [...local, ...web] });
       }
-      if (verification && !web.length) {
+      if (verification && !web.length && !sourcesOnly) {
         const names = shortlistedVendors([
           input.text,
           ...local.map((s) => s.content),
@@ -1711,7 +1753,7 @@ export function createKatha(options: KathaOptions) {
           };
         },
       );
-      if (verification && !web.length) {
+      if (verification && !web.length && !sourcesOnly) {
         comparisons.forEach((c) => (c.status = "UNVERIFIED"));
         result.answer =
           "I could not obtain current web evidence, so I cannot establish what changed. " +
