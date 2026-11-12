@@ -10,7 +10,11 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc --noEmit && vite build",
     "test": "tsx --test tests/*.test.ts",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "eval": "tsx evaluations/run.ts",
+    "test:browser": "node tests/browser-regression.mjs",
+    "eval:live": "tsx tests/live-providers.ts --run-live --primary-only",
+    "lint": "prettier --check client/src src evaluations tests"
   },
   "dependencies": {
     "@fastify/multipart": "latest",
@@ -18,6 +22,7 @@
     "@huggingface/transformers": "latest",
     "@js-temporal/polyfill": "latest",
     "@napi-rs/canvas": "^1.1.0",
+    "@phosphor-icons/react": "^2.1.10",
     "better-sqlite3": "latest",
     "dotenv": "latest",
     "fastify": "latest",
@@ -30,6 +35,7 @@
     "vite": "latest"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.0",
     "@types/better-sqlite3": "latest",
     "@types/node": "latest",

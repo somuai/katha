@@ -583,7 +583,7 @@ test("a from-now correction does not suppress the original historical record", a
       content: "The quota is three now.",
       mode: "CHANGE_FROM_NOW",
     });
-    const found = await app.evidence.recall({ text: "quota" });
+    const found = await app.evidence.recall({ text: "quota", original: true });
     assert.ok(found.sources.some((s: any) => s.id === original.sourceId));
     assert.match(
       (await app.evidence.inspect(original.sourceId)).corrections[0].content,
@@ -927,6 +927,28 @@ test("a dated-change claim without a dated source is downgraded", async () => {
         comparisons: [
           {
             claim: "Pricing",
+            baselinePrice: {
+              plan: "Attio Team",
+              amount: 20,
+              currency: "USD",
+              region: "US",
+              cadence: "month",
+              seats: 5,
+              basis: "per_seat",
+              limits: "unlimited contacts",
+              tax: "excluded",
+            },
+            currentPrice: {
+              plan: "Attio Team",
+              amount: 25,
+              currency: "USD",
+              region: "US",
+              cadence: "month",
+              seats: 5,
+              basis: "per_seat",
+              limits: "unlimited contacts",
+              tax: "excluded",
+            },
             status: "CHANGED_WITH_DATED_EVIDENCE",
             baselineSourceIds: [baseline],
             evidenceSourceIds: c.evidence
@@ -942,7 +964,8 @@ test("a dated-change claim without a dated source is downgraded", async () => {
         {
           title: "Current page",
           url: "https://example.com/pricing",
-          content: "New price with no effective date.",
+          content:
+            "Attio Team USD 25 per seat per month, US, five seats, unlimited contacts, tax excluded; no effective date.",
         },
       ],
     },
@@ -951,7 +974,8 @@ test("a dated-change claim without a dated source is downgraded", async () => {
     baseline = (
       await app.evidence.import({
         name: "Earlier",
-        content: "Attio earlier price.",
+        content:
+          "Attio Team USD 20 per seat per month, US, five seats, unlimited contacts, tax excluded.",
         occurredAt: "2026-11-03",
       })
     ).sourceId;
@@ -1161,6 +1185,418 @@ test("semantic recall retrieves a matching late document segment and preserves t
     assert.equal(
       (await app.evidence.inspect(imported.sourceId)).content,
       original,
+    );
+  } finally {
+    cleanup();
+  }
+});
+
+test("opening a workspace from a newer application fails without downgrading it", async () => {
+  const { default: Database } = await import("better-sqlite3");
+  const directory = mkdtempSync(join(tmpdir(), "katha-future-"));
+  const database = new Database(join(directory, "katha.sqlite"));
+  database.pragma("user_version=999");
+  database.close();
+  try {
+    assert.throws(() => createKatha({ directory }), /newer version/i);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("a correction changes one assertion at its effective date, preserving other facts and original text", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-12T12:00:00Z"),
+  });
+  try {
+    const imported = await app.evidence.import({
+      name: "CRM terms",
+      content: "The price is $20. We need five seats.",
+    });
+    const before: any = await app.evidence.inspect(imported.sourceId);
+    assert.equal(before.assertions.length, 2);
+    const correction = await app.evidence.correct({
+      sourceId: imported.sourceId,
+      assertionId: before.assertions[0].id,
+      content: "The price is $25.",
+      mode: "CHANGE_FROM_NOW",
+      effectiveAt: "2026-11-15T00:00:00Z",
+    } as any);
+    const past: any = await app.evidence.recall({
+      text: "price",
+      asOf: "2026-11-14T12:00:00Z",
+    } as any);
+    assert.ok(!past.sources.some((s: any) => s.id === correction.sourceId));
+    assert.equal(
+      past.sources.find((s: any) => s.id === imported.sourceId).interpretation,
+      "The price is $20. We need five seats.",
+    );
+    const current: any = await app.evidence.recall({
+      text: "price",
+      asOf: "2026-11-16T00:00:00Z",
+    } as any);
+    assert.equal(
+      current.sources.find((s: any) => s.id === imported.sourceId)
+        .interpretation,
+      "The price is $25. We need five seats.",
+    );
+    const inspected: any = await app.evidence.inspect(imported.sourceId);
+    assert.equal(inspected.content, "The price is $20. We need five seats.");
+    assert.equal(
+      inspected.assertions[0].corrections[0].effectiveAt,
+      "2026-11-15T00:00:00.000Z",
+    );
+    assert.equal(
+      inspected.corrections[0].metadata.assertionId,
+      before.assertions[0].id,
+    );
+  } finally {
+    cleanup();
+  }
+});
+
+test("price verification refuses to compare a monthly US quote with an annual India quote", async () => {
+  const base = {
+    plan: "Team",
+    amount: 20,
+    currency: "USD",
+    region: "US",
+    cadence: "month",
+    seats: 5,
+    basis: "per_seat",
+    limits: "unlimited contacts",
+    tax: "excluded",
+  };
+  const { app, cleanup } = setup({
+    search: {
+      async search() {
+        return [
+          {
+            title: "Pricing",
+            url: "https://example.com/pricing",
+            content:
+              "Team USD 20 per seat per month, US, five seats, unlimited contacts, tax excluded.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        return {
+          answer: "The price is unchanged.",
+          comparisons: [
+            {
+              claim: "Team price",
+              status: "CURRENTLY_MATCHES",
+              baselineSourceIds: [c.baseline[0].id],
+              evidenceSourceIds: [
+                c.evidence.find((s: any) => s.kind === "web").id,
+              ],
+              explanation: "same price",
+              baselinePrice: base,
+              currentPrice: { ...base, region: "IN", cadence: "year" },
+            },
+          ],
+        };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Shortlist",
+      content:
+        "Team USD 20 per seat per month, US, five seats, unlimited contacts, tax excluded.",
+    });
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "price",
+      expectedTailId: null,
+      text: "Has the Team price changed?",
+    });
+    const result = await wait(app, receipt.turnId);
+    assert.equal(result.comparisons[0].status, "UNVERIFIED");
+    assert.match(result.comparisons[0].explanation, /region|cadence/i);
+    assert.doesNotMatch(result.answer, /price is unchanged/);
+  } finally {
+    cleanup();
+  }
+});
+
+test("permanent deletion purges located assertions from source inspection", async () => {
+  const { app, cleanup } = setup();
+  try {
+    const s = await app.evidence.import({
+      name: "Private",
+      content: "Secret phrase that must be purged.",
+    });
+    await app.evidence.trash(s.sourceId);
+    await app.evidence.permanentlyDelete(s.sourceId);
+    const inspection = await app.evidence.inspect(s.sourceId);
+    assert.deepEqual(inspection.assertions, []);
+    assert.equal(inspection.content, "");
+  } finally {
+    cleanup();
+  }
+});
+
+test("superseded corrections do not compete with the current record and require edits on its current assertions", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-12T12:00:00Z"),
+  });
+  try {
+    const original = await app.evidence.import({
+      name: "Terms",
+      content: "The quota is five. The region is Europe.",
+    });
+    const old = await app.evidence.correct({
+      sourceId: original.sourceId,
+      content: "The quota is six. The region is Europe.",
+      mode: "CORRECT_PAST_RECORD",
+      effectiveAt: "2026-11-10T00:00:00Z",
+    });
+    const latest = await app.evidence.correct({
+      sourceId: original.sourceId,
+      content: "The quota is seven. The region is Europe.",
+      mode: "CORRECT_PAST_RECORD",
+      effectiveAt: "2026-11-11T00:00:00Z",
+    });
+    const found = await app.evidence.recall({ text: "quota" });
+    assert.ok(!found.sources.some((s) => s.id === old.sourceId));
+    assert.ok(found.sources.some((s) => s.id === latest.sourceId));
+    const inspected = await app.evidence.inspect(original.sourceId);
+    await assert.rejects(
+      app.evidence.correct({
+        sourceId: original.sourceId,
+        assertionId: inspected.assertions[0].id,
+        content: "The quota is eight.",
+        mode: "CHANGE_FROM_NOW",
+      }),
+      { code: "SOURCE_SUPERSEDED" },
+    );
+    const current = await app.evidence.inspect(latest.sourceId);
+    await app.evidence.correct({
+      sourceId: latest.sourceId,
+      assertionId: current.assertions[0].id,
+      content: "The quota is eight.",
+      mode: "CHANGE_FROM_NOW",
+    });
+    const interpreted = await app.evidence.recall({ text: "quota" });
+    assert.equal(
+      interpreted.sources.find((s) => s.id === latest.sourceId)?.interpretation,
+      "The quota is eight. The region is Europe.",
+    );
+  } finally {
+    cleanup();
+  }
+});
+
+test("like-for-like price terms must be present in their sources, not just agree with each other", async () => {
+  for (const fakeSeats of [false, true]) {
+    const quote = {
+      plan: "Alder Team",
+      amount: 20,
+      currency: "USD",
+      region: "US",
+      cadence: "month",
+      seats: fakeSeats ? 99 : 5,
+      basis: "per_seat",
+      limits: "unlimited contacts",
+      tax: "excluded",
+    };
+    const text =
+      "Alder Team costs USD 20 per seat per month in US, five seats, unlimited contacts, tax excluded.";
+    const { app, cleanup } = setup({
+      search: {
+        async search() {
+          return [
+            { title: "Price", url: "https://example.com", content: text },
+          ];
+        },
+      },
+      model: {
+        async generate(c: any) {
+          return {
+            answer: "Same",
+            comparisons: [
+              {
+                claim: "Alder price",
+                status: "CURRENTLY_MATCHES",
+                baselineSourceIds: [c.baseline[0].id],
+                evidenceSourceIds: [
+                  c.evidence.find((s: any) => s.kind === "web").id,
+                ],
+                explanation: "same",
+                baselinePrice: quote,
+                currentPrice: quote,
+              },
+            ],
+          };
+        },
+      },
+    });
+    try {
+      await app.evidence.import({ name: "Quote", content: text });
+      const chat = await app.workspace.createConversation();
+      const r = await app.turns.start({
+        conversationId: chat.id,
+        clientRequestId: "quote",
+        expectedTailId: null,
+        text: "Has Alder price changed?",
+      });
+      assert.equal(
+        (await wait(app, r.turnId)).comparisons[0].status,
+        fakeSeats ? "UNVERIFIED" : "CURRENTLY_MATCHES",
+      );
+    } finally {
+      cleanup();
+    }
+  }
+});
+
+test("a dated change is accepted only with a verbatim effective-date passage from linked evidence", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-12T12:00:00Z"),
+    search: {
+      async search() {
+        return [
+          {
+            title: "Official release",
+            url: "https://example.com/release",
+            content:
+              "Effective 2026-11-10, the export feature supports CSV files.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        const web = c.evidence.find((s: any) => s.kind === "web");
+        return {
+          answer: "CSV export was added.",
+          comparisons: [
+            {
+              claim: "CSV export",
+              status: "CHANGED_WITH_DATED_EVIDENCE",
+              baselineSourceIds: [c.baseline[0].id],
+              evidenceSourceIds: [web.id],
+              explanation: "The release says when support begins.",
+              effectiveAt: "2026-11-10",
+              effectiveDateEvidence: {
+                sourceId: web.id,
+                quote:
+                  "Effective 2026-11-10, the export feature supports CSV files.",
+              },
+            },
+          ],
+        };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Before",
+      content: "CSV export is unavailable.",
+      occurredAt: "2026-11-03",
+    });
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "dated",
+      expectedTailId: null,
+      text: "Has CSV export changed since 3 November?",
+      timezone: "UTC",
+    });
+    assert.equal(
+      (await wait(app, r.turnId)).comparisons[0].status,
+      "CHANGED_WITH_DATED_EVIDENCE",
+    );
+  } finally {
+    cleanup();
+  }
+});
+
+test("queued turns interpret scheduled corrections at acceptance time, not at execution time", async () => {
+  let clock = "2026-11-12T10:00:00Z";
+  const gate = deferred<void>();
+  let calls = 0;
+  const { app, cleanup } = setup({
+    clock: () => new Date(clock),
+    model: {
+      async generate(c: any) {
+        if (++calls === 1) await gate.promise;
+        return {
+          answer:
+            c.baseline
+              .map((s: any) => s.interpretation || s.content)
+              .join("\n") || "Ready",
+        };
+      },
+    },
+  });
+  try {
+    const record = await app.evidence.import({
+      name: "Quota",
+      content: "The quota is five.",
+    });
+    const source = await app.evidence.inspect(record.sourceId);
+    await app.evidence.correct({
+      sourceId: record.sourceId,
+      assertionId: source.assertions[0].id,
+      content: "The quota is six.",
+      mode: "CHANGE_FROM_NOW",
+      effectiveAt: "2026-11-12T11:00:00Z",
+    });
+    const chat = await app.workspace.createConversation();
+    const first = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "hold",
+      expectedTailId: null,
+      text: "Hold the queue",
+    });
+    await new Promise((r) => setTimeout(r, 5));
+    const second = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "quota",
+      expectedTailId: first.chatTail,
+      text: "What is our quota?",
+    });
+    clock = "2026-11-12T12:00:00Z";
+    gate.resolve();
+    const result = await wait(app, second.turnId);
+    assert.match(result.answer, /quota is five/);
+    assert.doesNotMatch(result.answer, /quota is six/);
+  } finally {
+    gate.resolve();
+    cleanup();
+  }
+});
+
+test("a later scheduled assertion cannot be stranded by an earlier whole-record replacement", async () => {
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-12T12:00:00Z"),
+  });
+  try {
+    const original = await app.evidence.import({
+      name: "Schedule",
+      content: "The quota is five.",
+    });
+    const s = await app.evidence.inspect(original.sourceId);
+    await app.evidence.correct({
+      sourceId: original.sourceId,
+      assertionId: s.assertions[0].id,
+      content: "The quota is eight.",
+      mode: "CHANGE_FROM_NOW",
+      effectiveAt: "2026-11-15T00:00:00Z",
+    });
+    await assert.rejects(
+      app.evidence.correct({
+        sourceId: original.sourceId,
+        content: "The quota is seven.",
+        mode: "CHANGE_FROM_NOW",
+        effectiveAt: "2026-11-14T00:00:00Z",
+      }),
+      { code: "CORRECTION_CONFLICT" },
     );
   } finally {
     cleanup();

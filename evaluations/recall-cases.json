@@ -1,0 +1,281 @@
+{
+  "label": "Hand-authored synthetic retrieval fixtures; not claims about real vendors",
+  "sources": [
+    {
+      "id": "crm",
+      "date": "2026-11-02",
+      "text": "Monday CRM shortlist: Alder, Birch, Cedar, Dogwood and Elm for a twenty-person sales team."
+    },
+    {
+      "id": "hosting",
+      "date": "2026-11-03",
+      "text": "Tuesday Postgres hosting decision: compare RiverDB and CloudLake. We care about connection pooling and cold starts."
+    },
+    {
+      "id": "budget",
+      "date": "2026-11-04",
+      "text": "The procurement budget is USD 400 per month, excluding tax. Annual commitments are not approved."
+    },
+    {
+      "id": "privacy",
+      "date": "2026-11-05",
+      "text": "Customer transcripts must stay in the European region. Do not send personal data to a US endpoint."
+    },
+    {
+      "id": "search",
+      "date": "2026-11-06",
+      "text": "Search failures do not establish that a vendor is unchanged. Report the missing evidence explicitly."
+    },
+    {
+      "id": "retry",
+      "date": "2026-11-07",
+      "text": "Browser disconnects detach the observer. Only an explicit cancellation stops durable work."
+    },
+    {
+      "id": "memory",
+      "date": "2026-11-08",
+      "text": "Store original conversations before asynchronous embeddings. Lexical retrieval must work while vectors are preparing."
+    },
+    {
+      "id": "billing",
+      "date": "2026-11-09",
+      "text": "Alder Team quote: USD 20 per seat per month, billed monthly, US region, excluding tax, five seats."
+    },
+    {
+      "id": "seats",
+      "date": "2026-11-10",
+      "text": "We need twenty sales seats and two read-only finance seats. The finance viewers must not be billed as salespeople."
+    },
+    {
+      "id": "ownership",
+      "date": "2026-11-11",
+      "text": "Nisha owns the CRM evaluation. Kabir owns the database migration. Review both on Friday."
+    },
+    {
+      "id": "retention",
+      "date": "2026-10-30",
+      "text": "Keep uploaded documents for thirty days unless the user deletes them. Permanent deletion must purge derived indexes."
+    },
+    {
+      "id": "latency",
+      "date": "2026-10-29",
+      "text": "Measure first useful answer separately from total completion time. Exclude time waiting for quota from active inference latency."
+    },
+    {
+      "id": "launch",
+      "date": "2026-10-28",
+      "text": "Launch was postponed because the Windows installer failed. Fix the path handling before announcing release."
+    },
+    {
+      "id": "correction",
+      "date": "2026-10-27",
+      "text": "Correction policy: preserve the original utterance and append a dated correction. Never rewrite an old quotation."
+    },
+    {
+      "id": "notes",
+      "date": "2026-10-26",
+      "text": "Meeting notes: the hiring challenge prizes architecture, reproducibility and explaining rejected alternatives."
+    },
+    {
+      "id": "audio",
+      "date": "2026-10-25",
+      "text": "Voice clips need explicit recording, sixty-second limits and an editable transcript before submission."
+    }
+  ],
+  "cases": [
+    {
+      "id": "r01",
+      "query": "Which CRM tools made our shortlist?",
+      "expected": "crm"
+    },
+    {
+      "id": "r02",
+      "query": "Postgres connection pooling cold starts",
+      "expected": "hosting"
+    },
+    {
+      "id": "r03",
+      "query": "procurement budget annual commitments",
+      "expected": "budget"
+    },
+    {
+      "id": "r04",
+      "query": "customer transcripts European region",
+      "expected": "privacy"
+    },
+    {
+      "id": "r05",
+      "query": "search failures missing evidence",
+      "expected": "search"
+    },
+    {
+      "id": "r06",
+      "query": "browser disconnects explicit cancellation",
+      "expected": "retry"
+    },
+    {
+      "id": "r07",
+      "query": "asynchronous embeddings lexical retrieval",
+      "expected": "memory"
+    },
+    {
+      "id": "r08",
+      "query": "Alder Team quote billed monthly",
+      "expected": "billing"
+    },
+    { "id": "r09", "query": "read-only finance seats", "expected": "seats" },
+    {
+      "id": "r10",
+      "query": "Nisha Kabir review Friday",
+      "expected": "ownership"
+    },
+    {
+      "id": "r11",
+      "query": "documents permanent deletion derived indexes",
+      "expected": "retention"
+    },
+    {
+      "id": "r12",
+      "query": "first useful answer total completion time",
+      "expected": "latency"
+    },
+    {
+      "id": "r13",
+      "query": "Windows installer launch postponed",
+      "expected": "launch"
+    },
+    {
+      "id": "r14",
+      "query": "dated correction old quotation",
+      "expected": "correction"
+    },
+    {
+      "id": "r15",
+      "query": "hiring architecture rejected alternatives",
+      "expected": "notes"
+    },
+    {
+      "id": "r16",
+      "query": "voice clips editable transcript",
+      "expected": "audio"
+    },
+    { "id": "r17", "query": "twenty-person sales team", "expected": "crm" },
+    { "id": "r18", "query": "RiverDB CloudLake", "expected": "hosting" },
+    { "id": "r19", "query": "USD 400 excluding tax", "expected": "budget" },
+    {
+      "id": "r20",
+      "query": "US endpoint personal data",
+      "expected": "privacy"
+    },
+    {
+      "id": "s01",
+      "query": "If my tab loses its connection, will the answer stop being generated?",
+      "expected": "retry"
+    },
+    {
+      "id": "s02",
+      "query": "Can I find a document immediately while its vector representation is still pending?",
+      "expected": "memory"
+    },
+    {
+      "id": "s03",
+      "query": "Who is responsible for comparing customer relationship management products?",
+      "expected": "ownership"
+    },
+    {
+      "id": "s04",
+      "query": "Which companies were selected to help our salespeople track customers?",
+      "expected": "crm"
+    },
+    {
+      "id": "s05",
+      "query": "Can we sign a twelve-month contract for the software?",
+      "expected": "budget"
+    },
+    {
+      "id": "s06",
+      "query": "What prevented us from shipping the app?",
+      "expected": "launch"
+    },
+    {
+      "id": "s07",
+      "query": "What should happen to information when I erase a file?",
+      "expected": "retention"
+    },
+    {
+      "id": "s08",
+      "query": "Should a failed lookup count as proof that nothing happened?",
+      "expected": "search"
+    },
+    {
+      "id": "s09",
+      "query": "How do we handle a fact someone later says was wrong?",
+      "expected": "correction"
+    },
+    {
+      "id": "s10",
+      "query": "What does the interviewer value most about our solution?",
+      "expected": "notes"
+    },
+    {
+      "id": "d01",
+      "query": "What did we shortlist on Monday?",
+      "date": "2026-11-02",
+      "expected": "crm"
+    },
+    {
+      "id": "d02",
+      "query": "What did we discuss on Tuesday?",
+      "date": "2026-11-03",
+      "expected": "hosting"
+    },
+    {
+      "id": "d03",
+      "query": "What did I record on 4 November?",
+      "date": "2026-11-04",
+      "expected": "budget"
+    },
+    {
+      "id": "d04",
+      "query": "What did I say on 5 November?",
+      "date": "2026-11-05",
+      "expected": "privacy"
+    },
+    {
+      "id": "d05",
+      "query": "What was recorded on 6 November?",
+      "date": "2026-11-06",
+      "expected": "search"
+    },
+    {
+      "id": "d06",
+      "query": "Show the 7 November note",
+      "date": "2026-11-07",
+      "expected": "retry"
+    },
+    {
+      "id": "d07",
+      "query": "Show the 8 November note",
+      "date": "2026-11-08",
+      "expected": "memory"
+    },
+    {
+      "id": "d08",
+      "query": "Show the 9 November note",
+      "date": "2026-11-09",
+      "expected": "billing"
+    },
+    {
+      "id": "d09",
+      "query": "Show the 10 November note",
+      "date": "2026-11-10",
+      "expected": "seats"
+    },
+    {
+      "id": "d10",
+      "query": "Show the 11 November note",
+      "date": "2026-11-11",
+      "expected": "ownership"
+    }
+  ]
+}

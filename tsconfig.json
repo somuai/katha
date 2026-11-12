@@ -12,5 +12,5 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["src", "client/src", "tests", "vite.config.ts"]
+  "include": ["src", "client/src", "tests", "vite.config.ts", "evaluations"]
 }

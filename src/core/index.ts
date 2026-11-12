@@ -1,3 +1,7 @@
+import { effectiveDateInQuote } from "./dated-evidence.js";
+import { comparePrices, priceHasNumericSupport } from "./pricing.js";
+import { seedAssertions } from "./assertions.js";
+import { migrate } from "./migrations.js";
 import Database from "better-sqlite3";
 import { randomUUID, createHash } from "node:crypto";
 import { mkdirSync, writeFileSync, unlinkSync, existsSync } from "node:fs";
@@ -58,23 +62,12 @@ export function createKatha(options: KathaOptions) {
   db.pragma("foreign_keys = ON");
   db.pragma("synchronous = FULL");
   db.pragma("busy_timeout = 3000");
-  db.exec(`CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY,value INTEGER NOT NULL);
-  INSERT OR IGNORE INTO meta VALUES('epoch',0);
-  CREATE TABLE IF NOT EXISTS conversations(id TEXT PRIMARY KEY,title TEXT NOT NULL,created_at TEXT NOT NULL,tail_id TEXT,deleted_at TEXT);
-  CREATE TABLE IF NOT EXISTS turns(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES conversations(id),request_id TEXT NOT NULL,input_hash TEXT NOT NULL,seq INTEGER NOT NULL,input_json TEXT NOT NULL,status TEXT NOT NULL,answer TEXT NOT NULL DEFAULT '',error TEXT,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,cutoff INTEGER NOT NULL,epoch INTEGER NOT NULL,citations_json TEXT NOT NULL DEFAULT '[]',comparisons_json TEXT NOT NULL DEFAULT '[]',source_ids_json TEXT NOT NULL DEFAULT '[]',trace_json TEXT NOT NULL DEFAULT '{}',UNIQUE(conversation_id,request_id));
-  CREATE TABLE IF NOT EXISTS sources(ordinal INTEGER PRIMARY KEY AUTOINCREMENT,id TEXT NOT NULL UNIQUE,kind TEXT NOT NULL,role TEXT NOT NULL,conversation_id TEXT REFERENCES conversations(id),turn_id TEXT REFERENCES turns(id),title TEXT NOT NULL,content TEXT NOT NULL,recorded_at TEXT NOT NULL,occurred_at TEXT,occurred_end TEXT,date_provenance TEXT NOT NULL DEFAULT 'unknown',version INTEGER NOT NULL DEFAULT 1,deleted_at TEXT,invalidated INTEGER NOT NULL DEFAULT 0,metadata_json TEXT NOT NULL DEFAULT '{}');
-  CREATE INDEX IF NOT EXISTS sources_time ON sources(recorded_at);CREATE INDEX IF NOT EXISTS sources_event ON sources(occurred_at);CREATE INDEX IF NOT EXISTS sources_chat ON sources(conversation_id,ordinal);
-  CREATE VIRTUAL TABLE IF NOT EXISTS source_fts USING fts5(source_id UNINDEXED,content);
-  CREATE TABLE IF NOT EXISTS corrections(id TEXT PRIMARY KEY,source_id TEXT NOT NULL REFERENCES sources(id),target_id TEXT NOT NULL REFERENCES sources(id),mode TEXT NOT NULL,effective_at TEXT NOT NULL);
-  CREATE TABLE IF NOT EXISTS dependencies(answer_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,PRIMARY KEY(answer_id,source_id));
-  CREATE TABLE IF NOT EXISTS events(turn_id TEXT NOT NULL REFERENCES turns(id),sequence INTEGER NOT NULL,type TEXT NOT NULL,data_json TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(turn_id,sequence));
-  CREATE TABLE IF NOT EXISTS search_cache(key TEXT PRIMARY KEY,results_json TEXT NOT NULL,created_at TEXT NOT NULL,expires_at TEXT NOT NULL);
-  CREATE TABLE IF NOT EXISTS usage(month TEXT PRIMARY KEY,search_credits INTEGER NOT NULL DEFAULT 0);
-  CREATE TABLE IF NOT EXISTS verification_runs(id TEXT PRIMARY KEY,turn_id TEXT NOT NULL REFERENCES turns(id),baseline_ids_json TEXT NOT NULL,evidence_ids_json TEXT NOT NULL,outcomes_json TEXT NOT NULL,coverage_json TEXT NOT NULL,created_at TEXT NOT NULL);
-  CREATE TABLE IF NOT EXISTS jobs(source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,version INTEGER NOT NULL,model_id TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'pending',attempts INTEGER NOT NULL DEFAULT 0,error TEXT,PRIMARY KEY(source_id,version,model_id));
-  CREATE TABLE IF NOT EXISTS segments(source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,model_id TEXT NOT NULL,start_token INTEGER NOT NULL,end_token INTEGER NOT NULL,text TEXT NOT NULL,vector_json TEXT NOT NULL,PRIMARY KEY(source_id,model_id,start_token));
-  CREATE TABLE IF NOT EXISTS embeddings(source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,version INTEGER NOT NULL,model_id TEXT NOT NULL,vector_json TEXT NOT NULL,PRIMARY KEY(source_id,version,model_id));
-  PRAGMA user_version=1;`);
+  try {
+    migrate(db);
+  } catch (error) {
+    db.close();
+    throw error;
+  }
   const now = () => iso(options.clock?.() || new Date());
   const epoch = () =>
     Number(
@@ -200,6 +193,7 @@ export function createKatha(options: KathaOptions) {
       id,
       input.content,
     );
+    seedAssertions(db, id, input.content);
     if (options.embedder)
       db.prepare(
         "INSERT OR IGNORE INTO jobs(source_id,version,model_id) VALUES(?,1,?)",
@@ -340,9 +334,24 @@ export function createKatha(options: KathaOptions) {
       );
       args.push(iso(q.to));
     }
+    // Effective time answers "when was it true?"; cutoff answers "when did we know?".
+    if (q.original) predicates.push("s.kind!='correction'");
+    const effective = iso(q.asOf || now());
+    predicates.push(
+      "(s.kind!='correction' OR EXISTS(SELECT 1 FROM corrections ce WHERE ce.source_id=s.id AND ce.effective_at<=?))",
+    );
+    args.push(effective);
+    if (!q.original) {
+      predicates.push(
+        `NOT EXISTS(SELECT 1 FROM corrections old JOIN corrections newer ON newer.target_id=old.target_id AND newer.assertion_id IS old.assertion_id JOIN sources ns ON ns.id=newer.source_id JOIN sources os ON os.id=old.source_id WHERE old.source_id=s.id AND newer.effective_at<=? AND ns.deleted_at IS NULL AND ns.invalidated=0 AND (newer.effective_at>old.effective_at OR (newer.effective_at=old.effective_at AND ns.ordinal>os.ordinal)) ${cutoff !== undefined ? "AND ns.ordinal<=" + Number(cutoff) : ""})`,
+      );
+      args.push(effective);
+    }
     if (!q.original)
       predicates.push(
-        "NOT EXISTS(SELECT 1 FROM corrections c JOIN sources cs ON cs.id=c.source_id WHERE c.target_id=s.id AND c.mode='CORRECT_PAST_RECORD' AND cs.deleted_at IS NULL AND cs.invalidated=0" +
+        "NOT EXISTS(SELECT 1 FROM corrections c JOIN sources cs ON cs.id=c.source_id WHERE c.target_id=s.id AND c.mode IN ('CORRECT_PAST_RECORD','CHANGE_FROM_NOW') AND c.assertion_id IS NULL AND c.effective_at<='" +
+          effective +
+          "' AND cs.deleted_at IS NULL AND cs.invalidated=0" +
           (cutoff !== undefined ? " AND cs.ordinal<=" + Number(cutoff) : "") +
           ")",
       );
@@ -386,7 +395,10 @@ export function createKatha(options: KathaOptions) {
     >();
     let ranking: string[] = [],
       methods: string[] = [];
-    if (q.from || q.to || !tokens.length) {
+    if (options.retrievalStrategy === "recent") {
+      ranking = rows.slice(0, 8).map((r) => r.id);
+      methods = ["recent-context-ablation"];
+    } else if (q.from || q.to || !tokens.length) {
       ranking = rows.map((r) => r.id);
       methods = ["calendar"];
     } else {
@@ -408,6 +420,7 @@ export function createKatha(options: KathaOptions) {
         .forEach((r, i) => ranks.set(r.source_id, 1 / (60 + i + 1)));
       methods = ["lexical"];
       if (
+        options.retrievalStrategy !== "lexical" &&
         options.embedder &&
         q.text &&
         (
@@ -497,13 +510,56 @@ export function createKatha(options: KathaOptions) {
       ).map((r) => r.id),
     );
     ranking = ranking.filter((id) => stillEligible.has(id));
+    function interpretation(row: any) {
+      const eligible = db
+        .prepare(
+          `SELECT a.start_offset,a.end_offset,c.source_id,cs.content,c.effective_at,cs.ordinal FROM assertions a JOIN corrections c ON c.assertion_id=a.id JOIN sources cs ON cs.id=c.source_id WHERE a.source_id=? AND c.effective_at<=? AND cs.deleted_at IS NULL AND cs.invalidated=0 ${internal ? "AND cs.ordinal<=?" : ""} ORDER BY c.effective_at DESC,cs.ordinal DESC`,
+        )
+        .all(
+          row.id,
+          iso(q.asOf || now()),
+          ...(internal ? [internal.cutoff] : []),
+        ) as any[];
+      const spans = new Map<number, any>();
+      if (!q.original)
+        for (const change of eligible)
+          if (!spans.has(change.start_offset))
+            spans.set(change.start_offset, change);
+      const whole = !q.original
+        ? (db
+            .prepare(
+              `SELECT c.source_id,cs.content FROM corrections c JOIN sources cs ON cs.id=c.source_id WHERE c.target_id=? AND c.assertion_id IS NULL AND c.effective_at<=? AND cs.deleted_at IS NULL AND cs.invalidated=0 ${internal ? "AND cs.ordinal<=?" : ""} ORDER BY c.effective_at DESC,cs.ordinal DESC LIMIT 1`,
+            )
+            .get(
+              row.id,
+              iso(q.asOf || now()),
+              ...(internal ? [internal.cutoff] : []),
+            ) as any)
+        : null;
+      if (whole)
+        return {
+          interpretation: whole.content,
+          interpretationSourceIds: [whole.source_id],
+        };
+      let text = row.content;
+      for (const change of [...spans.values()].sort(
+        (a, b) => b.start_offset - a.start_offset,
+      ))
+        text =
+          text.slice(0, change.start_offset) +
+          change.content +
+          text.slice(change.end_offset);
+      return {
+        interpretation: text,
+        interpretationSourceIds: [...spans.values()].map((c) => c.source_id),
+      };
+    }
     return {
-      sources: ranking
-        .slice(offset, offset + limit)
-        .map((id) => ({
-          ...source(byId.get(id)),
-          ...(matches.has(id) ? { matches: matches.get(id) } : {}),
-        })),
+      sources: ranking.slice(offset, offset + limit).map((id) => ({
+        ...source(byId.get(id)),
+        ...interpretation(byId.get(id)),
+        ...(matches.has(id) ? { matches: matches.get(id) } : {}),
+      })),
       total: ranking.length,
       hasMore: ranking.length > offset + limit,
       methods,
@@ -649,7 +705,31 @@ export function createKatha(options: KathaOptions) {
           "SELECT model_id,status,attempts,error FROM jobs WHERE source_id=?",
         )
         .all(id);
-      return { ...source(row), corrections, indexing: jobs };
+      const assertionRows = db
+        .prepare(
+          "SELECT * FROM assertions WHERE source_id=? ORDER BY start_offset",
+        )
+        .all(id) as any[];
+      const assertions = assertionRows.map((a) => ({
+        id: a.id,
+        text: a.text,
+        locator: { start: a.start_offset, end: a.end_offset },
+        corrections: (
+          db
+            .prepare(
+              "SELECT c.*,s.content,s.recorded_at,s.deleted_at FROM corrections c JOIN sources s ON s.id=c.source_id WHERE c.assertion_id=? ORDER BY c.effective_at,s.ordinal",
+            )
+            .all(a.id) as any[]
+        ).map((c) => ({
+          sourceId: c.source_id,
+          content: c.content,
+          mode: c.mode,
+          effectiveAt: c.effective_at,
+          recordedAt: c.recorded_at,
+          deletedAt: c.deleted_at,
+        })),
+      }));
+      return { ...source(row), corrections, assertions, indexing: jobs };
     },
     recall,
     async correct(input: CorrectionInput) {
@@ -671,7 +751,52 @@ export function createKatha(options: KathaOptions) {
           "INVALID_CORRECTION",
           "Choose whether this corrects a past record or changes it from now.",
         );
-      const time = input.effectiveAt ? iso(input.effectiveAt) : now();
+      if (
+        input.assertionId &&
+        !db
+          .prepare("SELECT id FROM assertions WHERE id=? AND source_id=?")
+          .get(input.assertionId, target.id)
+      )
+        throw new KathaError(
+          "INVALID_ASSERTION",
+          "Select an assertion belonging to this source.",
+        );
+      let time: string;
+      try {
+        time = input.effectiveAt
+          ? iso(input.effectiveAt)
+          : input.mode === "CORRECT_PAST_RECORD"
+            ? target.occurred_at || target.recorded_at
+            : now();
+      } catch {
+        throw new KathaError("INVALID_DATE", "Provide a valid effective date.");
+      }
+      if (
+        !input.assertionId &&
+        db
+          .prepare(
+            "SELECT c.id FROM corrections c JOIN sources s ON s.id=c.source_id WHERE c.target_id=? AND c.assertion_id IS NOT NULL AND c.effective_at>=? AND s.deleted_at IS NULL AND s.invalidated=0 LIMIT 1",
+          )
+          .get(target.id, time)
+      )
+        throw new KathaError(
+          "CORRECTION_CONFLICT",
+          "This replacement would strand scheduled fact corrections. Resolve those corrections first, or edit their current record.",
+          409,
+        );
+      if (input.assertionId) {
+        const replacement = db
+          .prepare(
+            "SELECT c.source_id FROM corrections c JOIN sources s ON s.id=c.source_id WHERE c.target_id=? AND c.assertion_id IS NULL AND c.effective_at<=? AND s.deleted_at IS NULL AND s.invalidated=0 ORDER BY c.effective_at DESC,s.ordinal DESC LIMIT 1",
+          )
+          .get(target.id, time) as any;
+        if (replacement)
+          throw new KathaError(
+            "SOURCE_SUPERSEDED",
+            "This record was replaced. Inspect the latest correction and edit its assertions instead.",
+            409,
+          );
+      }
       const id = db.transaction(() => {
         const id = addSource({
           kind: "correction",
@@ -684,14 +809,22 @@ export function createKatha(options: KathaOptions) {
           occurredEnd:
             input.mode === "CORRECT_PAST_RECORD" ? target.occurred_end : null,
           dateProvenance: "user-confirmed",
-          metadata: { targetId: target.id, mode: input.mode },
+          metadata: {
+            targetId: target.id,
+            mode: input.mode,
+            assertionId: input.assertionId || null,
+            effectiveAt: time,
+          },
         });
-        db.prepare("INSERT INTO corrections VALUES(?,?,?,?,?)").run(
+        db.prepare(
+          "INSERT INTO corrections(id,source_id,target_id,mode,effective_at,assertion_id) VALUES(?,?,?,?,?,?)",
+        ).run(
           randomUUID(),
           id,
           target.id,
           input.mode,
           time,
+          input.assertionId || null,
         );
         db.prepare("INSERT OR IGNORE INTO dependencies VALUES(?,?)").run(
           id,
@@ -757,6 +890,8 @@ export function createKatha(options: KathaOptions) {
           "DELETE FROM corrections WHERE source_id=? OR target_id=?",
         ).run(id, id);
         db.prepare("DELETE FROM source_fts WHERE source_id=?").run(id);
+        db.prepare("DELETE FROM segments WHERE source_id=?").run(id);
+        db.prepare("DELETE FROM assertions WHERE source_id=?").run(id);
         db.prepare("DELETE FROM embeddings WHERE source_id=?").run(id);
         db.prepare("DELETE FROM jobs WHERE source_id=?").run(id);
         db.prepare(
@@ -1019,6 +1154,7 @@ export function createKatha(options: KathaOptions) {
         conversationId: scope,
         limit: historical ? 200 : 20,
         original: historical,
+        asOf: row.created_at,
       };
       if (window) {
         query.from = window.from;
@@ -1031,7 +1167,7 @@ export function createKatha(options: KathaOptions) {
         ownId: own.id,
       });
       valid();
-      let local = recalled.sources.filter(
+      let local: Source[] = recalled.sources.filter(
         (s) => s.id !== own.id && s.kind !== "web",
       );
       let previousObservationIds: string[] = [];
@@ -1089,12 +1225,21 @@ export function createKatha(options: KathaOptions) {
         referenceClock: row.created_at,
         timezone: input.timezone || "UTC",
         retrievalMethods: recalled.methods,
-        baselineSourceIds: local.map((s) => s.id),
+        baselineSourceIds: local.flatMap((s) => [
+          s.id,
+          ...(s.interpretationSourceIds || []),
+        ]),
         previousObservationIds,
         searches: [],
         coverage: null,
       };
-      update(id, { sourceIds: local.map((s) => s.id), trace });
+      update(id, {
+        sourceIds: local.flatMap((s) => [
+          s.id,
+          ...(s.interpretationSourceIds || []),
+        ]),
+        trace,
+      });
       event(id, "sources", { sources: local });
       if (historical && !local.length) {
         update(id, {
@@ -1121,7 +1266,7 @@ export function createKatha(options: KathaOptions) {
         saveAnswer(
           id,
           answer,
-          local.map((s) => s.id),
+          local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
         );
         setStatus(id, "COMPLETED");
         event(id, "complete", getTurn(id));
@@ -1278,7 +1423,7 @@ export function createKatha(options: KathaOptions) {
         saveAnswer(
           id,
           answer,
-          local.map((s) => s.id),
+          local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
         );
         setStatus(id, "PARTIAL");
         event(id, "complete", getTurn(id));
@@ -1295,7 +1440,7 @@ export function createKatha(options: KathaOptions) {
         saveAnswer(
           id,
           answer,
-          local.map((s) => s.id),
+          local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
         );
         setStatus(id, "COMPLETED");
         event(id, "complete", getTurn(id));
@@ -1336,6 +1481,7 @@ export function createKatha(options: KathaOptions) {
         }),
       );
       valid();
+      if (result.usage) trace.usage = result.usage;
       if (deltaBuffer) {
         streamed += deltaBuffer;
         update(id, { answer: streamed });
@@ -1366,7 +1512,20 @@ export function createKatha(options: KathaOptions) {
         if (
           status === "CHANGED_WITH_DATED_EVIDENCE" &&
           !web.some((s) => {
-            const when = Date.parse(String(s.metadata.effectiveAt || ""));
+            const passage = c.effectiveDateEvidence;
+            const explicitDate =
+              passage &&
+              passage.sourceId === s.id &&
+              typeof passage.quote === "string" &&
+              passage.quote.length >= 12 &&
+              s.content.includes(passage.quote) &&
+              typeof c.effectiveAt === "string" &&
+              effectiveDateInQuote(c.effectiveAt, passage.quote)
+                ? c.effectiveAt
+                : null;
+            const when = Date.parse(
+              String(s.metadata.effectiveAt || explicitDate || ""),
+            );
             return (
               evidenceIds.includes(s.id) &&
               Number.isFinite(when) &&
@@ -1376,9 +1535,55 @@ export function createKatha(options: KathaOptions) {
           })
         )
           status = "DIFFERS_CHANGE_TIME_UNKNOWN";
+        let priceCheck;
+        const priceClaim =
+          /\b(price|pricing|cost|per seat|billing)\b|[$€£₹]/i.test(c.claim) ||
+          c.baselinePrice ||
+          c.currentPrice;
+        let explanation = c.explanation;
+        if (priceClaim) {
+          priceCheck = comparePrices(c.baselinePrice, c.currentPrice);
+          const baselineTexts = local
+            .filter((s) => baseline.includes(s.id))
+            .map((s) => s.interpretation || s.content);
+          const currentTexts = web
+            .filter((s) => evidenceIds.includes(s.id))
+            .map((s) => s.content);
+          if (!priceCheck.comparable) {
+            status = "UNVERIFIED";
+            explanation = priceCheck.reason;
+          } else if (
+            !baselineTexts.some((text) =>
+              priceHasNumericSupport(c.baselinePrice!, text),
+            ) ||
+            !currentTexts.some((text) =>
+              priceHasNumericSupport(c.currentPrice!, text),
+            )
+          ) {
+            status = "UNVERIFIED";
+            explanation =
+              "Extracted commercial terms are not supported by the linked source text.";
+          } else if (
+            priceCheck.equal &&
+            [
+              "DIFFERS_CHANGE_TIME_UNKNOWN",
+              "CHANGED_WITH_DATED_EVIDENCE",
+            ].includes(status)
+          ) {
+            status = "CONFLICTING";
+            explanation =
+              "The extracted like-for-like prices are equal but the generated comparison claims a change.";
+          } else if (!priceCheck.equal && status === "CURRENTLY_MATCHES") {
+            status = "DIFFERS_CHANGE_TIME_UNKNOWN";
+            explanation =
+              "Like-for-like amounts differ; the time of change is not established.";
+          }
+        }
         return {
           ...c,
           status,
+          explanation,
+          ...(priceCheck ? { priceCheck } : {}),
           baselineSourceIds: baseline,
           evidenceSourceIds: evidenceIds,
         };
@@ -1388,6 +1593,14 @@ export function createKatha(options: KathaOptions) {
         result.answer =
           "I could not obtain current web evidence, so I cannot establish what changed. " +
           result.answer;
+      }
+      if (verification && comparisons.some((c) => c.priceCheck)) {
+        result.answer = comparisons
+          .map(
+            (c) =>
+              `**${c.claim}** — ${c.status.replaceAll("_", " ").toLowerCase()}. ${c.explanation}`,
+          )
+          .join("\n\n");
       }
       const answer = result.answer?.trim();
       if (!answer)
@@ -1403,12 +1616,21 @@ export function createKatha(options: KathaOptions) {
         sourceIds: [...local, ...web].map((s) => s.id),
         trace,
       });
-      saveAnswer(id, answer, [...new Set([...local, ...web].map((s) => s.id))]);
+      saveAnswer(id, answer, [
+        ...new Set(
+          [...local, ...web].flatMap((s) => [
+            s.id,
+            ...(s.interpretationSourceIds || []),
+          ]),
+        ),
+      ]);
       if (verification)
         db.prepare("INSERT INTO verification_runs VALUES(?,?,?,?,?,?,?)").run(
           randomUUID(),
           id,
-          json(local.map((s) => s.id)),
+          json(
+            local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
+          ),
           json(web.map((s) => s.id)),
           json(comparisons),
           json(trace.coverage),

@@ -1,3 +1,4 @@
+import type { PriceTerms } from "../core/pricing.js";
 export type Evidence = {
   id: string;
   title: string;
@@ -24,6 +25,10 @@ export type Plan = {
   clarification?: string;
 };
 export type Comparison = {
+  effectiveAt?: string;
+  effectiveDateEvidence?: { sourceId: string; quote: string };
+  baselinePrice?: PriceTerms;
+  currentPrice?: PriceTerms;
   claim: string;
   baselineSourceIds: string[];
   evidenceIds: string[];
@@ -34,7 +39,6 @@ export type Comparison = {
     | "CONFLICTING"
     | "UNVERIFIED";
   explanation: string;
-  effectiveAt?: string;
 };
 export type Answer = {
   text: string;

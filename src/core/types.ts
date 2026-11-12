@@ -1,3 +1,4 @@
+import type { PriceTerms } from "./pricing.js";
 export type TurnStatus =
   | "QUEUED"
   | "WAITING_FOR_SOURCES"
@@ -22,6 +23,8 @@ export interface Conversation {
   deletedAt: string | null;
 }
 export interface Source {
+  interpretation?: string;
+  interpretationSourceIds?: string[];
   matches?: { text: string; startToken: number; endToken: number }[];
   id: string;
   kind: "message" | "attachment" | "web" | "correction";
@@ -44,6 +47,11 @@ export interface Citation {
   label?: string;
 }
 export interface Comparison {
+  effectiveAt?: string;
+  effectiveDateEvidence?: { sourceId: string; quote: string };
+  baselinePrice?: PriceTerms;
+  currentPrice?: PriceTerms;
+  priceCheck?: ReturnType<typeof import("./pricing.js").comparePrices>;
   claim: string;
   status: ComparisonStatus;
   baselineSourceIds: string[];
@@ -115,6 +123,7 @@ export interface ModelContext {
 export interface ModelAdapter {
   generate(context: ModelContext): Promise<{
     answer: string;
+    usage?: { inputTokens: number; outputTokens: number };
     citations?: Citation[];
     comparisons?: Comparison[];
   }>;
@@ -141,6 +150,7 @@ export interface ImportInput {
   metadata?: Record<string, unknown>;
 }
 export interface RecallQuery {
+  asOf?: string;
   text?: string;
   conversationId?: string;
   from?: string;
@@ -151,12 +161,15 @@ export interface RecallQuery {
   original?: boolean;
 }
 export interface CorrectionInput {
+  assertionId?: string;
   sourceId: string;
   content: string;
   mode: "CORRECT_PAST_RECORD" | "CHANGE_FROM_NOW";
   effectiveAt?: string;
 }
 export interface KathaOptions {
+  /** Evaluation ablation only; production defaults to hybrid. */
+  retrievalStrategy?: "recent" | "lexical" | "hybrid";
   directory: string;
   clock?: () => Date;
   model?: ModelAdapter;

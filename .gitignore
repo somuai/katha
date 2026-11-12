@@ -7,3 +7,8 @@ data/
 playwright-report/
 test-results/
 .DS_Store
+
+# Installed authoring skills and local screenshot evidence are not application dependencies.
+.agents/
+skills-lock.json
+qa/

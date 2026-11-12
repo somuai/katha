@@ -1,3 +1,9 @@
+import { PaperclipIcon as Paperclip } from "@phosphor-icons/react/dist/icons/Paperclip";
+import { ImageIcon as ImageIcon } from "@phosphor-icons/react/dist/icons/Image";
+import { AtIcon as At } from "@phosphor-icons/react/dist/icons/At";
+import { StackIcon as Stack } from "@phosphor-icons/react/dist/icons/Stack";
+import { MicrophoneIcon as Microphone } from "@phosphor-icons/react/dist/icons/Microphone";
+import { ArrowUpIcon as ArrowUp } from "@phosphor-icons/react/dist/icons/ArrowUp";
 import React, { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 
@@ -780,6 +786,14 @@ export default function App() {
                         {m.content || m.text || m.answer || ""}
                       </Markdown>
                     </div>
+                    {m.role === "user" && (
+                      <button
+                        className="record-inspect"
+                        onClick={() => inspect(m.id)}
+                      >
+                        Original & corrections
+                      </button>
+                    )}
                     {m.attachments?.length > 0 && (
                       <div className="attached-files">
                         {m.attachments.map((a: Item) => (
@@ -908,7 +922,12 @@ export default function App() {
               <textarea
                 ref={field}
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height =
+                    Math.min(e.target.scrollHeight, 180) + "px";
+                }}
                 onKeyDown={(e) => {
                   if (
                     e.key === "Enter" &&
@@ -921,11 +940,11 @@ export default function App() {
                 }}
                 placeholder={
                   hasConversation
-                    ? "Follow the thread…"
-                    : "Ask anything. Or pick up where you left off…"
+                    ? "Ask a follow-up…"
+                    : "Ask anything, or find something from your conversations…"
                 }
                 aria-label="Message Katha"
-                rows={hasConversation ? 2 : 3}
+                rows={2}
                 disabled={recording}
               />
               <div className="composer-tools">
@@ -943,11 +962,136 @@ export default function App() {
                     className="icon"
                     aria-label="Attach files or images"
                     title="Attach files or images"
-                    onClick={() => fileInput.current?.click()}
+                    onClick={() => {
+                      if (fileInput.current) {
+                        fileInput.current.accept =
+                          ".txt,.md,.csv,.json,.pdf,image/png,image/jpeg,image/webp,audio/*";
+                        fileInput.current.click();
+                      }
+                    }}
                     disabled={uploading || busy}
                   >
-                    <Icon name="clip" />
+                    <Paperclip aria-hidden="true" />
                   </button>
+                  <button
+                    type="button"
+                    className="icon"
+                    aria-label="Add image"
+                    title="Add image"
+                    disabled={uploading || busy}
+                    onClick={() => {
+                      if (fileInput.current) {
+                        fileInput.current.accept =
+                          "image/png,image/jpeg,image/webp";
+                        fileInput.current.click();
+                      }
+                    }}
+                  >
+                    <ImageIcon aria-hidden="true" />
+                  </button>
+                  <details
+                    className="composer-popover"
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") {
+                        e.currentTarget.open = false;
+                        e.stopPropagation();
+                      }
+                    }}
+                  >
+                    <summary
+                      aria-label="Add a saved source"
+                      title="Add a saved source"
+                    >
+                      <At aria-hidden="true" />
+                    </summary>
+                    <div className="composer-menu">
+                      <strong>Add a source</strong>
+                      {sources.filter((s) => !s.deletedAt).length ? (
+                        sources
+                          .filter((s) => !s.deletedAt)
+                          .slice(0, 5)
+                          .map((s) => (
+                            <button
+                              type="button"
+                              key={s.id}
+                              disabled={
+                                attachments.some((a) => a.id === s.id) || busy
+                              }
+                              onClick={(e) => {
+                                setAttachments((old) =>
+                                  old.some((a) => a.id === s.id)
+                                    ? old
+                                    : [
+                                        ...old,
+                                        { ...s, name: s.title || s.name },
+                                      ],
+                                );
+                                e.currentTarget
+                                  .closest("details")
+                                  ?.removeAttribute("open");
+                                field.current?.focus();
+                              }}
+                            >
+                              {s.title || s.name}
+                            </button>
+                          ))
+                      ) : (
+                        <p>Upload a file to add it as a source.</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          setTab("files");
+                          setDrawer(true);
+                          e.currentTarget
+                            .closest("details")
+                            ?.removeAttribute("open");
+                        }}
+                      >
+                        View all files
+                      </button>
+                    </div>
+                  </details>
+                  <details
+                    className="composer-popover"
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") {
+                        e.currentTarget.open = false;
+                        e.stopPropagation();
+                      }
+                    }}
+                  >
+                    <summary
+                      aria-label="Memory and attachment settings"
+                      title="Memory and attachment settings"
+                    >
+                      <Stack aria-hidden="true" />
+                    </summary>
+                    <div className="composer-menu">
+                      <strong>Search in</strong>
+                      <label>
+                        Memory scope
+                        <select
+                          value={scope}
+                          onChange={(e) => setScope(e.target.value)}
+                        >
+                          <option value="workspace">All conversations</option>
+                          <option value="conversation">This chat only</option>
+                        </select>
+                      </label>
+                      <label>
+                        Attachment date
+                        <input
+                          type="date"
+                          value={sourceDate}
+                          onChange={(e) => setSourceDate(e.target.value)}
+                        />
+                      </label>
+                      <small>
+                        Optional. Set before uploading a historical file.
+                      </small>
+                    </div>
+                  </details>
                   <button
                     type="button"
                     className={"icon " + (recording ? "recording" : "")}
@@ -960,19 +1104,8 @@ export default function App() {
                     onClick={record}
                     disabled={transcribing || busy}
                   >
-                    <Icon name="mic" />
+                    <Microphone aria-hidden="true" />
                   </button>
-                  <label className="scope-select">
-                    <select
-                      value={scope}
-                      onChange={(e) => setScope(e.target.value)}
-                      aria-label="Memory scope"
-                    >
-                      <option value="workspace">All conversations</option>
-                      <option value="conversation">This chat only</option>
-                    </select>
-                    <span>⌄</span>
-                  </label>
                 </div>
                 {turn ? (
                   <button
@@ -1000,7 +1133,7 @@ export default function App() {
                       (!draft.trim() && !attachments.length)
                     }
                   >
-                    <Icon name="send" />
+                    <ArrowUp aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -1058,17 +1191,6 @@ export default function App() {
                 Privacy & sources
               </button>
             </div>
-            {
-              <label className="event-date">
-                Attachment date{" "}
-                <input
-                  type="date"
-                  value={sourceDate}
-                  onChange={(e) => setSourceDate(e.target.value)}
-                />{" "}
-                <span>Optional · set before adding a file.</span>
-              </label>
-            }
           </div>
           {!hasConversation && (
             <div className="suggestions">
@@ -1161,7 +1283,13 @@ export default function App() {
                     ["Source date", inspection?.occurredAt],
                     ["Added", inspection?.recordedAt || inspection?.createdAt],
                     ["Status", inspection?.status],
-                    ["Method", inspection?.extractionMethod],
+                    [
+                      "Method",
+                      inspection?.metadata?.method ||
+                        inspection?.extractionMethod,
+                    ],
+                    ["Correction type", inspection?.metadata?.mode],
+                    ["Effective from", inspection?.metadata?.effectiveAt],
                   ]
                     .filter((x) => x[1])
                     .map(([label, value]) => (
@@ -1171,11 +1299,31 @@ export default function App() {
                       </div>
                     ))}
                 </dl>
-                {inspection?.url && /^https?:\/\//.test(inspection.url) && (
-                  <a href={inspection.url} target="_blank" rel="noreferrer">
-                    Open original source ↗
-                  </a>
+                {inspection?.metadata?.targetId && (
+                  <button
+                    className="record-inspect"
+                    onClick={() => inspect(inspection.metadata.targetId)}
+                  >
+                    Inspect the record this corrects
+                  </button>
                 )}
+                {inspection?.metadata?.warnings?.map((warning: string) => (
+                  <p className="source-warning" key={warning}>
+                    {warning}
+                  </p>
+                ))}
+                {(inspection?.url || inspection?.metadata?.url) &&
+                  /^https?:\/\//.test(
+                    inspection.url || inspection.metadata.url,
+                  ) && (
+                    <a
+                      href={inspection.url || inspection.metadata.url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open original source ↗
+                    </a>
+                  )}
                 <div className="source-content">
                   <Markdown>
                     {inspection?.text ||
@@ -1185,6 +1333,42 @@ export default function App() {
                       "This source has no extracted text yet."}
                   </Markdown>
                 </div>
+                {inspection?.id && !inspection.deletedAt && (
+                  <CorrectionEditor
+                    key={inspection.id}
+                    source={inspection}
+                    onSaved={async () => {
+                      await inspect(inspection.id);
+                      await refresh();
+                    }}
+                  />
+                )}
+                {!!inspection?.corrections?.length && (
+                  <section className="correction-lineage">
+                    <h3>Correction history</h3>
+                    <p>
+                      The original above is retained. Corrections append to it.
+                    </p>
+                    {inspection.corrections.map((c: any) => (
+                      <article key={c.id}>
+                        <p>{c.content}</p>
+                        <small>
+                          {c.metadata?.mode === "CHANGE_FROM_NOW"
+                            ? "Changed from"
+                            : "Corrects past record"}{" "}
+                          ·{" "}
+                          {c.metadata?.effectiveAt ||
+                            c.occurredAt ||
+                            c.recordedAt}
+                          {c.deletedAt ? " · Deleted" : ""}
+                        </small>
+                        <button onClick={() => inspect(c.id)}>
+                          Inspect correction
+                        </button>
+                      </article>
+                    ))}
+                  </section>
+                )}
                 {inspection?.id && (
                   <div className="inspector-actions">
                     {inspection.deletedAt ? (
@@ -1277,5 +1461,106 @@ function Audit({ data }: { data: any }) {
         private model reasoning.
       </p>
     </div>
+  );
+}
+
+function CorrectionEditor({
+  source,
+  onSaved,
+}: {
+  source: any;
+  onSaved: () => Promise<void>;
+}) {
+  const [assertionId, setAssertionId] = useState(""),
+    [content, setContent] = useState(""),
+    [mode, setMode] = useState("CORRECT_PAST_RECORD"),
+    [effectiveAt, setEffectiveAt] = useState(""),
+    [saving, setSaving] = useState(false),
+    [error, setError] = useState("");
+  return (
+    <details className="correction-editor">
+      <summary>Correct a fact</summary>
+      <p>
+        Keep the original wording. Add what changed, or correct what was wrong.
+      </p>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setSaving(true);
+          setError("");
+          try {
+            await api("/api/sources/" + source.id + "/correct", {
+              method: "POST",
+              body: JSON.stringify({
+                content,
+                mode,
+                assertionId: assertionId || undefined,
+                effectiveAt: effectiveAt
+                  ? new Date(effectiveAt).toISOString()
+                  : undefined,
+              }),
+            });
+            setContent("");
+            await onSaved();
+          } catch (e: any) {
+            setError(e.message);
+          } finally {
+            setSaving(false);
+          }
+        }}
+      >
+        <label>
+          Which fact?
+          <select
+            value={assertionId}
+            onChange={(e) => setAssertionId(e.target.value)}
+          >
+            <option value="">Entire record</option>
+            {source.assertions?.map((a: any) => (
+              <option key={a.id} value={a.id}>
+                {a.text}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          New wording
+          <textarea
+            required
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={3}
+          />
+        </label>
+        <label>
+          What does this mean?
+          <select value={mode} onChange={(e) => setMode(e.target.value)}>
+            <option value="CORRECT_PAST_RECORD">
+              The earlier record was wrong
+            </option>
+            <option value="CHANGE_FROM_NOW">
+              It changed from a particular time
+            </option>
+          </select>
+        </label>
+        <label>
+          Effective date and time (your local timezone)
+          <input
+            type="datetime-local"
+            value={effectiveAt}
+            onChange={(e) => setEffectiveAt(e.target.value)}
+          />
+        </label>
+        <small>
+          {mode === "CORRECT_PAST_RECORD"
+            ? "If blank, applies from the original record’s date."
+            : "If blank, applies from now."}
+        </small>
+        {error && <p role="alert">{error}</p>}
+        <button type="submit" disabled={saving || !content.trim()}>
+          {saving ? "Saving…" : "Save correction"}
+        </button>
+      </form>
+    </details>
   );
 }

@@ -1,0 +1,1754 @@
+{
+  "label": "Hand-authored synthetic retrieval fixtures; not claims about real vendors",
+  "runAt": "2026-11-12T08:08:40.995Z",
+  "metric": "Expected original source in top 5; no answer-generation accuracy claim",
+  "notMeasured": [
+    "supported-claim precision",
+    "dated-change precision",
+    "live provider latency"
+  ],
+  "runs": [
+    {
+      "strategy": "recent",
+      "hits": 0,
+      "cases": 40,
+      "recallAt5": 0,
+      "medianMs": 0.23933300000000202,
+      "results": [
+        {
+          "id": "r01",
+          "expected": "crm",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.9224159999999983
+        },
+        {
+          "id": "r02",
+          "expected": "hosting",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.383624999999995
+        },
+        {
+          "id": "r03",
+          "expected": "budget",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.29245800000001054
+        },
+        {
+          "id": "r04",
+          "expected": "privacy",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.268375000000006
+        },
+        {
+          "id": "r05",
+          "expected": "search",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.28908400000000256
+        },
+        {
+          "id": "r06",
+          "expected": "retry",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.23933300000000202
+        },
+        {
+          "id": "r07",
+          "expected": "memory",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2546660000000003
+        },
+        {
+          "id": "r08",
+          "expected": "billing",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.26908300000000906
+        },
+        {
+          "id": "r09",
+          "expected": "seats",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.25004199999999344
+        },
+        {
+          "id": "r10",
+          "expected": "ownership",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.29587500000000944
+        },
+        {
+          "id": "r11",
+          "expected": "retention",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2711669999999913
+        },
+        {
+          "id": "r12",
+          "expected": "latency",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.23366700000001117
+        },
+        {
+          "id": "r13",
+          "expected": "launch",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.23229200000000105
+        },
+        {
+          "id": "r14",
+          "expected": "correction",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.22979200000000333
+        },
+        {
+          "id": "r15",
+          "expected": "notes",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.23083300000000406
+        },
+        {
+          "id": "r16",
+          "expected": "audio",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.242834000000002
+        },
+        {
+          "id": "r17",
+          "expected": "crm",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2283340000000038
+        },
+        {
+          "id": "r18",
+          "expected": "hosting",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.23904200000001197
+        },
+        {
+          "id": "r19",
+          "expected": "budget",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2756660000000011
+        },
+        {
+          "id": "r20",
+          "expected": "privacy",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2696669999999983
+        },
+        {
+          "id": "s01",
+          "expected": "retry",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.29512499999999875
+        },
+        {
+          "id": "s02",
+          "expected": "memory",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.24979100000000187
+        },
+        {
+          "id": "s03",
+          "expected": "ownership",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.22724999999999795
+        },
+        {
+          "id": "s04",
+          "expected": "crm",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.23316699999999457
+        },
+        {
+          "id": "s05",
+          "expected": "budget",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.27845800000000054
+        },
+        {
+          "id": "s06",
+          "expected": "launch",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.22650000000000148
+        },
+        {
+          "id": "s07",
+          "expected": "retention",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.22724999999999795
+        },
+        {
+          "id": "s08",
+          "expected": "search",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.22350000000000136
+        },
+        {
+          "id": "s09",
+          "expected": "correction",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2244579999999985
+        },
+        {
+          "id": "s10",
+          "expected": "notes",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.242416999999989
+        },
+        {
+          "id": "d01",
+          "expected": "crm",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2295000000000016
+        },
+        {
+          "id": "d02",
+          "expected": "hosting",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.22962499999999864
+        },
+        {
+          "id": "d03",
+          "expected": "budget",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2357499999999959
+        },
+        {
+          "id": "d04",
+          "expected": "privacy",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2317080000000118
+        },
+        {
+          "id": "d05",
+          "expected": "search",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2459999999999951
+        },
+        {
+          "id": "d06",
+          "expected": "retry",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.5537920000000014
+        },
+        {
+          "id": "d07",
+          "expected": "memory",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2306250000000034
+        },
+        {
+          "id": "d08",
+          "expected": "billing",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.2307919999999939
+        },
+        {
+          "id": "d09",
+          "expected": "seats",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.21949999999999648
+        },
+        {
+          "id": "d10",
+          "expected": "ownership",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "recent-context-ablation"
+          ],
+          "ms": 0.21804199999999696
+        }
+      ]
+    },
+    {
+      "strategy": "lexical",
+      "hits": 32,
+      "cases": 40,
+      "recallAt5": 0.8,
+      "medianMs": 0.20924999999999727,
+      "results": [
+        {
+          "id": "r01",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "crm",
+            "ownership"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.4749170000000049
+        },
+        {
+          "id": "r02",
+          "expected": "hosting",
+          "hit": true,
+          "retrieved": [
+            "hosting"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.2707499999999925
+        },
+        {
+          "id": "r03",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.20612500000001432
+        },
+        {
+          "id": "r04",
+          "expected": "privacy",
+          "hit": true,
+          "retrieved": [
+            "privacy",
+            "billing"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.23324999999999818
+        },
+        {
+          "id": "r05",
+          "expected": "search",
+          "hit": true,
+          "retrieved": [
+            "search"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.19874999999998977
+        },
+        {
+          "id": "r06",
+          "expected": "retry",
+          "hit": true,
+          "retrieved": [
+            "retry",
+            "audio"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.24125000000000796
+        },
+        {
+          "id": "r07",
+          "expected": "memory",
+          "hit": true,
+          "retrieved": [
+            "memory"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.22279199999999832
+        },
+        {
+          "id": "r08",
+          "expected": "billing",
+          "hit": true,
+          "retrieved": [
+            "billing",
+            "crm",
+            "seats"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.27950000000001296
+        },
+        {
+          "id": "r09",
+          "expected": "seats",
+          "hit": true,
+          "retrieved": [
+            "seats",
+            "retry",
+            "billing"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.2503340000000094
+        },
+        {
+          "id": "r10",
+          "expected": "ownership",
+          "hit": true,
+          "retrieved": [
+            "ownership"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.1939999999999884
+        },
+        {
+          "id": "r11",
+          "expected": "retention",
+          "hit": true,
+          "retrieved": [
+            "retention"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.24983300000002373
+        },
+        {
+          "id": "r12",
+          "expected": "latency",
+          "hit": true,
+          "retrieved": [
+            "latency"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.19941600000001358
+        },
+        {
+          "id": "r13",
+          "expected": "launch",
+          "hit": true,
+          "retrieved": [
+            "launch"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.18874999999999886
+        },
+        {
+          "id": "r14",
+          "expected": "correction",
+          "hit": true,
+          "retrieved": [
+            "correction"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.18337500000001228
+        },
+        {
+          "id": "r15",
+          "expected": "notes",
+          "hit": true,
+          "retrieved": [
+            "notes"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.18304200000000037
+        },
+        {
+          "id": "r16",
+          "expected": "audio",
+          "hit": true,
+          "retrieved": [
+            "audio"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.18191699999999855
+        },
+        {
+          "id": "r17",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "crm",
+            "seats",
+            "billing"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.23662500000000364
+        },
+        {
+          "id": "r18",
+          "expected": "hosting",
+          "hit": true,
+          "retrieved": [
+            "hosting"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.1617920000000197
+        },
+        {
+          "id": "r19",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget",
+            "billing"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.2124170000000163
+        },
+        {
+          "id": "r20",
+          "expected": "privacy",
+          "hit": true,
+          "retrieved": [
+            "privacy",
+            "distractor-0",
+            "distractor-1",
+            "distractor-2",
+            "distractor-3"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.2865419999999972
+        },
+        {
+          "id": "s01",
+          "expected": "retry",
+          "hit": false,
+          "retrieved": [
+            "hosting"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.2382080000000144
+        },
+        {
+          "id": "s02",
+          "expected": "memory",
+          "hit": true,
+          "retrieved": [
+            "memory"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.239167000000009
+        },
+        {
+          "id": "s03",
+          "expected": "ownership",
+          "hit": false,
+          "retrieved": [
+            "privacy"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.22350000000000136
+        },
+        {
+          "id": "s04",
+          "expected": "crm",
+          "hit": false,
+          "retrieved": [
+            "seats"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.22399999999998954
+        },
+        {
+          "id": "s05",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget",
+            "billing"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.22333399999999415
+        },
+        {
+          "id": "s06",
+          "expected": "launch",
+          "hit": false,
+          "retrieved": [
+            "latency"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.20924999999999727
+        },
+        {
+          "id": "s07",
+          "expected": "retention",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "lexical",
+            "recent-fallback"
+          ],
+          "ms": 0.2907079999999951
+        },
+        {
+          "id": "s08",
+          "expected": "search",
+          "hit": false,
+          "retrieved": [
+            "launch"
+          ],
+          "methods": [
+            "lexical"
+          ],
+          "ms": 0.20854199999999423
+        },
+        {
+          "id": "s09",
+          "expected": "correction",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "lexical",
+            "recent-fallback"
+          ],
+          "ms": 0.2770829999999762
+        },
+        {
+          "id": "s10",
+          "expected": "notes",
+          "hit": false,
+          "retrieved": [
+            "distractor-9",
+            "distractor-8",
+            "distractor-7",
+            "distractor-6",
+            "distractor-5"
+          ],
+          "methods": [
+            "lexical",
+            "recent-fallback"
+          ],
+          "ms": 0.262457999999981
+        },
+        {
+          "id": "d01",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "crm"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.08387500000000614
+        },
+        {
+          "id": "d02",
+          "expected": "hosting",
+          "hit": true,
+          "retrieved": [
+            "hosting"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06266700000000469
+        },
+        {
+          "id": "d03",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06070900000000279
+        },
+        {
+          "id": "d04",
+          "expected": "privacy",
+          "hit": true,
+          "retrieved": [
+            "privacy"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06129100000001131
+        },
+        {
+          "id": "d05",
+          "expected": "search",
+          "hit": true,
+          "retrieved": [
+            "search"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.0630000000000166
+        },
+        {
+          "id": "d06",
+          "expected": "retry",
+          "hit": true,
+          "retrieved": [
+            "retry"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06133399999998801
+        },
+        {
+          "id": "d07",
+          "expected": "memory",
+          "hit": true,
+          "retrieved": [
+            "memory"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.060458000000011225
+        },
+        {
+          "id": "d08",
+          "expected": "billing",
+          "hit": true,
+          "retrieved": [
+            "billing"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.05979200000001583
+        },
+        {
+          "id": "d09",
+          "expected": "seats",
+          "hit": true,
+          "retrieved": [
+            "seats"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.05895799999998985
+        },
+        {
+          "id": "d10",
+          "expected": "ownership",
+          "hit": true,
+          "retrieved": [
+            "ownership"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.059332999999980984
+        }
+      ]
+    },
+    {
+      "strategy": "hybrid",
+      "hits": 40,
+      "cases": 40,
+      "recallAt5": 1,
+      "medianMs": 1.6195000000000164,
+      "results": [
+        {
+          "id": "r01",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "crm",
+            "ownership",
+            "notes",
+            "audio"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 2.4691249999999627
+        },
+        {
+          "id": "r02",
+          "expected": "hosting",
+          "hit": true,
+          "retrieved": [
+            "hosting"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.8156249999999545
+        },
+        {
+          "id": "r03",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget",
+            "notes",
+            "latency",
+            "seats"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.84699999999998
+        },
+        {
+          "id": "r04",
+          "expected": "privacy",
+          "hit": true,
+          "retrieved": [
+            "privacy",
+            "billing",
+            "audio",
+            "memory",
+            "correction"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.8836670000000595
+        },
+        {
+          "id": "r05",
+          "expected": "search",
+          "hit": true,
+          "retrieved": [
+            "search",
+            "notes"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.7312080000000378
+        },
+        {
+          "id": "r06",
+          "expected": "retry",
+          "hit": true,
+          "retrieved": [
+            "retry",
+            "audio"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.9952919999999494
+        },
+        {
+          "id": "r07",
+          "expected": "memory",
+          "hit": true,
+          "retrieved": [
+            "memory",
+            "latency"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 2.070124999999962
+        },
+        {
+          "id": "r08",
+          "expected": "billing",
+          "hit": true,
+          "retrieved": [
+            "billing",
+            "seats",
+            "crm",
+            "budget",
+            "correction"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.8923340000000053
+        },
+        {
+          "id": "r09",
+          "expected": "seats",
+          "hit": true,
+          "retrieved": [
+            "seats",
+            "billing",
+            "retry"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.780791000000022
+        },
+        {
+          "id": "r10",
+          "expected": "ownership",
+          "hit": true,
+          "retrieved": [
+            "ownership"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.863917000000015
+        },
+        {
+          "id": "r11",
+          "expected": "retention",
+          "hit": true,
+          "retrieved": [
+            "retention",
+            "search"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.8021660000000566
+        },
+        {
+          "id": "r12",
+          "expected": "latency",
+          "hit": true,
+          "retrieved": [
+            "latency"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.5347090000000208
+        },
+        {
+          "id": "r13",
+          "expected": "launch",
+          "hit": true,
+          "retrieved": [
+            "launch"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.5313750000000255
+        },
+        {
+          "id": "r14",
+          "expected": "correction",
+          "hit": true,
+          "retrieved": [
+            "correction",
+            "search"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.5778750000000628
+        },
+        {
+          "id": "r15",
+          "expected": "notes",
+          "hit": true,
+          "retrieved": [
+            "notes",
+            "search",
+            "crm",
+            "seats"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.5048329999999623
+        },
+        {
+          "id": "r16",
+          "expected": "audio",
+          "hit": true,
+          "retrieved": [
+            "audio",
+            "correction",
+            "privacy",
+            "memory"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.6195000000000164
+        },
+        {
+          "id": "r17",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "crm",
+            "seats",
+            "billing",
+            "notes",
+            "distractor-5"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.677958999999987
+        },
+        {
+          "id": "r18",
+          "expected": "hosting",
+          "hit": true,
+          "retrieved": [
+            "hosting",
+            "ownership"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.3914999999999509
+        },
+        {
+          "id": "r19",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget",
+            "billing"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.4599590000000262
+        },
+        {
+          "id": "r20",
+          "expected": "privacy",
+          "hit": true,
+          "retrieved": [
+            "privacy",
+            "distractor-0",
+            "distractor-1",
+            "distractor-2",
+            "distractor-3"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.4445000000000618
+        },
+        {
+          "id": "s01",
+          "expected": "retry",
+          "hit": true,
+          "retrieved": [
+            "hosting",
+            "retry"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.8696250000000418
+        },
+        {
+          "id": "s02",
+          "expected": "memory",
+          "hit": true,
+          "retrieved": [
+            "memory",
+            "retention",
+            "search",
+            "latency"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.989417000000003
+        },
+        {
+          "id": "s03",
+          "expected": "ownership",
+          "hit": true,
+          "retrieved": [
+            "privacy",
+            "ownership",
+            "search",
+            "crm",
+            "hosting"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.7811669999999822
+        },
+        {
+          "id": "s04",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "seats",
+            "crm",
+            "distractor-9",
+            "distractor-4",
+            "distractor-1"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.9817500000000337
+        },
+        {
+          "id": "s05",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget",
+            "billing"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.7050839999999425
+        },
+        {
+          "id": "s06",
+          "expected": "launch",
+          "hit": true,
+          "retrieved": [
+            "latency",
+            "launch",
+            "privacy",
+            "search"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.6182079999999814
+        },
+        {
+          "id": "s07",
+          "expected": "retention",
+          "hit": true,
+          "retrieved": [
+            "retention"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.5930829999999787
+        },
+        {
+          "id": "s08",
+          "expected": "search",
+          "hit": true,
+          "retrieved": [
+            "launch",
+            "search"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.6184999999999263
+        },
+        {
+          "id": "s09",
+          "expected": "correction",
+          "hit": true,
+          "retrieved": [
+            "correction",
+            "search"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.6647919999999203
+        },
+        {
+          "id": "s10",
+          "expected": "notes",
+          "hit": true,
+          "retrieved": [
+            "notes"
+          ],
+          "methods": [
+            "lexical",
+            "semantic"
+          ],
+          "ms": 1.640957999999955
+        },
+        {
+          "id": "d01",
+          "expected": "crm",
+          "hit": true,
+          "retrieved": [
+            "crm"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.10420799999997143
+        },
+        {
+          "id": "d02",
+          "expected": "hosting",
+          "hit": true,
+          "retrieved": [
+            "hosting"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.07550000000003365
+        },
+        {
+          "id": "d03",
+          "expected": "budget",
+          "hit": true,
+          "retrieved": [
+            "budget"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.07237499999996544
+        },
+        {
+          "id": "d04",
+          "expected": "privacy",
+          "hit": true,
+          "retrieved": [
+            "privacy"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.07116599999994833
+        },
+        {
+          "id": "d05",
+          "expected": "search",
+          "hit": true,
+          "retrieved": [
+            "search"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.07104100000003655
+        },
+        {
+          "id": "d06",
+          "expected": "retry",
+          "hit": true,
+          "retrieved": [
+            "retry"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06795800000008967
+        },
+        {
+          "id": "d07",
+          "expected": "memory",
+          "hit": true,
+          "retrieved": [
+            "memory"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06725000000005821
+        },
+        {
+          "id": "d08",
+          "expected": "billing",
+          "hit": true,
+          "retrieved": [
+            "billing"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06779099999994287
+        },
+        {
+          "id": "d09",
+          "expected": "seats",
+          "hit": true,
+          "retrieved": [
+            "seats"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.0665000000000191
+        },
+        {
+          "id": "d10",
+          "expected": "ownership",
+          "hit": true,
+          "retrieved": [
+            "ownership"
+          ],
+          "methods": [
+            "calendar"
+          ],
+          "ms": 0.06641700000000128
+        }
+      ]
+    }
+  ]
+}

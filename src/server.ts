@@ -65,14 +65,12 @@ app.get("/api/conversations/:id", async (req) => {
   return { conversation: chat, messages: chat.messages };
 });
 app.post("/api/conversations/:id/turns", async (req, reply) =>
-  reply
-    .code(202)
-    .send(
-      await katha.turns.start({
-        ...(req.body as any),
-        conversationId: (req.params as any).id,
-      }),
-    ),
+  reply.code(202).send(
+    await katha.turns.start({
+      ...(req.body as any),
+      conversationId: (req.params as any).id,
+    }),
+  ),
 );
 app.get("/api/turns/:id", async (req) =>
   katha.turns.get((req.params as any).id),

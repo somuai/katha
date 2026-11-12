@@ -7,9 +7,7 @@ export type EmbeddedSegment = {
   endToken: number;
   vector: number[];
 };
-export function createLocalEmbedder(
-  cacheDirectory?: string,
-): Embedder & {
+export function createLocalEmbedder(cacheDirectory?: string): Embedder & {
   segment(text: string): Promise<EmbeddedSegment[]>;
   close(): Promise<void>;
 } {

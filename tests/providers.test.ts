@@ -298,3 +298,33 @@ test("core adapter uses the explicitly selected historical baseline rather than 
   assert.equal(input.baseline[0].id, "old");
   assert.equal(input.history, undefined);
 });
+
+test("a valid photo is not rejected because base64 bytes are counted as text tokens", async () => {
+  const { extractAttachment } = await import("../src/ingestion/index.ts");
+  const { default: sharp } = await import("sharp");
+  const { randomBytes } = await import("node:crypto");
+  const image = await sharp(randomBytes(300 * 300 * 3), {
+    raw: { width: 300, height: 300, channels: 3 },
+  })
+    .png()
+    .toBuffer();
+  const providers = createProviders({
+    groqKey: "fixture",
+    fetcher: (async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({ text: "A patterned test image." }),
+              },
+            },
+          ],
+        }),
+      )) as typeof fetch,
+  });
+  const result = await extractAttachment(image, "photo.png", "image/png", {
+    providers,
+  });
+  assert.equal(result.content, "A patterned test image.");
+});
