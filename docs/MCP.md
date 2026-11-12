@@ -17,7 +17,7 @@ Notion only calls `notion-search` and `notion-fetch`; Canva only calls `search-d
 
 Notion's provider consent may grant broader capabilities than Katha uses; **read-only calls** do not mean a read-only OAuth grant. Review the provider's consent screen. Canva explicitly requests `profile:read design:meta:read design:content:read`; it does not inherit all advertised write scopes. Token responses declaring extra scopes are rejected. A token response omitting scopes cannot independently prove grant breadth.
 
-Notion's initial live discovery/registration produced an official authorization URL on 12 November 2026; no workspace login, page fetch or account authorization was performed. Canva's flow is fixture-verified and still requires configured app credentials. Both use the fixed callback `http://localhost:3000/api/connections/oauth/callback`.
+Notion's initial live discovery/registration produced an official authorization URL on 12 November 2026; no workspace login, page fetch or account authorization was performed. Canva's flow is fixture-verified and still requires configured app credentials. Notion uses `http://localhost:3000/api/connections/oauth/callback`. Canva requires the IP-literal loopback callback `http://127.0.0.1:3000/api/connections/canva/callback`.
 
 Codex's plugin model packages skills/MCP settings; Katha implements its own host connection UI and OAuth client. Codex's existing authenticated sessions and host-specific connectors do not transfer. No official portable Gmail MCP endpoint is invented. HubSpot's official MCP needs a separately registered MCP client and validated tool mapping; the current HubSpot import adapter is the explicitly labeled direct API path.
 
@@ -25,7 +25,7 @@ Codex's plugin model packages skills/MCP settings; Katha implements its own host
 
 The application owner registers the OAuth applications. A visitor's Google sign-in alone cannot register Katha as an OAuth client or authorize unrelated providers. Put application credentials in the root `.env`, never in chat:
 
-- `CANVA_CLIENT_ID`, `CANVA_CLIENT_SECRET`: create a Canva developer application, enable Canva MCP and register the shared MCP callback above. Notion needs no preconfigured app secret.
+- `CANVA_CLIENT_ID`, `CANVA_CLIENT_SECRET`: create a Canva developer application, enable Canva MCP and register the Canva callback above. Notion needs no preconfigured app secret.
 - `GOOGLE_CLIENT_ID`, optional `GOOGLE_CLIENT_SECRET` depending on Google client type. Enable Gmail API and configure consent/test users. Register `http://localhost:3000/api/connections/gmail/callback` (use the configured PORT). Google restricts `gmail.readonly`; production distribution can require verification. No live account authorization has been claimed.
 - `HUBSPOT_CLIENT_ID`, `HUBSPOT_CLIENT_SECRET`. Register `http://localhost:3000/api/connections/hubspot/callback`. Configure OAuth and only the optional contacts/companies/deals read scopes being offered. Ordinary HubSpot app OAuth uses its documented confidential-client flow; it is distinct from HubSpot's PKCE MCP flow.
 

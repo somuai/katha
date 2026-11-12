@@ -119,5 +119,10 @@ export function providerCatalog(options: {
       setup:
         "Owner registers a Canva MCP application and sets CANVA_CLIENT_ID and CANVA_CLIENT_SECRET. Requests profile and existing-design read scopes only.",
     },
-  ];
+  ].map((provider) =>
+    ["hubspot", "hubspot-mcp", "salesforce"].includes(provider.id) &&
+    !provider.connected
+      ? { ...provider, available: false, status: "coming_soon" }
+      : provider,
+  );
 }

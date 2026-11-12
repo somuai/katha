@@ -234,8 +234,9 @@ export function Connections({
                   )}
                   <p>{p.description}</p>
                   {!p.available &&
-                    (p.status === "not_implemented" ? (
-                      <small>Not supported yet</small>
+                    (p.status === "not_implemented" ||
+                    p.status === "coming_soon" ? (
+                      <small>Coming soon</small>
                     ) : (
                       <details className="provider-setup">
                         <summary>One-time app setup needed</summary>

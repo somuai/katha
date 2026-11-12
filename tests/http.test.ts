@@ -59,18 +59,22 @@ test("HTTP persists a turn and exposes complete replay without configured provid
     assert.equal(catalog.localWorkspace, true);
     assert.equal(
       catalog.providers.find((p: any) => p.id === "salesforce").status,
-      "ready",
+      "coming_soon",
     );
     assert.deepEqual(
       catalog.providers
         .filter((p: any) => ["gmail", "hubspot"].includes(p.id))
         .map((p: any) => p.status),
-      ["owner_setup_required", "owner_setup_required"],
+      ["owner_setup_required", "coming_soon"],
     );
     const callback = await fetch(
       `http://localhost:${port}/api/connections/gmail/callback?state=invalid&code=invalid`,
     );
     assert.equal(callback.status, 503);
+    const canvaCallback = await fetch(
+      `http://127.0.0.1:${port}/api/connections/canva/callback?state=invalid&code=invalid`,
+    );
+    assert.equal(canvaCallback.status, 400);
     for (let i = 0; i < 7; i++) {
       const authorization = await fetch(
         `http://localhost:${port}/api/connections/gmail/authorize`,

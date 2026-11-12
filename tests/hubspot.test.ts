@@ -326,7 +326,7 @@ test("disconnect during OAuth exchange prevents restoring a removed connection",
   }
 });
 
-test("provider picker enables HubSpot only after owner setup; no arbitrary callback or object kind", async () => {
+test("provider picker keeps HubSpot coming soon; no arbitrary callback or object kind", async () => {
   const f = setup();
   try {
     const catalog = providerCatalog({
@@ -335,7 +335,10 @@ test("provider picker enables HubSpot only after owner setup; no arbitrary callb
       hubspotConfigured: true,
       hubspotConnected: false,
     });
-    assert.equal(catalog.find((p) => p.id === "hubspot")!.available, true);
+    assert.equal(
+      catalog.find((p) => p.id === "hubspot")!.status,
+      "coming_soon",
+    );
     assert.equal(catalog.find((p) => p.id === "salesforce")!.available, false);
     const missing = createHubspotConnector({
       directory: join(f.directory, "none"),

@@ -36,23 +36,31 @@ export async function registerConnections(
               client_id: process.env.HUBSPOT_MCP_CLIENT_ID,
               client_secret: process.env.HUBSPOT_MCP_CLIENT_SECRET,
             }
-          : id === "official-canva" &&
-              process.env.CANVA_CLIENT_ID &&
-              process.env.CANVA_CLIENT_SECRET
-            ? {
-                client_id: process.env.CANVA_CLIENT_ID,
-                client_secret: process.env.CANVA_CLIENT_SECRET,
-              }
-            : undefined,
+          : undefined,
+  });
+  const salesforce = createSalesforceConnector({ oauth, evidence });
+  const hubspotMcp = createHubspotMcp({ oauth, evidence });
+  const notion = createNotionConnector({ oauth, evidence });
+  // Canva requires an IP-literal loopback redirect. Its separate manager
+  // preserves Notion's previously registered localhost redirect and tokens.
+  const canvaOauth = createMcpOAuthManager({
+    directory: join(directory, "canva-oauth"),
+    callbackUrl: `http://127.0.0.1:${Number(process.env.PORT || 3000)}/api/connections/canva/callback`,
+    clientFor: (id) =>
+      id === "official-canva" &&
+      process.env.CANVA_CLIENT_ID &&
+      process.env.CANVA_CLIENT_SECRET
+        ? {
+            client_id: process.env.CANVA_CLIENT_ID,
+            client_secret: process.env.CANVA_CLIENT_SECRET,
+          }
+        : undefined,
     scopeFor: (id) =>
       id === "official-canva"
         ? "profile:read design:meta:read design:content:read"
         : undefined,
   });
-  const salesforce = createSalesforceConnector({ oauth, evidence });
-  const hubspotMcp = createHubspotMcp({ oauth, evidence });
-  const notion = createNotionConnector({ oauth, evidence });
-  const canva = createCanvaConnector({ oauth, evidence });
+  const canva = createCanvaConnector({ oauth: canvaOauth, evidence });
   const gmail = createGmailConnector({
     directory: join(directory, "provider-oauth"),
     redirectUri: origin + "/api/connections/gmail/callback",
@@ -304,6 +312,18 @@ export async function registerConnections(
     hubspot.disconnect();
     operations.invalidate("hubspot");
     return { removed: true };
+  });
+  app.get("/api/connections/canva/callback", async (req, reply) => {
+    operations.limit("canva:callback", 12);
+    const q = req.query as any;
+    if (typeof q.state !== "string" || typeof q.code !== "string")
+      return reply.code(400).send({
+        error:
+          "Canva authorization was cancelled or incomplete. Return to Katha and reconnect.",
+      });
+    await canvaOauth.finish(q.state, q.code);
+    operations.invalidate("canva");
+    return callbackResult(reply);
   });
   app.get("/api/connections/oauth/callback", async (req, reply) => {
     const q = req.query as any;
