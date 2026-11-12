@@ -1681,3 +1681,44 @@ test("a long web observation keeps relevant evidence beyond navigation available
     cleanup();
   }
 });
+
+test("still include asks for current evidence rather than treating a stale plan as current", async () => {
+  const { app, cleanup } = setup({
+    search: {
+      async search() {
+        return [
+          {
+            title: "Now",
+            url: "https://example.com/export",
+            content: "The plan no longer includes CSV export.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        return {
+          answer: c.evidence.some((s: any) => s.kind === "web")
+            ? "The current source says CSV export is no longer included."
+            : "CSV export is included.",
+        };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Old",
+      content: "Our plan includes CSV export.",
+    });
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "still",
+      expectedTailId: null,
+      text: "Does our plan still include CSV export?",
+    });
+    assert.match((await wait(app, r.turnId)).answer, /no longer/);
+  } finally {
+    cleanup();
+  }
+});

@@ -1,5 +1,14 @@
+import { createHash, randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import "dotenv/config";
-import { readFile, writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
+import {
+  readFile,
+  writeFile,
+  mkdir,
+  mkdtemp,
+  rm,
+  rename,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -27,8 +36,63 @@ const models = (
   process.env.EVAL_MODELS ||
   `${process.env.GROQ_MODEL || "qwen/qwen3.8-27b"},openai/gpt-oss-120b`
 ).split(",");
-const output = process.env.EVAL_OUTPUT || "data/evaluations/answers";
+const output =
+  process.env.EVAL_OUTPUT || `data/evaluations/answers-${Date.now()}`;
+async function loadJSON(path: string, fallback: any) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch (e: any) {
+    if (e.code === "ENOENT") return fallback;
+    throw new Error(`Cannot resume corrupt file ${path}: ${e.message}`);
+  }
+}
+async function saveJSON(path: string, value: unknown) {
+  const tmp = path + "." + randomUUID() + ".tmp";
+  await writeFile(tmp, JSON.stringify(value, null, 2));
+  await rename(tmp, path);
+}
+const engineFiles = execFileSync(
+  "git",
+  [
+    "ls-files",
+    "src",
+    "evaluations/answers.ts",
+    "evaluations/answer-cases.json",
+  ],
+  { encoding: "utf8" },
+)
+  .trim()
+  .split("\n")
+  .filter(Boolean);
+const engineHash = createHash("sha256");
+for (const f of engineFiles) engineHash.update(f).update(await readFile(f));
+const identity = {
+  fixtureHash: createHash("sha256")
+    .update(JSON.stringify(fixture))
+    .digest("hex"),
+  implementationHash: engineHash.digest("hex"),
+  models,
+  temperature: 0,
+  maxOutputTokens: 700,
+  node: process.versions.node,
+};
 await mkdir(output, { recursive: true });
+const existingManifest = await loadJSON(join(output, "manifest.json"), null);
+if (
+  existingManifest &&
+  JSON.stringify(existingManifest.identity) !== JSON.stringify(identity)
+)
+  throw new Error(
+    "Run identity changed. Use a fresh EVAL_OUTPUT; incompatible experiments cannot be resumed.",
+  );
+await saveJSON(join(output, "manifest.json"), {
+  identity,
+  revision: execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim(),
+  startedAt: existingManifest?.startedAt || new Date().toISOString(),
+});
+console.log("Output:", output);
 const options = {
   groqKey: process.env.GROQ_API_KEY,
   tavilyKey: process.env.TAVILY_API_KEY,
@@ -44,13 +108,29 @@ for (const model of models) {
 }
 // Capture actual search observations once, independently of candidate planning.
 let captured: Record<string, SearchResult[]> = {};
-try {
-  captured = JSON.parse(await readFile(join(output, "captured.json"), "utf8"));
-} catch {}
+captured = await loadJSON(join(output, "captured.json"), {});
+const captureOutcomes: Record<string, any> = await loadJSON(
+  join(output, "capture-outcomes.json"),
+  {},
+);
 const search = createProviders(options);
 for (const c of fixture.cases.filter((c: any) => c.kind === "web")) {
-  if (captured[c.id]) continue;
+  if (captured[c.id]) {
+    if (!captureOutcomes[c.id])
+      captureOutcomes[c.id] = {
+        status: "legacy_outcome_unknown",
+        errors: null,
+      };
+    continue;
+  }
   const results = await search.search([{ query: c.query }], undefined, false);
+  captureOutcomes[c.id] = {
+    status: results.some((r) => r.error) ? "failed" : "succeeded",
+    errors: results
+      .filter((r) => r.error)
+      .map((r) => ({ query: r.query, error: r.error })),
+    observedAt: new Date().toISOString(),
+  };
   captured[c.id] = results
     .flatMap((r) => r.evidence)
     .map((e) => ({
@@ -60,18 +140,18 @@ for (const c of fixture.cases.filter((c: any) => c.kind === "web")) {
       observedAt: e.observedAt,
       publishedAt: e.publishedAt,
     }));
-  await writeFile(
-    join(output, "captured.json"),
-    JSON.stringify(captured, null, 2),
-  );
+  await saveJSON(join(output, "captured.json"), captured);
+  await saveJSON(join(output, "capture-outcomes.json"), captureOutcomes);
   console.log("Captured", c.id, captured[c.id].length, "results");
 }
 const results: any[] = [];
-try {
-  results.push(
-    ...JSON.parse(await readFile(join(output, "results.json"), "utf8")).results,
-  );
-} catch {}
+const previous = await loadJSON(join(output, "results.json"), {
+  identity,
+  results: [],
+});
+if (JSON.stringify(previous.identity) !== JSON.stringify(identity))
+  throw new Error("Saved result identity differs; start a fresh run.");
+results.push(...previous.results);
 for (const c of fixture.cases)
   for (const model of models) {
     if (results.some((r) => r.id === c.id && r.model === model)) continue;
@@ -104,6 +184,11 @@ for (const c of fixture.cases)
       model: recordingModel,
       search: {
         async search() {
+          if (captureOutcomes[c.id]?.status === "failed")
+            throw Error(
+              "Captured search failed: " +
+                JSON.stringify(captureOutcomes[c.id].errors),
+            );
           if (c.scenario === "failed")
             throw Error("Deliberate captured search failure");
           return evidence;
@@ -189,7 +274,11 @@ for (const c of fixture.cases)
         runAt: new Date().toISOString(),
         baselineId,
         completionMs,
-        firstUsefulMs: firstUsefulMs ?? completionMs,
+        firstUsefulMs:
+          snapshot.answer.trim() &&
+          ["COMPLETED", "PARTIAL"].includes(snapshot.status)
+            ? (firstUsefulMs ?? completionMs)
+            : null,
         quotaMs,
         assertions,
         snapshot,
@@ -220,19 +309,14 @@ for (const c of fixture.cases)
       app.close();
       await rm(directory, { recursive: true, force: true });
     }
-    await writeFile(
-      join(output, "results.json"),
-      JSON.stringify(
-        {
-          label: fixture.label,
-          models,
-          gate: "Unreviewed: no supported-claim accuracy is inferred from keyword checks.",
-          results,
-        },
-        null,
-        2,
-      ),
-    );
+    await saveJSON(join(output, "results.json"), {
+      identity,
+      label: fixture.label,
+      models,
+      captureOutcomes,
+      gate: "Unreviewed: no supported-claim accuracy is inferred from keyword checks.",
+      results,
+    });
   }
 console.log(
   "Full-turn evaluation complete. Review each claim before computing support precision.",

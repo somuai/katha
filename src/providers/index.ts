@@ -536,7 +536,7 @@ export function createKathaAdapters(options: ProviderOptions = {}) {
         ? `Correction lineage: target=${source.metadata.targetId}, mode=${source.metadata.mode}, effectiveAt=${source.metadata.effectiveAt}. `
         : "") +
       (source.interpretation && source.interpretation !== source.content
-        ? `Original record: ${source.content}\nCurrent interpretation: ${source.interpretation}\nCorrection source IDs: ${(source.interpretationSourceIds || []).join(", ")}`
+        ? `Effective interpretation: ${source.interpretation}\nCorrection source IDs: ${(source.interpretationSourceIds || []).join(", ")}`
         : source.matches?.length
           ? source.matches
               .map(

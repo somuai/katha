@@ -1058,10 +1058,10 @@ export function createKatha(options: KathaOptions) {
         } catch (error) {
           valid();
           const e = error as { code?: string; retryAt?: number };
-          if (e.code !== "RATE_LIMIT" || attempt >= 2) throw error;
+          if (e.code !== "RATE_LIMIT" || attempt >= 10) throw error;
           const delay = Math.max(
-            10,
-            (e.retryAt || Date.now() + 60000) - Date.now(),
+            250,
+            (e.retryAt || Date.now() + 60000) - Date.now() + 100,
           );
           if (quotaWait + delay > 120000)
             throw new KathaError(
@@ -1132,10 +1132,10 @@ export function createKatha(options: KathaOptions) {
         );
       }
       const verification =
-        /\b(changed?|still (?:correct|true|accurate|valid|right|available|supported|matches?|costs?|the same)|correct|current|pricing|latest|since|verify|update[ds]?)\b/i.test(
+        /\b(changed?|still (?:correct|true|accurate|valid|right|available|supported|include|offer|provide|allow|require|exist|work|use|match(?:es)?|costs?|the same)|correct|current|pricing|latest|since|verify|update[ds]?)\b/i.test(
           input.text,
         ) &&
-        (/\b(since|still (?:correct|true|accurate|valid|right|available|supported|matches?|costs?|the same)|changed?|correct|verify)\b/i.test(
+        (/\b(since|still (?:correct|true|accurate|valid|right|available|supported|include|offer|provide|allow|require|exist|work|use|match(?:es)?|costs?|the same)|changed?|correct|verify)\b/i.test(
           input.text,
         ) ||
           !!window) &&

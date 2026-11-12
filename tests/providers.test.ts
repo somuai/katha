@@ -355,3 +355,58 @@ test("search exposes query-relevant passages instead of navigation-heavy raw pag
     "WAL permits readers and a writer to proceed concurrently.",
   );
 });
+
+test("current answer projection retains the effective correction even when the original is long", async () => {
+  const { createKathaAdapters } = await import("../src/providers/index.ts");
+  const { model } = createKathaAdapters({
+    groqKey: "fixture",
+    fetcher: (async (_url, init) => {
+      const request = JSON.parse(String(init?.body)),
+        context = JSON.parse(request.messages[1].content);
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  text: context.baseline[0].text,
+                  citations: ["s"],
+                  comparisons: [],
+                }),
+              },
+            },
+          ],
+        }),
+      );
+    }) as typeof fetch,
+  });
+  const s = {
+    id: "s",
+    kind: "attachment" as const,
+    role: "document" as const,
+    conversationId: null,
+    turnId: null,
+    title: "Quota",
+    content: "The quota is five. ".repeat(60),
+    interpretation: "The quota is eight.",
+    interpretationSourceIds: ["correction"],
+    recordedAt: "2026-11-03T00:00:00Z",
+    occurredAt: null,
+    occurredEnd: null,
+    dateProvenance: "recorded",
+    version: 1,
+    deletedAt: null,
+    invalidated: false,
+    metadata: {},
+  };
+  const result = await model.generate({
+    question: "What is the quota?",
+    history: [],
+    baseline: [s],
+    evidence: [s],
+    verification: false,
+    signal: new AbortController().signal,
+  });
+  assert.match(result.answer, /quota is eight/);
+  assert.doesNotMatch(result.answer, /quota is five/);
+});
