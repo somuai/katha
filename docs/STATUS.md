@@ -1,0 +1,5 @@
+# Implementation status
+Implemented: local SQLite/FTS, durable turns, idempotency, SSE replay, scoped recall, calendar resolution, corrections, deletion invalidation, search budgets/cache, remote model/search adapters, attachment parsing, voice/image processing, local embedding worker, responsive React UI.
+Verified: focused offline tests, TypeScript/build, real MiniLM worker download and normalized384-dimensional output.
+Not yet verified: live Groq/Tavily model quality, twelve live cases,90% supported-claim gate, three-way ablation, fresh-install on Windows/Linux, real microphone and scanned-PDF provider path. No API credentials are configured in this copy.
+Verified later:47 automated tests pass, including quota waiting, transient search retries, per-segment semantic retrieval and deletion races. Desktop/mobile browser smoke checks pass; no horizontal overflow at375px. Further work: entity/price typed normalization and complete assertion-level correction/effective-time modeling need deeper evaluation. Do not claim the entire proposed release gate has passed.

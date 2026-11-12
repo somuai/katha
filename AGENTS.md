@@ -1,0 +1,2 @@
+# Katha
+Use the installed mattpocock/skills guidance: codebase-design, domain-modeling, and TDD. Read GLOSSARY.md and DESIGN.md first. Test the durable Turns and Evidence Library interfaces using real temporary SQLite/files and injected external providers. Preserve original records and temporal provenance; never classify failed searches as unchanged. Work in vertical red/green slices. Keep provider keys, user data and runtime models out of git. Run npm test, npm run check, npm run build before handoff. Katha is separate from the Wispr portfolio.
