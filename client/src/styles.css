@@ -1725,3 +1725,130 @@ body {
     margin-bottom: 8px;
   }
 }
+
+.brand-with-doodle {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0;
+  margin-bottom: 14px;
+}
+.brand-with-doodle .katha-doodle {
+  width: 46px;
+  height: 46px;
+  margin: 0;
+  flex: none;
+  box-shadow: none;
+}
+.brand-with-doodle:hover .katha-doodle,
+.brand-with-doodle:focus-visible .katha-doodle {
+  transform: rotate(4deg) translateY(-2px);
+}
+.brand-with-doodle:hover .doodle-wink,
+.brand-with-doodle:focus-visible .doodle-wink {
+  animation: katha-wink 1.2s steps(1, end) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-with-doodle:hover .katha-doodle,
+  .brand-with-doodle:focus-visible .katha-doodle {
+    transform: none;
+  }
+  .brand-with-doodle:hover .doodle-wink,
+  .brand-with-doodle:focus-visible .doodle-wink {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Same unframed sidebar doodle and word-by-word hover as the portfolio. */
+.brand-with-doodle {
+  width: 100%;
+  justify-content: center;
+  margin: 0 0 18px;
+}
+.brand-with-doodle .katha-doodle {
+  width: 135px;
+  height: 135px;
+  border-radius: 0;
+  background: none;
+  overflow: hidden;
+  transform: none;
+  box-shadow: none;
+  transition: transform 0.2s;
+}
+.brand-with-doodle .katha-doodle img {
+  inset: auto;
+  width: 176px;
+  height: auto;
+  left: -20px;
+  top: -14px;
+  object-fit: contain;
+  transition: opacity 0.12s;
+}
+.brand-with-doodle:hover .katha-doodle,
+.brand-with-doodle:focus-visible .katha-doodle {
+  transform: rotate(13deg);
+}
+.brand-with-doodle:hover .doodle-idle,
+.brand-with-doodle:focus-visible .doodle-idle {
+  opacity: 0;
+}
+.brand-with-doodle:hover .doodle-wink,
+.brand-with-doodle:focus-visible .doodle-wink {
+  animation: none;
+  opacity: 1;
+}
+.welcome h1.binary-title span {
+  display: inline-block;
+  transform: none;
+  transition: none;
+}
+.welcome h1.binary-title .title-word {
+  position: relative;
+  outline-offset: 5px;
+}
+.welcome h1.binary-title .title-character {
+  position: relative;
+}
+.welcome h1.binary-title .title-spacer {
+  visibility: hidden;
+}
+.welcome h1.binary-title .title-glyph {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.title-word--greeting.is-active {
+  color: #a7cdd0;
+  font-style: italic;
+}
+.title-word--name.is-active {
+  color: #efd960;
+  font-style: italic;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-with-doodle .katha-doodle {
+    transition: none;
+  }
+  .brand-with-doodle:hover .katha-doodle,
+  .brand-with-doodle:focus-visible .katha-doodle {
+    transform: none;
+  }
+}
+@media (max-width: 600px) {
+  .brand-with-doodle .katha-doodle {
+    width: 112px;
+    height: 112px;
+  }
+  .brand-with-doodle .katha-doodle img {
+    width: 146px;
+    left: -17px;
+    top: -12px;
+  }
+}
+
+.brand-with-doodle .katha-doodle img {
+  mix-blend-mode: multiply;
+}

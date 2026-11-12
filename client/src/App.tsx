@@ -1,3 +1,4 @@
+import { AnimatedTitleWord } from "./AnimatedTitle.js";
 import { PaperclipIcon as Paperclip } from "@phosphor-icons/react/dist/icons/Paperclip";
 import { ImageIcon as ImageIcon } from "@phosphor-icons/react/dist/icons/Image";
 import { AtIcon as At } from "@phosphor-icons/react/dist/icons/At";
@@ -589,8 +590,27 @@ export default function App() {
         }}
       >
         <div className="brand-row">
-          <button className="brand" onClick={newChat}>
-            Katha
+          <button
+            className="brand brand-with-doodle"
+            onClick={newChat}
+            aria-label="Katha — new chat"
+          >
+            <span className="katha-doodle" aria-hidden="true">
+              <img
+                className="doodle-idle"
+                src="/assets/doodles/katha-idle.webp"
+                alt=""
+                width="384"
+                height="384"
+              />
+              <img
+                className="doodle-wink"
+                src="/assets/doodles/katha-wink.webp"
+                alt=""
+                width="384"
+                height="384"
+              />
+            </span>
           </button>
           <button
             ref={mobileClose}
@@ -730,38 +750,9 @@ export default function App() {
         >
           {!hasConversation && (
             <div className="welcome">
-              <button
-                className="katha-doodle"
-                type="button"
-                aria-label="Ask Katha — start a conversation"
-                title="Ask Katha"
-                onClick={() => field.current?.focus()}
-              >
-                <img
-                  className="doodle-idle"
-                  src="/assets/doodles/katha-idle.webp"
-                  alt=""
-                  width="384"
-                  height="384"
-                />
-                <img
-                  className="doodle-wink"
-                  src="/assets/doodles/katha-wink.webp"
-                  alt=""
-                  width="384"
-                  height="384"
-                />
-              </button>
-              <h1 aria-label="Ask Katha" tabIndex={0}>
-                {Array.from("Ask Katha").map((letter, i) => (
-                  <span
-                    key={i}
-                    aria-hidden="true"
-                    style={{ "--letter": i } as React.CSSProperties}
-                  >
-                    {letter === " " ? "\u00a0" : letter}
-                  </span>
-                ))}
+              <h1 aria-label="Ask Katha" className="binary-title">
+                <AnimatedTitleWord text="Ask" variant="greeting" />{" "}
+                <AnimatedTitleWord text="Katha" variant="name" />
               </h1>
               <p>Ask a question. Pick up where you left off.</p>
               {(configured.model === false || configured.search === false) && (

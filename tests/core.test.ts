@@ -1602,3 +1602,82 @@ test("a later scheduled assertion cannot be stranded by an earlier whole-record 
     cleanup();
   }
 });
+
+test("an ambiguous verification asks the planner clarification without falling through to web search", async () => {
+  const { app, cleanup } = setup({
+    model: {
+      plan: async () => ({
+        queries: [],
+        clarification: "Which shortlist: CRM tools or database hosts?",
+      }),
+      generate: async () => {
+        throw Error("Should clarify first");
+      },
+    },
+    search: {
+      async search() {
+        throw Error("Must not search an ambiguous shortlist");
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Choices",
+      content: "CRM shortlist: Alder. Database shortlist: RiverDB.",
+    });
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "clarify",
+      expectedTailId: null,
+      text: "Has our shortlist changed?",
+    });
+    const turn = await wait(app, r.turnId);
+    assert.equal(turn.status, "COMPLETED");
+    assert.equal(turn.answer, "Which shortlist: CRM tools or database hosts?");
+  } finally {
+    cleanup();
+  }
+});
+
+test("a long web observation keeps relevant evidence beyond navigation available to generation and inspection", async () => {
+  const { app, cleanup } = setup({
+    search: {
+      async search() {
+        return [
+          {
+            title: "WAL",
+            url: "https://example.com/wal",
+            content:
+              "Navigation menu.\n\n".repeat(500) +
+              "WAL readers can continue while a writer commits.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c: any) {
+        const s = c.evidence.find((s: any) => s.kind === "web");
+        return { answer: s.content, citations: [{ sourceId: s.id }] };
+      },
+    },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "passage",
+      expectedTailId: null,
+      text: "Search web for WAL readers and writer concurrency.",
+    });
+    const turn = await wait(app, r.turnId);
+    assert.match(turn.answer, /WAL readers can continue/);
+    const web = turn.sources.find((s: any) => s.kind === "web");
+    assert.match(
+      (await app.evidence.inspect(web.id)).content,
+      /WAL readers can continue/,
+    );
+  } finally {
+    cleanup();
+  }
+});

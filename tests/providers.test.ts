@@ -328,3 +328,30 @@ test("a valid photo is not rejected because base64 bytes are counted as text tok
   });
   assert.equal(result.content, "A patterned test image.");
 });
+
+test("search exposes query-relevant passages instead of navigation-heavy raw page prefixes", async () => {
+  const provider = createProviders({
+    tavilyKey: "fixture",
+    fetcher: (async () =>
+      new Response(
+        JSON.stringify({
+          results: [
+            {
+              title: "SQLite WAL",
+              url: "https://sqlite.org/wal.html",
+              content:
+                "WAL permits readers and a writer to proceed concurrently.",
+              raw_content:
+                "Navigation menu. ".repeat(2000) +
+                "WAL permits readers and a writer to proceed concurrently.",
+            },
+          ],
+        }),
+      )) as typeof fetch,
+  });
+  const result = await provider.search([{ query: "WAL readers writers" }]);
+  assert.equal(
+    result[0].evidence[0].text,
+    "WAL permits readers and a writer to proceed concurrently.",
+  );
+});

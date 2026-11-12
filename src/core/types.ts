@@ -127,7 +127,9 @@ export interface ModelAdapter {
     citations?: Citation[];
     comparisons?: Comparison[];
   }>;
-  plan?(context: Omit<ModelContext, "onDelta">): Promise<{ queries: string[] }>;
+  plan?(
+    context: Omit<ModelContext, "onDelta">,
+  ): Promise<{ queries: string[]; clarification?: string }>;
 }
 export interface EmbeddedSegment {
   text: string;

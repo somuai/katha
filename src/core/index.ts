@@ -1,3 +1,4 @@
+import { selectPassages } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
 import { comparePrices, priceHasNumericSupport } from "./pricing.js";
 import { seedAssertions } from "./assertions.js";
@@ -1005,7 +1006,7 @@ export function createKatha(options: KathaOptions) {
         .slice(0, 5)
         .map((r) => ({
           ...r,
-          content: compact(r.content, 6000),
+          content: compact(r.content, 24000),
           observedAt: r.observedAt || now(),
         }));
       if (closed || signal.aborted)
@@ -1131,11 +1132,17 @@ export function createKatha(options: KathaOptions) {
         );
       }
       const verification =
-        /\b(changed?|still|correct|current|pricing|latest|since|verify|update[ds]?)\b/i.test(
+        /\b(changed?|still (?:correct|true|accurate|valid|right|available|supported|matches?|costs?|the same)|correct|current|pricing|latest|since|verify|update[ds]?)\b/i.test(
           input.text,
         ) &&
-        (/\b(since|still|changed?|correct|verify)\b/i.test(input.text) ||
-          !!window);
+        (/\b(since|still (?:correct|true|accurate|valid|right|available|supported|matches?|costs?|the same)|changed?|correct|verify)\b/i.test(
+          input.text,
+        ) ||
+          !!window) &&
+        !(
+          /\b(observation|snapshot|search failure)\b/i.test(input.text) &&
+          /\b(establish|prove|mean)\b/i.test(input.text)
+        );
       const historical =
         !!window &&
         (/\b(what|asked?|said|discuss|shortlist|decid|remember)\b/i.test(
@@ -1310,8 +1317,26 @@ export function createKatha(options: KathaOptions) {
               signal: controller.signal,
             }),
           );
-          queries = plan.queries;
           valid();
+          if (plan.clarification?.trim()) {
+            update(id, {
+              answer: plan.clarification.trim(),
+              sourceIds: local.map((s) => s.id),
+              trace: { ...trace, clarification: true },
+            });
+            saveAnswer(
+              id,
+              plan.clarification.trim(),
+              local.flatMap((s) => [
+                s.id,
+                ...(s.interpretationSourceIds || []),
+              ]),
+            );
+            setStatus(id, "COMPLETED");
+            event(id, "complete", getTurn(id));
+            return;
+          }
+          queries = plan.queries;
         }
         if (!queries.length)
           queries = [
@@ -1461,7 +1486,7 @@ export function createKatha(options: KathaOptions) {
           now: row.created_at,
           evidence: [...local, ...web].map((s) => ({
             ...s,
-            content: compact(s.content, 1800),
+            content: selectPassages(s.content, input.text, 1800),
           })),
           verification,
           signal: controller.signal,
@@ -1499,95 +1524,97 @@ export function createKatha(options: KathaOptions) {
         "CONFLICTING",
         "UNVERIFIED",
       ]);
-      const comparisons = (result.comparisons || []).map((c) => {
-        const baseline = (c.baselineSourceIds || []).filter((x) =>
-            local.some((s) => s.id === x),
-          ),
-          evidenceIds = (c.evidenceSourceIds || []).filter((x) =>
-            web.some((s) => s.id === x),
-          );
-        let status = c.status;
-        if (!statuses.has(status) || !baseline.length || !evidenceIds.length)
-          status = "UNVERIFIED";
-        if (
-          status === "CHANGED_WITH_DATED_EVIDENCE" &&
-          !web.some((s) => {
-            const passage = c.effectiveDateEvidence;
-            const explicitDate =
-              passage &&
-              passage.sourceId === s.id &&
-              typeof passage.quote === "string" &&
-              passage.quote.length >= 12 &&
-              s.content.includes(passage.quote) &&
-              typeof c.effectiveAt === "string" &&
-              effectiveDateInQuote(c.effectiveAt, passage.quote)
-                ? c.effectiveAt
-                : null;
-            const when = Date.parse(
-              String(s.metadata.effectiveAt || explicitDate || ""),
+      const comparisons = (verification ? result.comparisons || [] : []).map(
+        (c) => {
+          const baseline = (c.baselineSourceIds || []).filter((x) =>
+              local.some((s) => s.id === x),
+            ),
+            evidenceIds = (c.evidenceSourceIds || []).filter((x) =>
+              web.some((s) => s.id === x),
             );
-            return (
-              evidenceIds.includes(s.id) &&
-              Number.isFinite(when) &&
-              when <= Date.parse(now()) &&
-              (!window || when >= Date.parse(window.from))
-            );
-          })
-        )
-          status = "DIFFERS_CHANGE_TIME_UNKNOWN";
-        let priceCheck;
-        const priceClaim =
-          /\b(price|pricing|cost|per seat|billing)\b|[$€£₹]/i.test(c.claim) ||
-          c.baselinePrice ||
-          c.currentPrice;
-        let explanation = c.explanation;
-        if (priceClaim) {
-          priceCheck = comparePrices(c.baselinePrice, c.currentPrice);
-          const baselineTexts = local
-            .filter((s) => baseline.includes(s.id))
-            .map((s) => s.interpretation || s.content);
-          const currentTexts = web
-            .filter((s) => evidenceIds.includes(s.id))
-            .map((s) => s.content);
-          if (!priceCheck.comparable) {
+          let status = c.status;
+          if (!statuses.has(status) || !baseline.length || !evidenceIds.length)
             status = "UNVERIFIED";
-            explanation = priceCheck.reason;
-          } else if (
-            !baselineTexts.some((text) =>
-              priceHasNumericSupport(c.baselinePrice!, text),
-            ) ||
-            !currentTexts.some((text) =>
-              priceHasNumericSupport(c.currentPrice!, text),
-            )
-          ) {
-            status = "UNVERIFIED";
-            explanation =
-              "Extracted commercial terms are not supported by the linked source text.";
-          } else if (
-            priceCheck.equal &&
-            [
-              "DIFFERS_CHANGE_TIME_UNKNOWN",
-              "CHANGED_WITH_DATED_EVIDENCE",
-            ].includes(status)
-          ) {
-            status = "CONFLICTING";
-            explanation =
-              "The extracted like-for-like prices are equal but the generated comparison claims a change.";
-          } else if (!priceCheck.equal && status === "CURRENTLY_MATCHES") {
+          if (
+            status === "CHANGED_WITH_DATED_EVIDENCE" &&
+            !web.some((s) => {
+              const passage = c.effectiveDateEvidence;
+              const explicitDate =
+                passage &&
+                passage.sourceId === s.id &&
+                typeof passage.quote === "string" &&
+                passage.quote.length >= 12 &&
+                s.content.includes(passage.quote) &&
+                typeof c.effectiveAt === "string" &&
+                effectiveDateInQuote(c.effectiveAt, passage.quote)
+                  ? c.effectiveAt
+                  : null;
+              const when = Date.parse(
+                String(s.metadata.effectiveAt || explicitDate || ""),
+              );
+              return (
+                evidenceIds.includes(s.id) &&
+                Number.isFinite(when) &&
+                when <= Date.parse(now()) &&
+                (!window || when >= Date.parse(window.from))
+              );
+            })
+          )
             status = "DIFFERS_CHANGE_TIME_UNKNOWN";
-            explanation =
-              "Like-for-like amounts differ; the time of change is not established.";
+          let priceCheck;
+          const priceClaim =
+            /\b(price|pricing|cost|per seat|billing)\b|[$€£₹]/i.test(c.claim) ||
+            c.baselinePrice ||
+            c.currentPrice;
+          let explanation = c.explanation;
+          if (priceClaim) {
+            priceCheck = comparePrices(c.baselinePrice, c.currentPrice);
+            const baselineTexts = local
+              .filter((s) => baseline.includes(s.id))
+              .map((s) => s.interpretation || s.content);
+            const currentTexts = web
+              .filter((s) => evidenceIds.includes(s.id))
+              .map((s) => s.content);
+            if (!priceCheck.comparable) {
+              status = "UNVERIFIED";
+              explanation = priceCheck.reason;
+            } else if (
+              !baselineTexts.some((text) =>
+                priceHasNumericSupport(c.baselinePrice!, text),
+              ) ||
+              !currentTexts.some((text) =>
+                priceHasNumericSupport(c.currentPrice!, text),
+              )
+            ) {
+              status = "UNVERIFIED";
+              explanation =
+                "Extracted commercial terms are not supported by the linked source text.";
+            } else if (
+              priceCheck.equal &&
+              [
+                "DIFFERS_CHANGE_TIME_UNKNOWN",
+                "CHANGED_WITH_DATED_EVIDENCE",
+              ].includes(status)
+            ) {
+              status = "CONFLICTING";
+              explanation =
+                "The extracted like-for-like prices are equal but the generated comparison claims a change.";
+            } else if (!priceCheck.equal && status === "CURRENTLY_MATCHES") {
+              status = "DIFFERS_CHANGE_TIME_UNKNOWN";
+              explanation =
+                "Like-for-like amounts differ; the time of change is not established.";
+            }
           }
-        }
-        return {
-          ...c,
-          status,
-          explanation,
-          ...(priceCheck ? { priceCheck } : {}),
-          baselineSourceIds: baseline,
-          evidenceSourceIds: evidenceIds,
-        };
-      });
+          return {
+            ...c,
+            status,
+            explanation,
+            ...(priceCheck ? { priceCheck } : {}),
+            baselineSourceIds: baseline,
+            evidenceSourceIds: evidenceIds,
+          };
+        },
+      );
       if (verification && !web.length) {
         comparisons.forEach((c) => (c.status = "UNVERIFIED"));
         result.answer =
