@@ -730,6 +730,28 @@ export default function App() {
         >
           {!hasConversation && (
             <div className="welcome">
+              <button
+                className="katha-doodle"
+                type="button"
+                aria-label="Ask Katha — start a conversation"
+                title="Ask Katha"
+                onClick={() => field.current?.focus()}
+              >
+                <img
+                  className="doodle-idle"
+                  src="/assets/doodles/katha-idle.webp"
+                  alt=""
+                  width="384"
+                  height="384"
+                />
+                <img
+                  className="doodle-wink"
+                  src="/assets/doodles/katha-wink.webp"
+                  alt=""
+                  width="384"
+                  height="384"
+                />
+              </button>
               <h1 aria-label="Ask Katha" tabIndex={0}>
                 {Array.from("Ask Katha").map((letter, i) => (
                   <span

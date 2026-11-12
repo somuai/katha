@@ -1655,3 +1655,73 @@ body {
     min-height: 30px;
   }
 }
+
+.katha-doodle {
+  position: relative;
+  display: block;
+  width: 94px;
+  height: 94px;
+  margin: 0 auto 12px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 14px #082c251f;
+  transform: rotate(-5deg);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.35s;
+}
+.katha-doodle img {
+  position: absolute;
+  inset: -16%;
+  width: 132%;
+  height: 132%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.doodle-wink {
+  opacity: 0;
+}
+.katha-doodle:hover,
+.katha-doodle:focus-visible {
+  transform: rotate(4deg) translateY(-4px) scale(1.04);
+  box-shadow: 0 9px 22px #082c2533;
+}
+.katha-doodle:hover .doodle-wink,
+.katha-doodle:focus-visible .doodle-wink {
+  animation: katha-wink 1.2s steps(1, end) both;
+}
+@keyframes katha-wink {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+  }
+  15%,
+  60% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .katha-doodle {
+    transition: none;
+    transform: none;
+  }
+  .katha-doodle:hover,
+  .katha-doodle:focus-visible {
+    transform: none;
+  }
+  .katha-doodle:hover .doodle-wink,
+  .katha-doodle:focus-visible .doodle-wink {
+    animation: none;
+    opacity: 1;
+  }
+}
+@media (max-width: 600px) {
+  .katha-doodle {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 8px;
+  }
+}
