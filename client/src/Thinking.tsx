@@ -1,3 +1,4 @@
+import { providerLogo } from "./providerLogo.js";
 type Source = {
   id?: string;
   kind?: string;
@@ -25,8 +26,16 @@ export function Thinking({ sources }: { sources: Source[] }) {
         icon: "/assets/providers/" + connector + ".ico",
         glyph: connector[0],
       });
-    else if (connector === "hubspot")
-      labels.set("hubspot", { name: "HubSpot", glyph: "H" });
+    else if (
+      connector === "hubspot" ||
+      connector === "hubspot-mcp" ||
+      connector === "salesforce"
+    )
+      labels.set(connector, {
+        name: connector === "salesforce" ? "Salesforce" : "HubSpot",
+        icon: providerLogo(connector),
+        glyph: connector === "salesforce" ? "S" : "H",
+      });
     else if (sourceUrl && /^https?:\/\//i.test(sourceUrl)) {
       try {
         const host = new URL(sourceUrl).hostname.replace(/^www\./, "");

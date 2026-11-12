@@ -1,3 +1,4 @@
+import { providerLogo } from "./providerLogo.js";
 import { useEffect, useState, useRef } from "react";
 async function request(path: string, options: RequestInit = {}) {
   const r = await fetch("/api/connections" + path, {
@@ -210,10 +211,8 @@ export function Connections({
                   className={"provider-mark provider-mark--" + p.id}
                   aria-hidden="true"
                 >
-                  {["gmail", "notion", "canva"].includes(p.id) ? (
-                    <img src={"/assets/providers/" + p.id + ".ico"} alt="" />
-                  ) : p.id === "hubspot" ? (
-                    "H"
+                  {providerLogo(p.id) ? (
+                    <img src={providerLogo(p.id)} alt="" />
                   ) : (
                     p.name[0]
                   )}

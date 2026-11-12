@@ -64,7 +64,7 @@ Fixture tests exercise real SDK discovery/PKCE/refresh, state replay/expiry, rea
 - [MCP authorization specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization)
 - [Official SDK client documentation](https://ts.sdk.modelcontextprotocol.io/client.html)
 
-The Gmail icon is served locally from Google's official `ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico`. Other providers use text service marks; unverified brand assets are not invented. Loading shows only actual selected evidence, not simulated connections.
+The Gmail icon is served locally from Google's official `ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico`. Salesforce uses its login-site favicon; HubSpot uses its site favicon obtained through Google’s favicon service and saved locally. Loading shows only actual selected evidence, not simulated connections.
 
 Additional primary references:
 
