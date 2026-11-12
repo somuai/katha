@@ -19,6 +19,8 @@ test("HTTP persists a turn and exposes complete replay without configured provid
       GOOGLE_CLIENT_SECRET: "",
       HUBSPOT_CLIENT_ID: "",
       HUBSPOT_CLIENT_SECRET: "",
+      SALESFORCE_CLIENT_ID: "public-fixture-client",
+      SALESFORCE_CLIENT_SECRET: "",
     },
     stdio: "pipe",
   });
@@ -55,6 +57,10 @@ test("HTTP persists a turn and exposes complete replay without configured provid
     assert.deepEqual((await api("/api/connections")).connections, []);
     const catalog = await api("/api/connections/providers");
     assert.equal(catalog.localWorkspace, true);
+    assert.equal(
+      catalog.providers.find((p: any) => p.id === "salesforce").status,
+      "ready",
+    );
     assert.deepEqual(
       catalog.providers
         .filter((p: any) => ["gmail", "hubspot"].includes(p.id))

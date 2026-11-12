@@ -24,9 +24,7 @@ export async function registerConnections(
     directory: join(directory, "mcp-oauth"),
     callbackUrl: origin + "/api/connections/oauth/callback",
     clientFor: (id) =>
-      id === "official-salesforce" &&
-      process.env.SALESFORCE_CLIENT_ID &&
-      process.env.SALESFORCE_CLIENT_SECRET
+      id === "official-salesforce" && process.env.SALESFORCE_CLIENT_ID
         ? {
             client_id: process.env.SALESFORCE_CLIENT_ID,
             client_secret: process.env.SALESFORCE_CLIENT_SECRET,
@@ -79,9 +77,7 @@ export async function registerConnections(
   }
   app.get("/api/connections/providers", async () => ({
     providers: providerCatalog({
-      salesforceConfigured:
-        !!process.env.SALESFORCE_CLIENT_ID &&
-        !!process.env.SALESFORCE_CLIENT_SECRET,
+      salesforceConfigured: !!process.env.SALESFORCE_CLIENT_ID,
       salesforceConnected: salesforce.status().connected,
       hubspotMcpConfigured:
         !!process.env.HUBSPOT_MCP_CLIENT_ID &&
@@ -100,10 +96,7 @@ export async function registerConnections(
     localWorkspace: true,
   }));
   app.post("/api/connections/salesforce/authorize", async () => {
-    if (
-      !process.env.SALESFORCE_CLIENT_ID ||
-      !process.env.SALESFORCE_CLIENT_SECRET
-    )
+    if (!process.env.SALESFORCE_CLIENT_ID)
       throw Object.assign(
         Error("Configure the Salesforce External Client App first."),
         { status: 503 },

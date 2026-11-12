@@ -1665,6 +1665,22 @@ export function createKatha(options: KathaOptions) {
       const citations = (result.citations || []).filter((c) =>
         allowed.has(c.sourceId),
       );
+      // A cited current interpretation may combine the original with one or
+      // more effective assertion corrections. Expose those corrections in the
+      // answer's citations so the supporting values remain inspectable.
+      const citedIds = new Set(citations.map((c) => c.sourceId));
+      for (const s of local) {
+        if (!citedIds.has(s.id)) continue;
+        for (const correctionId of s.interpretationSourceIds || []) {
+          if (!citedIds.has(correctionId)) {
+            citations.push({
+              sourceId: correctionId,
+              label: `Correction to ${s.title}`,
+            });
+            citedIds.add(correctionId);
+          }
+        }
+      }
       const statuses = new Set([
         "CURRENTLY_MATCHES",
         "DIFFERS_CHANGE_TIME_UNKNOWN",
@@ -1836,7 +1852,13 @@ export function createKatha(options: KathaOptions) {
         answer,
         citations,
         comparisons,
-        sourceIds: [...local, ...web].map((s) => s.id),
+        sourceIds: [
+          ...new Set([
+            ...local.map((s) => s.id),
+            ...web.map((s) => s.id),
+            ...citations.map((c) => c.sourceId),
+          ]),
+        ],
         trace,
       });
       saveAnswer(id, answer, [

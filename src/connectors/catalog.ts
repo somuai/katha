@@ -100,7 +100,7 @@ export function providerCatalog(options: {
           : "ready"
         : "owner_setup_required",
       setup:
-        "An administrator must enable the read-only MCP server and register an External Client App. Configure SALESFORCE_CLIENT_ID and SALESFORCE_CLIENT_SECRET.",
+        "An administrator must enable the read-only MCP server and register an External Client App. Configure SALESFORCE_CLIENT_ID; the client secret is optional for a public client.",
     },
     {
       id: "canva",
