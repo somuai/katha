@@ -1722,3 +1722,42 @@ test("still include asks for current evidence rather than treating a stale plan 
     cleanup();
   }
 });
+
+test("a follow-up about an attached CSV keeps the earlier attachment in context", async () => {
+  const { app, cleanup } = setup({
+    model: {
+      async generate(c: any) {
+        const csv = c.baseline.find((s: any) => s.title === "crm.csv");
+        return {
+          answer: csv
+            ? "CRM source available: " + csv.content
+            : "CRM source missing",
+        };
+      },
+    },
+  });
+  try {
+    const source = await app.evidence.import({
+      name: "crm.csv",
+      content: "name,stage\nAsha,new\nBela,qualified",
+    });
+    const chat = await app.workspace.createConversation();
+    const first = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "one",
+      expectedTailId: null,
+      text: "Summarize this file",
+      attachmentIds: [source.sourceId],
+    });
+    await wait(app, first.turnId);
+    const next = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "two",
+      expectedTailId: first.chatTail,
+      text: "What next steps do you recommend from this CRM data?",
+    });
+    assert.match((await wait(app, next.turnId)).answer, /CRM source available/);
+  } finally {
+    cleanup();
+  }
+});

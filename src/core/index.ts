@@ -1214,6 +1214,36 @@ export function createKatha(options: KathaOptions) {
         if (!local.some((s) => s.id === attachmentId))
           local.unshift(attachment);
       }
+      // Resolve ordinary follow-ups to the most recent attachments in this conversation.
+      // Apply the acceptance cutoff and deletion state so newer or removed files cannot leak in.
+      if (
+        !historical &&
+        !input.attachmentIds?.length &&
+        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet)\b/i.test(
+          input.text,
+        )
+      ) {
+        const prior = db
+          .prepare(
+            "SELECT input_json FROM turns WHERE conversation_id=? AND seq<? AND status='COMPLETED' ORDER BY seq DESC LIMIT 10",
+          )
+          .all(input.conversationId, row.seq) as { input_json: string }[];
+        const previous = prior
+          .map(
+            (t) =>
+              JSON.parse(t.input_json).attachmentIds as string[] | undefined,
+          )
+          .find((ids) => ids?.length);
+        for (const sourceId of previous || []) {
+          const eligible = db
+            .prepare(
+              "SELECT * FROM sources WHERE id=? AND ordinal<=? AND deleted_at IS NULL AND invalidated=0",
+            )
+            .get(sourceId, row.cutoff) as any;
+          if (eligible && !local.some((s) => s.id === sourceId))
+            local.unshift(source(eligible));
+        }
+      }
       // Exact historical recall must preserve the original questions and paired responses.
       if (historical) {
         for (const s of [...local]) {
@@ -1291,7 +1321,8 @@ export function createKatha(options: KathaOptions) {
       let web: Source[] = [],
         searches: any[] = [];
       const personalMemory =
-        /\b(my|our|we|remember|i said|i told|i asked)\b/i.test(input.text);
+        /\b(my|our|we|remember|i said|i told|i asked)\b/i.test(input.text) ||
+        !!input.attachmentIds?.length;
       const currentQuestion =
         verification ||
         (/\b(latest|current|today|news|pricing|price|search|web|recent|release|what is|who is)\b/i.test(

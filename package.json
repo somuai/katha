@@ -24,6 +24,7 @@
     "@napi-rs/canvas": "^1.1.0",
     "@phosphor-icons/react": "^2.1.10",
     "better-sqlite3": "latest",
+    "csv-parse": "^7.0.3",
     "dotenv": "latest",
     "fastify": "latest",
     "music-metadata": "^12.4.0",

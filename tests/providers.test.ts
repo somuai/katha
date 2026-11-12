@@ -410,3 +410,62 @@ test("current answer projection retains the effective correction even when the o
   assert.match(result.answer, /quota is eight/);
   assert.doesNotMatch(result.answer, /quota is five/);
 });
+
+test("a large CSV answer receives a complete integer aggregate and the requested late row", async () => {
+  const { createKathaAdapters } = await import("../src/providers/index.ts");
+  const { model } = createKathaAdapters({
+    groqKey: "fixture",
+    fetcher: (async (_url, init) => {
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  text: context.baseline[0].csvSummary,
+                  citations: ["csv"],
+                  comparisons: [],
+                }),
+              },
+            },
+          ],
+        }),
+      );
+    }) as typeof fetch,
+  });
+  const content =
+    "name,amount\n" +
+    Array.from({ length: 100 }, (_, i) => `Customer${i + 1},${i + 1}`).join(
+      "\n",
+    );
+  const source = {
+    id: "csv",
+    kind: "attachment" as const,
+    role: "document" as const,
+    conversationId: null,
+    turnId: null,
+    title: "large.csv",
+    content,
+    recordedAt: "2026-11-03T00:00:00Z",
+    occurredAt: null,
+    occurredEnd: null,
+    dateProvenance: "recorded",
+    version: 1,
+    deletedAt: null,
+    invalidated: false,
+    metadata: {},
+  };
+  const result = await model.generate({
+    question: "What is the amount for Customer100 and sum of all amounts?",
+    history: [],
+    baseline: [source],
+    evidence: [source],
+    verification: false,
+    signal: new AbortController().signal,
+  });
+  assert.match(result.answer, /sum 5050/);
+  assert.match(result.answer, /Customer100.*amount=100/);
+});
