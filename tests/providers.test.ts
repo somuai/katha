@@ -1489,3 +1489,57 @@ test("a broad search query is not evidence that every returned page describes ev
     ["birch"],
   );
 });
+
+test("per-vendor assessment labels come from the host scope, not a model's generic claim title", async () => {
+  let clock = Date.now();
+  const p = createProviders({
+    groqKey: "fixture",
+    clock: () => (clock += 10000),
+    fetcher: (async () =>
+      Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Unknown export change.",
+                citations: [],
+                comparisons: [
+                  {
+                    claim: "Export capabilities",
+                    status: "UNVERIFIED",
+                    explanation: "No dated evidence.",
+                    baselineSourceIds: ["old"],
+                    evidenceIds: ["web"],
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      })) as typeof fetch,
+  });
+  const answer = await p.answer({
+    question: "We shortlisted Alder and Birch. Have capabilities changed?",
+    baseline: [
+      {
+        id: "old",
+        title: "Shortlist",
+        text: "We shortlisted Alder and Birch.",
+        observedAt: "2026-11-09",
+      },
+    ],
+    evidence: [
+      {
+        id: "web",
+        title: "Alder and Birch",
+        text: "Alder and Birch capabilities.",
+        observedAt: "2026-11-13",
+      },
+    ],
+  });
+  assert.deepEqual(
+    answer.comparisons.map((c) => c.claim),
+    ["Alder: Export capabilities", "Birch: Export capabilities"],
+  );
+});
