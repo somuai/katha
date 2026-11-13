@@ -1,3 +1,4 @@
+import { shortlistedVendors } from "./shortlist.js";
 import { retainedEvidenceResponse } from "./evidence-recovery.js";
 import { selectPassages, documentNamedPeople } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
@@ -59,24 +60,6 @@ const terms = (text: string) =>
   [...new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || [])].filter(
     (x) => x.length > 2 && !stopWords.has(x),
   );
-
-function shortlistedVendors(texts: string[]) {
-  const group = texts
-    .map(
-      (t) =>
-        t.match(/\bshortlisted\s+([^.!?\n]+?)(?=\s+for\b|[.!?\n]|$)/i)?.[1],
-    )
-    .find(Boolean);
-  const names = [
-    ...new Set(
-      group
-        ?.split(/\s*,\s*|\s+and\s+/i)
-        .map((n) => n.trim())
-        .filter((n) => /^[A-Z][A-Za-z0-9 .&-]{0,35}$/.test(n)) || [],
-    ),
-  ];
-  return names.length >= 2 && names.length <= 10 ? names : [];
-}
 
 export function createKatha(options: KathaOptions) {
   mkdirSync(options.directory, { recursive: true });
@@ -387,6 +370,62 @@ export function createKatha(options: KathaOptions) {
     }
     return { where: predicates.join(" AND "), args };
   }
+  function effectiveInterpretation(
+    row: any,
+    original: boolean,
+    at: string,
+    cutoff?: number,
+  ) {
+    if (original)
+      return {
+        interpretation: row.content,
+        interpretationSourceIds: [] as string[],
+      };
+    let current = row;
+    const lineage: string[] = [];
+    const seen = new Set<string>([row.id]);
+    for (;;) {
+      const replacement = db
+        .prepare(
+          `SELECT cs.* FROM corrections c JOIN sources cs ON cs.id=c.source_id WHERE c.target_id=? AND c.assertion_id IS NULL AND c.effective_at<=? AND cs.deleted_at IS NULL AND cs.invalidated=0 ${cutoff !== undefined ? "AND cs.ordinal<=?" : ""} ORDER BY c.effective_at DESC,cs.ordinal DESC LIMIT 1`,
+        )
+        .get(current.id, at, ...(cutoff !== undefined ? [cutoff] : [])) as any;
+      if (!replacement) break;
+      if (seen.has(replacement.id) || seen.size >= 128)
+        throw new KathaError(
+          "INVALID_CORRECTION_LINEAGE",
+          "Correction lineage is cyclic or exceeds 128 records.",
+          409,
+        );
+      seen.add(replacement.id);
+      lineage.push(replacement.id);
+      current = replacement;
+    }
+    const eligible = db
+      .prepare(
+        `SELECT a.start_offset,a.end_offset,c.source_id,cs.content,c.effective_at,cs.ordinal FROM assertions a JOIN corrections c ON c.assertion_id=a.id JOIN sources cs ON cs.id=c.source_id WHERE a.source_id=? AND c.effective_at<=? AND cs.deleted_at IS NULL AND cs.invalidated=0 ${cutoff !== undefined ? "AND cs.ordinal<=?" : ""} ORDER BY c.effective_at DESC,cs.ordinal DESC`,
+      )
+      .all(current.id, at, ...(cutoff !== undefined ? [cutoff] : [])) as any[];
+    const spans = new Map<number, any>();
+    for (const change of eligible)
+      if (!spans.has(change.start_offset))
+        spans.set(change.start_offset, change);
+    let text = current.content;
+    for (const change of [...spans.values()].sort(
+      (a, b) => b.start_offset - a.start_offset,
+    ))
+      text =
+        text.slice(0, change.start_offset) +
+        change.content +
+        text.slice(change.end_offset);
+    return {
+      interpretation: text,
+      interpretationSourceIds: [
+        ...lineage,
+        ...[...spans.values()].map((c) => c.source_id),
+      ],
+    };
+  }
   async function recall(
     q: RecallQuery = {},
     internal?: {
@@ -534,54 +573,15 @@ export function createKatha(options: KathaOptions) {
       ).map((r) => r.id),
     );
     ranking = ranking.filter((id) => stillEligible.has(id));
-    function interpretation(row: any) {
-      const eligible = db
-        .prepare(
-          `SELECT a.start_offset,a.end_offset,c.source_id,cs.content,c.effective_at,cs.ordinal FROM assertions a JOIN corrections c ON c.assertion_id=a.id JOIN sources cs ON cs.id=c.source_id WHERE a.source_id=? AND c.effective_at<=? AND cs.deleted_at IS NULL AND cs.invalidated=0 ${internal ? "AND cs.ordinal<=?" : ""} ORDER BY c.effective_at DESC,cs.ordinal DESC`,
-        )
-        .all(
-          row.id,
-          iso(q.asOf || now()),
-          ...(internal ? [internal.cutoff] : []),
-        ) as any[];
-      const spans = new Map<number, any>();
-      if (!q.original)
-        for (const change of eligible)
-          if (!spans.has(change.start_offset))
-            spans.set(change.start_offset, change);
-      const whole = !q.original
-        ? (db
-            .prepare(
-              `SELECT c.source_id,cs.content FROM corrections c JOIN sources cs ON cs.id=c.source_id WHERE c.target_id=? AND c.assertion_id IS NULL AND c.effective_at<=? AND cs.deleted_at IS NULL AND cs.invalidated=0 ${internal ? "AND cs.ordinal<=?" : ""} ORDER BY c.effective_at DESC,cs.ordinal DESC LIMIT 1`,
-            )
-            .get(
-              row.id,
-              iso(q.asOf || now()),
-              ...(internal ? [internal.cutoff] : []),
-            ) as any)
-        : null;
-      if (whole)
-        return {
-          interpretation: whole.content,
-          interpretationSourceIds: [whole.source_id],
-        };
-      let text = row.content;
-      for (const change of [...spans.values()].sort(
-        (a, b) => b.start_offset - a.start_offset,
-      ))
-        text =
-          text.slice(0, change.start_offset) +
-          change.content +
-          text.slice(change.end_offset);
-      return {
-        interpretation: text,
-        interpretationSourceIds: [...spans.values()].map((c) => c.source_id),
-      };
-    }
     return {
       sources: ranking.slice(offset, offset + limit).map((id) => ({
         ...source(byId.get(id)),
-        ...interpretation(byId.get(id)),
+        ...effectiveInterpretation(
+          byId.get(id),
+          !!q.original,
+          iso(q.asOf || now()),
+          internal?.cutoff,
+        ),
         ...(matches.has(id) ? { matches: matches.get(id) } : {}),
       })),
       total: ranking.length,
@@ -1308,6 +1308,7 @@ export function createKatha(options: KathaOptions) {
             .map(source);
         }
       }
+      const activeSourceIds = new Set<string>();
       for (const attachmentId of input.attachmentIds || []) {
         const attachment = source(requireSource(attachmentId));
         if (attachment.deletedAt || attachment.invalidated)
@@ -1316,8 +1317,18 @@ export function createKatha(options: KathaOptions) {
             "An attached source was removed before execution.",
             409,
           );
-        if (!local.some((s) => s.id === attachmentId))
-          local.unshift(attachment);
+        const existing = local.findIndex((s) => s.id === attachmentId);
+        const selected = {
+          ...(existing >= 0 ? local.splice(existing, 1)[0] : attachment),
+          ...effectiveInterpretation(
+            requireSource(attachmentId),
+            historical,
+            row.created_at,
+            row.cutoff,
+          ),
+        };
+        local.unshift(selected);
+        activeSourceIds.add(selected.id);
       }
       // Resolve ordinary follow-ups to the most recent attachments in this conversation.
       // Apply the acceptance cutoff and deletion state so newer or removed files cannot leak in.
@@ -1345,8 +1356,22 @@ export function createKatha(options: KathaOptions) {
               "SELECT * FROM sources WHERE id=? AND ordinal<=? AND deleted_at IS NULL AND invalidated=0",
             )
             .get(sourceId, row.cutoff) as any;
-          if (eligible && !local.some((s) => s.id === sourceId))
-            local.unshift(source(eligible));
+          if (eligible) {
+            const existing = local.findIndex((s) => s.id === sourceId);
+            const selected = {
+              ...(existing >= 0
+                ? local.splice(existing, 1)[0]
+                : source(eligible)),
+              ...effectiveInterpretation(
+                eligible,
+                false,
+                row.created_at,
+                row.cutoff,
+              ),
+            };
+            local.unshift(selected);
+            activeSourceIds.add(selected.id);
+          }
         }
       }
       // Exact historical recall must preserve the original questions and paired responses.
@@ -1363,6 +1388,7 @@ export function createKatha(options: KathaOptions) {
         }
       }
       const trace: Record<string, unknown> = {
+        activeSourceIds: [...activeSourceIds],
         resolvedDate: window || null,
         referenceClock: row.created_at,
         timezone: input.timezone || "UTC",
@@ -1615,6 +1641,7 @@ export function createKatha(options: KathaOptions) {
         const plan = await withQuota(() =>
           options.model!.plan!({
             question: input.text,
+            activeSourceIds: [...activeSourceIds],
             history,
             evidence: local,
             baseline: local,
@@ -1831,6 +1858,7 @@ export function createKatha(options: KathaOptions) {
       const result = await withQuota(() =>
         options.model!.generate({
           question: input.text,
+          activeSourceIds: [...activeSourceIds],
           retrievalHint: retrievalHints.join(" "),
           history,
           baseline: local,

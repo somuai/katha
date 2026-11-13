@@ -112,6 +112,7 @@ export interface SearchAdapter {
   ): Promise<SearchResult[]>;
 }
 export interface ModelContext {
+  activeSourceIds?: string[];
   retrievalHint?: string;
   question: string;
   history: Source[];

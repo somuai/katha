@@ -15,6 +15,10 @@ Search-call budgets should not be read as guaranteed billing credits across all 
 
 HTTP ingress additionally limits turn submissions to 30/minute and uploads to 12/minute per client IP, before body processing. State is bounded to 1,024 active client/bucket entries. Read, cancellation and SSE routes remain available. Rejections expose HTTP 429 and Retry-After.
 
+Selected attachments (including eligible follow-ups) are promoted ahead of unrelated workspace hits. Both selected-file and ordinary recall paths apply the same effective correction interpretation and acceptance cutoff. Correction traversal is bounded to 128 linked records and rejects cycles or excessive chains explicitly. Original quotation mode retains original text.
+
+Explicit/attributed quotations are checked against retained source text (normalizing layout whitespace and apostrophe typography). Unknown citation IDs, omitted explicitly requested citations, and invalid quotations share a maximum of one repair attempt per answer. Invalid repairs fail closed. This is a narrow string/provenance check, not semantic verification of arbitrary prose. It does not certify that a valid citation entails every generated claim.
+
 ## Inference outages
 
 When inference quota or a model service prevents answering, already-materialized eligible records can be returned as a clearly labelled `PARTIAL` evidence-only response. No model answer or current verification is claimed; the trace records `generatedAnswer: false`. Cancellation and source deletion still take precedence. This does not restore provider capacity or replace model-based recommendations. Upload preparation that is throttled returns HTTP429 and Retry-After without claiming that a file was imported.

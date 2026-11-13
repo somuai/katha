@@ -1249,3 +1249,64 @@ test("a permanently invalid citation still fails closed after the bounded repair
     { code: "INVALID_CITATION" },
   );
 });
+
+test("generic five-tools follow-up uses the original named list for individual assessments", async () => {
+  let clock = Date.now();
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => (clock += 10000),
+    fetcher: (async (_url, init) => {
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      const claim =
+        context.question.match(/^Assess ONLY ([^.]+)\./)?.[1] ||
+        "Grouped answer";
+      return Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "No complete offer established.",
+                citations: [],
+                comparisons: [
+                  {
+                    claim,
+                    status: "UNVERIFIED",
+                    explanation: "Missing commercial terms.",
+                    baselineSourceIds: ["original"],
+                    evidenceIds: ["current"],
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const answer = await p.answer({
+    question: "We shortlisted 5 CRM tools on Monday. Has pricing changed?",
+    baseline: [
+      {
+        id: "original",
+        title: "Original user message",
+        observedAt: "2026-11-09",
+        text: "We shortlisted Alder, Birch, Cedar, Elm and Fir for 20 seats.",
+      },
+    ],
+    evidence: [
+      {
+        id: "current",
+        title: "Pricing evidence",
+        text: "Alder Birch Cedar Elm Fir current pricing: commercial terms incomplete.",
+        observedAt: "2026-11-13",
+      },
+    ],
+  });
+  assert.deepEqual(
+    answer.comparisons.map((c) => c.claim),
+    ["Alder", "Birch", "Cedar", "Elm", "Fir"],
+  );
+});

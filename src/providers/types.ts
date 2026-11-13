@@ -52,6 +52,7 @@ export type Answer = {
   usage?: { inputTokens: number; outputTokens: number };
 };
 export type ModelInput = {
+  activeSourceIds?: string[];
   retrievalHint?: string;
   question: string;
   history?: string;
