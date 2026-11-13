@@ -14,6 +14,7 @@ if (!process.argv.includes("--run-live")) {
 }
 if (!process.env.GROQ_API_KEY)
   throw Error("Configure the server Groq key first.");
+const textOnly = process.argv.includes("--text-only");
 const directory = await mkdtemp(join(tmpdir(), "katha-attachment-acceptance-"));
 const port = 37000 + Math.floor(Math.random() * 500),
   base = `http://localhost:${port}`;
@@ -173,6 +174,8 @@ async function save() {
           encoding: "utf8",
         }).trim(),
         startedAt,
+        model: process.env.GROQ_MODEL || "qwen/qwen3.8-27b",
+        mode: textOnly ? "CSV text comparison" : "image and CSV acceptance",
         uploads,
         passed: results.filter((r) => r.passed).length,
         total: results.length,
@@ -185,39 +188,42 @@ async function save() {
 }
 try {
   await boot();
-  const canvas = createCanvas(750, 180),
-    ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, 750, 180);
-  ctx.fillStyle = "#000";
-  ctx.font = "30px sans-serif";
-  ctx.fillText("Customer Falcon", 24, 60);
-  ctx.fillText("Budget: USD 700", 24, 115);
-  const image = await upload(
-    "crm-card.png",
-    "image/png",
-    canvas.toBuffer("image/png"),
-  );
-  const imageChat = await api("/api/conversations", {});
-  await ask(
-    "image-initial",
-    imageChat,
-    "Which customer and budget are shown in this image?",
-    [/Falcon/i, /700/],
-    [image],
-  );
-  await ask("image-followup", imageChat, "What was that budget again?", [
-    /700/,
-  ]);
-  await stop();
-  await boot();
-  const fresh = await api("/api/conversations", {});
-  await ask(
-    "image-after-restart",
-    fresh,
-    "What customer and budget were shown in crm-card.png?",
-    [/Falcon/i, /700/],
-  );
+  let image: string | undefined;
+  if (!textOnly) {
+    const canvas = createCanvas(750, 180),
+      ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, 750, 180);
+    ctx.fillStyle = "#000";
+    ctx.font = "30px sans-serif";
+    ctx.fillText("Customer Falcon", 24, 60);
+    ctx.fillText("Budget: USD 700", 24, 115);
+    image = await upload(
+      "crm-card.png",
+      "image/png",
+      canvas.toBuffer("image/png"),
+    );
+    const imageChat = await api("/api/conversations", {});
+    await ask(
+      "image-initial",
+      imageChat,
+      "Which customer and budget are shown in this image?",
+      [/Falcon/i, /700/],
+      [image],
+    );
+    await ask("image-followup", imageChat, "What was that budget again?", [
+      /700/,
+    ]);
+    await stop();
+    await boot();
+    const fresh = await api("/api/conversations", {});
+    await ask(
+      "image-after-restart",
+      fresh,
+      "What customer and budget were shown in crm-card.png?",
+      [/Falcon/i, /700/],
+    );
+  }
   const csv =
     "customer,day,status,stage,amount\n" +
     Array.from(
@@ -266,24 +272,26 @@ try {
     [],
     [/your (?:sales )?team (?:of|has) 120|120 employees/i],
   );
-  await api(`/api/sources/${image}/trash`, {});
-  const deletedChat = await api("/api/conversations", {});
-  await ask(
-    "image-deleted",
-    deletedChat,
-    "What customer and budget were shown in crm-card.png? Use retained sources only.",
-    [/no |not |cannot|can't|missing|unavailable/i],
-    [],
-    [/Falcon/i, /\b700\b/],
-  );
-  await api(`/api/sources/${image}/restore`, {});
-  const restoredChat = await api("/api/conversations", {});
-  await ask(
-    "image-restored",
-    restoredChat,
-    "What customer and budget were shown in crm-card.png?",
-    [/Falcon/i, /700/],
-  );
+  if (image) {
+    await api(`/api/sources/${image}/trash`, {});
+    const deletedChat = await api("/api/conversations", {});
+    await ask(
+      "image-deleted",
+      deletedChat,
+      "What customer and budget were shown in crm-card.png? Use retained sources only.",
+      [/no |not |cannot|can't|missing|unavailable/i],
+      [],
+      [/Falcon/i, /\b700\b/],
+    );
+    await api(`/api/sources/${image}/restore`, {});
+    const restoredChat = await api("/api/conversations", {});
+    await ask(
+      "image-restored",
+      restoredChat,
+      "What customer and budget were shown in crm-card.png?",
+      [/Falcon/i, /700/],
+    );
+  }
 } catch (error) {
   results.push({
     id: "run-error",
