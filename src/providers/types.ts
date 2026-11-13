@@ -5,6 +5,8 @@ export type Evidence = {
   title: string;
   url?: string;
   text: string;
+  /** Server-only original passage for exact quote reconstruction; never sent as extra model context. */
+  sourceText?: string;
   observedAt: string;
   publishedAt?: string;
   query?: string;
@@ -49,6 +51,7 @@ export type Answer = {
   usage?: { inputTokens: number; outputTokens: number };
 };
 export type ModelInput = {
+  retrievalHint?: string;
   question: string;
   history?: string;
   evidence?: Evidence[];

@@ -1,5 +1,13 @@
 # Implementation status
 
+## PDF contribution and cross-chat identity regression
+
+An owner-reported 50-page PDF exposed two issues: lexical excerpts selected another author's contribution, and a page hint did not reliably preserve the original attachment context. Explicit physical PDF page selection now precedes lexical ranking; multiple-author contribution sections expose an author/page index, while a uniquely named author selects that section. PDF passage selection uses the original document rather than only preselected semantic snippets. Attachment follow-ups find the last eligible attachment-bearing turn without the former ten-turn cutoff.
+
+For personal contribution/name/role questions, an additional scoped recall retrieves user-stated `my name is` records. This is source-linked memory, not a guessed identity or fixed owner profile. Conversation-only scope, acceptance cutoff, correction interpretation and deletion still apply. Retained identity text guides passage selection but does not rewrite the user's original question.
+
+The configured real model was tested with the owner's actual PDF and a prior name statement in a separate temporary conversation. The initial contribution question and page-44 follow-up both returned the correct author's section with citations; explicit-name follow-up also passed. Without a prior name, the model asked which author rather than claiming the document lacked the contribution. Raw document/run captures remain ignored locally; synthetic scope/deletion/page regressions are committed. All 171 local tests, type checking, lint and build pass. Earlier wrong answers remain immutable history; ask again to use the repaired retrieval path.
+
 ## Current-revision release checks
 
 Commit 09caa5e passed all six GitHub Actions jobs: Windows, Linux and macOS install/tests/build, plus Chromium, Firefox and WebKit browser checks (https://github.com/somuai/katha/actions/runs/43341910381). The owner reports reviewing both retrospective evidence reports; this confirms owner review, not a current-code accuracy certification.

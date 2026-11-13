@@ -1204,6 +1204,38 @@ export function createKatha(options: KathaOptions) {
       let local: Source[] = recalled.sources.filter(
         (s) => s.id !== own.id && s.kind !== "web",
       );
+      const identityHints: string[] = [];
+      if (
+        !historical &&
+        /\b(my (?:name|contributions?|role|identity)|who am i|about me|what did i (?:do|build|contribute))\b/i.test(
+          input.text,
+        )
+      ) {
+        const identity = await recall(
+          {
+            text: "my name is",
+            conversationId: scope,
+            limit: 5,
+            asOf: row.created_at,
+          },
+          {
+            cutoff: row.cutoff,
+            chatSeq: { id: input.conversationId, seq: row.seq },
+            ownId: own.id,
+          },
+        );
+        valid();
+        const stated = identity.sources.filter(
+          (s) =>
+            s.kind === "message" &&
+            s.role === "user" &&
+            /\bmy name is\b/i.test(s.interpretation || s.content),
+        );
+        for (const source of stated.slice(0, 3)) {
+          identityHints.push(source.interpretation || source.content);
+          if (!local.some((s) => s.id === source.id)) local.unshift(source);
+        }
+      }
       // Date-specific questions about what was asked refer to original user
       // messages, rather than every attachment or unrelated answer on that day.
       if (
@@ -1270,13 +1302,13 @@ export function createKatha(options: KathaOptions) {
       if (
         !historical &&
         !input.attachmentIds?.length &&
-        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet)\b/i.test(
+        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet|pages?|contributions?|role)\b/i.test(
           input.text,
         )
       ) {
         const prior = db
           .prepare(
-            "SELECT input_json FROM turns WHERE conversation_id=? AND seq<? AND status='COMPLETED' ORDER BY seq DESC LIMIT 10",
+            "SELECT input_json FROM turns WHERE conversation_id=? AND seq<? AND status='COMPLETED' AND json_array_length(json_extract(input_json,'$.attachmentIds'))>0 ORDER BY seq DESC LIMIT 1",
           )
           .all(input.conversationId, row.seq) as { input_json: string }[];
         const previous = prior
@@ -1677,13 +1709,18 @@ export function createKatha(options: KathaOptions) {
       const result = await withQuota(() =>
         options.model!.generate({
           question: input.text,
+          retrievalHint: identityHints.join(" "),
           history,
           baseline: local,
           timezone: input.timezone,
           now: row.created_at,
           evidence: [...local, ...web].map((s) => ({
             ...s,
-            content: selectPassages(s.content, input.text, 1800),
+            content: selectPassages(
+              s.content,
+              input.text + " " + identityHints.join(" "),
+              1800,
+            ),
           })),
           verification,
           signal: controller.signal,

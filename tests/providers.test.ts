@@ -1,6 +1,81 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProviders } from "../src/providers/index.ts";
+test("model quota retry uses bounded provider guidance when Retry-After is absent", async () => {
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => 1000,
+    fetcher: (async () =>
+      Response.json(
+        { error: { message: "Rate limit reached. Please try again in 1.5s." } },
+        { status: 429 },
+      )) as typeof fetch,
+  });
+  await assert.rejects(
+    p.answer({ question: "A question" }),
+    (e: any) => e.code === "RATE_LIMIT" && e.retryAt === 2500,
+  );
+});
+test("compact price responses bind quotes to retained sources and reject unknown references", async () => {
+  let reference = "old";
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => Date.now() + 100000,
+    fetcher: (async () =>
+      Response.json({
+        usage: { total_tokens: 10 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Unverified",
+                citations: [],
+                comparisons: [
+                  {
+                    claim: "Price",
+                    status: "UNVERIFIED",
+                    baselineSourceIds: [],
+                    evidenceIds: [],
+                    explanation: "Only one offer",
+                    baselinePrice: [
+                      "Core",
+                      20,
+                      "USD",
+                      "US",
+                      "month",
+                      20,
+                      "per_seat",
+                      "unlimited contacts",
+                      "excluded",
+                      reference,
+                    ],
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      })) as typeof fetch,
+  });
+  const input = {
+    question: "Check the offer",
+    baseline: [
+      {
+        id: "old",
+        title: "Old",
+        text: "Located passage: Exact retained offer text",
+        sourceText: "Exact retained offer text",
+        observedAt: "2026-11-09",
+      },
+    ],
+  };
+  assert.equal(
+    (await p.answer(input)).comparisons[0].baselinePrice?.sourceQuote,
+    "Exact retained offer text",
+  );
+  reference = "invented";
+  await assert.rejects(p.answer(input), { code: "INVALID_CITATION" });
+});
 test("structured extraction selects model-supported reasoning controls and never returns reasoning text", async () => {
   for (const model of ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"]) {
     let request: any;

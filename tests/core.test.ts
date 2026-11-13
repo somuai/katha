@@ -44,6 +44,109 @@ const wait = async (app: any, id: string) => {
   }
   throw new Error("Turn did not terminate");
 };
+test("contribution retrieval uses user-stated cross-chat identity only within the selected memory scope", async () => {
+  const { app, cleanup } = setup({
+    model: {
+      generate: async (c: any) => {
+        if (!/contribution/.test(c.question)) return { answer: "Remembered" };
+        const file = c.evidence.find((s: any) => s.title === "team.pdf");
+        if (c.retrievalHint?.includes("Alia Das")) {
+          assert.match(file.content, /Alia led architecture/);
+          assert.doesNotMatch(file.content, /Bo wrote docs/);
+          return { answer: "Alia led architecture" };
+        }
+        return { answer: "Which student are you?" };
+      },
+    },
+  });
+  try {
+    const old = await app.workspace.createConversation();
+    const remembered = await app.turns.start({
+      conversationId: old.id,
+      clientRequestId: "name",
+      expectedTailId: null,
+      text: "my name is Alia Das remember it",
+    });
+    await wait(app, remembered.turnId);
+    const file = await app.evidence.import({
+      name: "team.pdf",
+      content:
+        "[Page 44]\nStudent: Alia Das Roll number: 1 Contribution: Alia led architecture.\n\n[Page 45]\nStudent: Bo Sen Roll number: 2 Contribution: Bo wrote docs.",
+    });
+    const chat = await app.workspace.createConversation();
+    const ask = async (
+      request: string,
+      memoryScope: "workspace" | "conversation",
+    ) => {
+      const current = await app.workspace.getConversation(chat.id);
+      const receipt = await app.turns.start({
+        conversationId: chat.id,
+        clientRequestId: request,
+        expectedTailId: current.tailId,
+        text: "What is my contribution?",
+        attachmentIds: [file.sourceId],
+        memoryScope,
+      });
+      return wait(app, receipt.turnId);
+    };
+    assert.match(
+      (await ask("global", "workspace")).answer,
+      /Alia led architecture/,
+    );
+    assert.match((await ask("scoped", "conversation")).answer, /Which student/);
+    const identity = (
+      await app.workspace.getConversation(old.id)
+    ).messages.find(
+      (s: any) =>
+        s.kind === "message" &&
+        s.role === "user" &&
+        s.content.includes("my name is Alia"),
+    );
+    assert.ok(identity);
+    await app.evidence.trash(identity.id);
+    assert.match((await ask("deleted", "workspace")).answer, /Which student/);
+  } finally {
+    cleanup();
+  }
+});
+test("a page-only follow-up reaches the uploaded PDF after more than ten intervening turns", async () => {
+  const { app, cleanup } = setup({
+    model: {
+      generate: async (c: any) => {
+        if (c.question !== "Page 44") return { answer: "Acknowledged" };
+        const file = c.evidence.find((s: any) => s.title === "report.pdf");
+        assert.ok(file, "The original attachment must remain available");
+        assert.match(file.content, /Alia led architecture/);
+        assert.doesNotMatch(file.content, /Bo wrote documentation/);
+        return { answer: file.content, citations: [{ sourceId: file.id }] };
+      },
+    },
+  });
+  try {
+    const file = await app.evidence.import({
+      name: "report.pdf",
+      mimeType: "application/pdf",
+      content:
+        "[Page 44]\nAlia led architecture.\n\n[Page 45]\nBo wrote documentation.",
+    });
+    const chat = await app.workspace.createConversation();
+    for (let i = 0; i < 14; i++) {
+      const current = await app.workspace.getConversation(chat.id);
+      const receipt = await app.turns.start({
+        conversationId: chat.id,
+        clientRequestId: `page-${i}`,
+        expectedTailId: current.tailId,
+        text: i === 13 ? "Page 44" : `Unrelated remark ${i}`,
+        attachmentIds: i === 0 ? [file.sourceId] : [],
+      });
+      const turn = await wait(app, receipt.turnId);
+      assert.equal(turn.status, "COMPLETED");
+      if (i === 13) assert.match(turn.answer, /Alia led architecture/);
+    }
+  } finally {
+    cleanup();
+  }
+});
 test("supported conflicting current offers remain conflicting without a fictitious single current amount", async () => {
   const offer = (amount: number) => ({
     plan: "Core",

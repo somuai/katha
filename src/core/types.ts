@@ -111,6 +111,7 @@ export interface SearchAdapter {
   ): Promise<SearchResult[]>;
 }
 export interface ModelContext {
+  retrievalHint?: string;
   question: string;
   history: Source[];
   evidence: Source[];
