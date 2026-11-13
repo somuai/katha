@@ -1,6 +1,9 @@
 import { parse } from "csv-parse/sync";
 // Derived locally from the complete retained CSV; malformed or unsafe values are not guessed.
-export function summarizeCsv(text: string, question: string) {
+export function prepareCsvEvidence(
+  text: string,
+  question: string,
+): { summary: string; excerpt: string } | undefined {
   try {
     const rows: string[][] = parse(text, {
       skip_empty_lines: true,
@@ -15,7 +18,12 @@ export function summarizeCsv(text: string, question: string) {
       normalizedHeaders.some((h) => !h) ||
       new Set(normalizedHeaders).size !== headers.length
     )
-      return "CSV column names are blank or duplicated; named-column calculations are ambiguous. Ask for distinct column names before computing a sum.";
+      return {
+        summary:
+          "CSV column names are blank or duplicated; named-column calculations are ambiguous. Ask for distinct column names before computing a sum.",
+        excerpt:
+          "Original CSV retained; ambiguous columns are not assigned meanings.",
+      };
     const terms = (
       question.toLowerCase().match(/[\p{L}\p{N}_-]{3,}/gu) || []
     ).filter(
@@ -145,6 +153,7 @@ export function summarizeCsv(text: string, question: string) {
       .slice(0, 5);
     const lines = [
       `Complete CSV: ${data.length} data rows. Exact numeric sums and low-cardinality counts below are computed across all rows; other analyses may require more evidence.`,
+      `CSV structure parsed successfully: ${data.reduce((count, row) => count + row.filter((cell) => !cell.trim()).length, 0)} blank cells across all data rows. Excerpt omission is not an incomplete source row.`,
       ...scoped,
       ...matched.map(
         (row) =>
@@ -162,7 +171,22 @@ export function summarizeCsv(text: string, question: string) {
     }
     if (included.length < lines.length)
       included.push("Additional summary fields were omitted due to size.");
-    return included.join("\n");
+    const selected = matched.length ? matched : data.slice(0, 3);
+    let excerpt =
+      "Parsed CSV excerpt with complete rows; other rows remain retained and are not shown here.\n";
+    const columnLine = `Columns: ${JSON.stringify(headers)}`;
+    if (excerpt.length + columnLine.length > 650)
+      return {
+        summary: included.join("\n"),
+        excerpt:
+          "CSV original retained; column header exceeds the excerpt budget. Use the explicit computed summary only.",
+      };
+    excerpt += columnLine;
+    for (const row of selected) {
+      const line = `\nRow: ${JSON.stringify(row)}`;
+      if (excerpt.length + line.length <= 650) excerpt += line;
+    }
+    return { summary: included.join("\n"), excerpt };
   } catch {
     return undefined;
   }

@@ -1,4 +1,4 @@
-import { summarizeCsv } from "../core/csv-summary.js";
+import { prepareCsvEvidence } from "../core/csv-summary.js";
 import { explicitOfferAnswer } from "./explicit-offers.js";
 import { completePriceTerms, currencyAmountPattern } from "../core/pricing.js";
 import { resolveDate } from "../core/temporal.js";
@@ -296,11 +296,13 @@ export function createProviders(options: ProviderOptions = {}) {
       baseline: input.baseline?.slice(0, 8).map((e) => ({
         ...e,
         sourceText: undefined,
-        text: selectPassages(
-          e.text,
-          input.question + " " + (input.retrievalHint || ""),
-          700,
-        ),
+        text: e.csvSummary
+          ? e.text
+          : selectPassages(
+              e.text,
+              input.question + " " + (input.retrievalHint || ""),
+              700,
+            ),
       })),
       evidence: diverseEvidence(input).map((e) => ({
         ...e,
@@ -927,49 +929,53 @@ export function createKathaAdapters(options: ProviderOptions = {}) {
   const asEvidence = (
     source: import("../core/types.ts").Source,
     currentQuestion: string,
-  ): Evidence => ({
-    id: source.id,
-    title: source.title,
-    sourceText: source.interpretation || source.content,
-    ...(source.title.toLowerCase().endsWith(".csv")
-      ? {
-          csvSummary: summarizeCsv(
-            source.interpretation || source.content,
-            currentQuestion,
-          ),
-        }
-      : {}),
-    text:
-      (source.kind === "correction"
-        ? `Correction lineage: target=${source.metadata.targetId}, mode=${source.metadata.mode}, effectiveAt=${source.metadata.effectiveAt}. `
-        : "") +
-      (/\[Page\s+\d+\]/.test(source.content)
-        ? source.interpretation || source.content
-        : source.interpretation && source.interpretation !== source.content
-          ? `Effective interpretation: ${source.interpretation}\nCorrection source IDs: ${(source.interpretationSourceIds || []).join(", ")}`
-          : source.matches?.length
-            ? source.matches
-                .map(
-                  (m) =>
-                    `Located passage (tokens ${m.startToken}–${m.endToken}): ${m.text}`,
-                )
-                .join("\n")
-            : source.content),
-    observedAt:
-      typeof source.metadata.observedAt === "string"
-        ? source.metadata.observedAt
-        : source.recordedAt,
-    url:
-      typeof source.metadata.url === "string" ? source.metadata.url : undefined,
-    publishedAt:
-      typeof source.metadata.publishedAt === "string"
-        ? source.metadata.publishedAt
-        : undefined,
-    query:
-      typeof source.metadata.query === "string"
-        ? source.metadata.query
-        : undefined,
-  });
+  ): Evidence => {
+    const table = source.title.toLowerCase().endsWith(".csv")
+      ? prepareCsvEvidence(
+          source.interpretation || source.content,
+          currentQuestion,
+        )
+      : undefined;
+    return {
+      id: source.id,
+      title: source.title,
+      sourceText: source.interpretation || source.content,
+      ...(table ? { csvSummary: table.summary } : {}),
+      text: table
+        ? table.excerpt
+        : (source.kind === "correction"
+            ? `Correction lineage: target=${source.metadata.targetId}, mode=${source.metadata.mode}, effectiveAt=${source.metadata.effectiveAt}. `
+            : "") +
+          (/\[Page\s+\d+\]/.test(source.content)
+            ? source.interpretation || source.content
+            : source.interpretation && source.interpretation !== source.content
+              ? `Effective interpretation: ${source.interpretation}\nCorrection source IDs: ${(source.interpretationSourceIds || []).join(", ")}`
+              : source.matches?.length
+                ? source.matches
+                    .map(
+                      (m) =>
+                        `Located passage (tokens ${m.startToken}–${m.endToken}): ${m.text}`,
+                    )
+                    .join("\n")
+                : source.content),
+      observedAt:
+        typeof source.metadata.observedAt === "string"
+          ? source.metadata.observedAt
+          : source.recordedAt,
+      url:
+        typeof source.metadata.url === "string"
+          ? source.metadata.url
+          : undefined,
+      publishedAt:
+        typeof source.metadata.publishedAt === "string"
+          ? source.metadata.publishedAt
+          : undefined,
+      query:
+        typeof source.metadata.query === "string"
+          ? source.metadata.query
+          : undefined,
+    };
+  };
   const input = (c: import("../core/types.ts").ModelContext): ModelInput => ({
     question: c.question,
     retrievalHint: c.retrievalHint,

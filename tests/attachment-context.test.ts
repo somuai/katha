@@ -45,7 +45,9 @@ async function inspectPreparedContext(
             {
               message: {
                 content: JSON.stringify({
-                  text: evidence.csvSummary || evidence.text,
+                  text: evidence.csvSummary
+                    ? evidence.csvSummary + "\n" + evidence.text
+                    : evidence.text,
                   citations: [citation],
                   comparisons: [],
                 }),
@@ -225,4 +227,19 @@ test("a collective project question is not mistaken for an ambiguous individual 
   );
   assert.match(answer, /bounded memory gateway/);
   assert.doesNotMatch(answer, /Ask their name/);
+});
+
+test("complete CSV rows disclose zero missing cells and distinguish omitted excerpts from malformed data", async () => {
+  const csv =
+    "customer,amount\n" +
+    Array.from({ length: 120 }, (_, i) => `Customer${i + 1},0.10`).join("\n");
+  const answer = await inspectPreparedContext(
+    "crm.csv",
+    csv,
+    "Recommend next steps from this CRM CSV.",
+  );
+  assert.match(answer, /0 blank cells/);
+  assert.match(answer, /complete rows/i);
+  assert.match(answer, /Customer1/);
+  assert.doesNotMatch(answer, /Customer77/);
 });
