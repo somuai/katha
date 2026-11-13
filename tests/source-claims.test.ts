@@ -149,3 +149,12 @@ test("documentation states that is an attributed quotation and cannot bypass val
   assert.equal(turn.status, "FAILED");
   assert.equal(turn.answer, "");
 });
+
+test("a cited quotation does not need an attribution prefix to be checked", async () => {
+  const turn = await ask("Explain my work from this report.", (id) => ({
+    text: `“I designed every component without anyone's help.” [${id}]`,
+    citations: [id],
+  }));
+  assert.equal(turn.status, "FAILED");
+  assert.equal(turn.answer, "");
+});

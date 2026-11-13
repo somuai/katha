@@ -40,6 +40,9 @@ export function unsupportedSourceQuotes(
     const quote = match[1] || match[2];
     if (
       explicit ||
+      /^\s*(?:\[[0-9a-f-]{36}\]|【[0-9a-f-]{36}】)/i.test(
+        prose.slice(match.index! + match[0].length),
+      ) ||
       attributed(prose.slice(Math.max(0, match.index! - 160), match.index))
     )
       quotes.push(quote);
@@ -47,6 +50,9 @@ export function unsupportedSourceQuotes(
   for (const match of prose.matchAll(/(?:^|\n)((?:>[^\n]*(?:\n|$))+)/g))
     if (
       explicit ||
+      /^\s*(?:\[[0-9a-f-]{36}\]|【[0-9a-f-]{36}】)/i.test(
+        prose.slice(match.index! + match[0].length),
+      ) ||
       attributed(prose.slice(Math.max(0, match.index! - 160), match.index))
     )
       quotes.push(match[1].replace(/^>\s?/gm, ""));
