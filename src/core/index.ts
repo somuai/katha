@@ -4,6 +4,7 @@ import { selectPassages, documentNamedPeople } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
 import {
   comparePrices,
+  currencyAmountPattern,
   priceHasNumericSupport,
   supportedPriceConflict,
 } from "./pricing.js";
@@ -1973,114 +1974,175 @@ export function createKatha(options: KathaOptions) {
         "CONFLICTING",
         "UNVERIFIED",
       ]);
-      const comparisons = (verification ? result.comparisons || [] : []).map(
-        (c) => {
-          const baseline = (c.baselineSourceIds || []).filter((x) =>
-              local.some((s) => s.id === x),
-            ),
-            evidenceIds = (c.evidenceSourceIds || []).filter((x) =>
-              web.some((s) => s.id === x),
-            );
-          let status = c.status;
-          if (!statuses.has(status) || !baseline.length || !evidenceIds.length)
-            status = "UNVERIFIED";
-          if (
-            status === "CHANGED_WITH_DATED_EVIDENCE" &&
-            !web.some((s) => {
-              const passage = c.effectiveDateEvidence;
-              const explicitDate =
-                passage &&
-                passage.sourceId === s.id &&
-                typeof passage.quote === "string" &&
-                passage.quote.length >= 12 &&
-                s.content.includes(passage.quote) &&
-                typeof c.effectiveAt === "string" &&
-                effectiveDateInQuote(c.effectiveAt, passage.quote)
-                  ? c.effectiveAt
-                  : null;
-              const when = Date.parse(
-                String(s.metadata.effectiveAt || explicitDate || ""),
-              );
-              return (
-                evidenceIds.includes(s.id) &&
-                Number.isFinite(when) &&
-                when <= Date.parse(now()) &&
-                (!window || when >= Date.parse(window.from))
-              );
-            })
-          )
-            status = "DIFFERS_CHANGE_TIME_UNKNOWN";
-          let priceCheck;
-          const priceClaim =
-            /\b(price|pricing|cost|per seat|billing)\b|[$€£₹]/i.test(c.claim) ||
-            c.baselinePrice ||
-            c.currentPrice;
-          let explanation = c.explanation;
-          if (priceClaim) {
-            priceCheck = comparePrices(c.baselinePrice, c.currentPrice);
-            const baselineTexts = local
-              .filter((s) => baseline.includes(s.id))
-              .map((s) => s.interpretation || s.content);
-            const currentTexts = web
-              .filter((s) => evidenceIds.includes(s.id))
-              .map((s) => s.content);
-            if (
-              status === "CONFLICTING" &&
-              supportedPriceConflict(c.currentAlternatives, currentTexts)
-            ) {
-              priceCheck = {
-                comparable: false,
-                reason:
-                  "Conflicting like-for-like current offers are each supported by retained evidence.",
-              };
-              explanation = priceCheck.reason;
-            } else if (!priceCheck.comparable) {
-              status = "UNVERIFIED";
-              explanation = priceCheck.reason;
-            } else if (
-              !baselineTexts.some((text) =>
-                priceHasNumericSupport(c.baselinePrice!, text),
-              ) ||
-              !currentTexts.some((text) =>
-                priceHasNumericSupport(c.currentPrice!, text),
-              )
-            ) {
-              status = "UNVERIFIED";
-              explanation =
-                "Extracted commercial terms are not supported by the linked source text.";
-            } else if (
-              priceCheck.equal &&
-              [
-                "DIFFERS_CHANGE_TIME_UNKNOWN",
-                "CHANGED_WITH_DATED_EVIDENCE",
-              ].includes(status)
-            ) {
-              status = "CONFLICTING";
-              explanation =
-                "The extracted like-for-like prices are equal but the generated comparison claims a change.";
-            } else if (!priceCheck.equal && status === "CURRENTLY_MATCHES") {
-              status = "DIFFERS_CHANGE_TIME_UNKNOWN";
-              explanation =
-                "Like-for-like amounts differ; the time of change is not established.";
+      const comparisons: Comparison[] = (
+        verification ? result.comparisons || [] : []
+      ).map((c) => {
+        const baseline = (c.baselineSourceIds || []).filter((x) =>
+            local.some((s) => s.id === x),
+          ),
+          evidenceIds = (c.evidenceSourceIds || []).filter((x) =>
+            web.some((s) => s.id === x),
+          );
+        let status = c.status;
+        let explanation = c.explanation;
+        let establishedAt: string | undefined;
+        let establishedProof: typeof c.effectiveDateEvidence;
+        if (!statuses.has(status) || !baseline.length || !evidenceIds.length) {
+          status = "UNVERIFIED";
+          explanation =
+            "No linked historical and current passages established this comparison. Inspect the retained sources; the change remains unverified.";
+        }
+        if (status === "CHANGED_WITH_DATED_EVIDENCE") {
+          const supported = web.some((s) => {
+            const passage = c.effectiveDateEvidence;
+            const explicitDate =
+              passage &&
+              passage.sourceId === s.id &&
+              typeof passage.quote === "string" &&
+              passage.quote.length >= 12 &&
+              s.content.includes(passage.quote) &&
+              typeof c.effectiveAt === "string" &&
+              effectiveDateInQuote(c.effectiveAt, passage.quote)
+                ? c.effectiveAt
+                : undefined;
+            const date =
+              explicitDate ||
+              (typeof s.metadata.effectiveAt === "string"
+                ? s.metadata.effectiveAt
+                : undefined);
+            const when = Date.parse(date || "");
+            const validDate =
+              evidenceIds.includes(s.id) &&
+              Number.isFinite(when) &&
+              when <= Date.parse(now()) &&
+              (!window || when >= Date.parse(window.from));
+            if (validDate) {
+              establishedAt = date;
+              establishedProof = explicitDate ? passage : undefined;
             }
+            return validDate;
+          });
+          if (!supported) {
+            status = "DIFFERS_CHANGE_TIME_UNKNOWN";
+            explanation =
+              "A difference was reported, but no validated effective-date passage established when it changed within the requested window.";
           }
-          return {
-            ...c,
-            status,
-            explanation,
-            ...(priceCheck ? { priceCheck } : {}),
-            baselineSourceIds: baseline,
-            evidenceSourceIds: evidenceIds,
-          };
-        },
-      );
+        }
+        let priceCheck;
+        const priceClaim =
+          /\b(price|pricing|cost|per seat|billing)\b|[$€£₹]/i.test(c.claim) ||
+          c.baselinePrice ||
+          c.currentPrice;
+        if (priceClaim) {
+          priceCheck = comparePrices(c.baselinePrice, c.currentPrice);
+          const baselineTexts = local
+            .filter((s) => baseline.includes(s.id))
+            .map((s) => s.interpretation || s.content);
+          const currentTexts = web
+            .filter((s) => evidenceIds.includes(s.id))
+            .map((s) => s.content);
+          if (
+            status === "CONFLICTING" &&
+            supportedPriceConflict(c.currentAlternatives, currentTexts)
+          ) {
+            priceCheck = {
+              comparable: false,
+              reason:
+                "Conflicting like-for-like current offers are each supported by retained evidence.",
+            };
+            explanation = priceCheck.reason;
+          } else if (!priceCheck.comparable) {
+            status = "UNVERIFIED";
+            explanation = priceCheck.reason;
+          } else if (
+            !baselineTexts.some((text) =>
+              priceHasNumericSupport(c.baselinePrice!, text),
+            ) ||
+            !currentTexts.some((text) =>
+              priceHasNumericSupport(c.currentPrice!, text),
+            )
+          ) {
+            status = "UNVERIFIED";
+            explanation =
+              "Extracted commercial terms are not supported by the linked source text.";
+          } else if (
+            priceCheck.equal &&
+            [
+              "DIFFERS_CHANGE_TIME_UNKNOWN",
+              "CHANGED_WITH_DATED_EVIDENCE",
+            ].includes(status)
+          ) {
+            status = "CONFLICTING";
+            explanation =
+              "The extracted like-for-like prices are equal but the generated comparison claims a change.";
+          } else if (!priceCheck.equal && status === "CURRENTLY_MATCHES") {
+            status = "DIFFERS_CHANGE_TIME_UNKNOWN";
+            explanation =
+              "Like-for-like amounts differ; the time of change is not established.";
+          }
+        }
+        if (
+          status === "CHANGED_WITH_DATED_EVIDENCE" &&
+          priceClaim &&
+          c.effectiveDateEvidence
+        ) {
+          const terms = c.currentPrice;
+          const pattern =
+            terms && currencyAmountPattern(terms.currency, terms.amount);
+          const relevantDate =
+            establishedProof &&
+            terms &&
+            establishedProof.quote
+              .split(/[.!?;](?!\d)|\n/)
+              .some(
+                (clause) =>
+                  effectiveDateInQuote(establishedAt!, clause) &&
+                  clause
+                    .toLowerCase()
+                    .replace(/[*_`]/g, "")
+                    .includes(terms.plan.toLowerCase().replace(/[*_`]/g, "")) &&
+                  pattern?.test(clause),
+              );
+          if (!relevantDate) {
+            status = "DIFFERS_CHANGE_TIME_UNKNOWN";
+            explanation =
+              "The prices differ, but the supplied dated passage does not establish this plan and amount's effective date. An unrelated release date cannot date a price change.";
+          }
+        }
+        return {
+          ...c,
+          status,
+          explanation,
+          effectiveAt:
+            status === "CHANGED_WITH_DATED_EVIDENCE"
+              ? establishedAt
+              : undefined,
+          effectiveDateEvidence:
+            status === "CHANGED_WITH_DATED_EVIDENCE"
+              ? establishedProof
+              : undefined,
+          ...(priceCheck ? { priceCheck } : {}),
+          baselineSourceIds: baseline,
+          evidenceSourceIds: evidenceIds,
+        };
+      });
+      if (verification && historical && web.length && !comparisons.length) {
+        comparisons.push({
+          claim: "Requested historical verification",
+          status: "UNVERIFIED",
+          baselineSourceIds: local.map((s) => s.id),
+          evidenceSourceIds: web.map((s) => s.id),
+          explanation:
+            "No structured comparison was established for the historical record. Retained sources are available, but I cannot claim a change or stability from this answer.",
+        });
+      }
       if (verification && !web.length && !sourcesOnly) {
         comparisons.forEach((c) => (c.status = "UNVERIFIED"));
         result.answer =
           "I could not obtain current web evidence, so I cannot establish what changed. " +
           result.answer;
       }
-      if (verification && comparisons.some((c) => c.priceCheck)) {
+      if (verification && comparisons.length) {
         result.answer = comparisons
           .map(
             (c) =>

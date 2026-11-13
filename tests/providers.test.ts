@@ -1543,3 +1543,55 @@ test("per-vendor assessment labels come from the host scope, not a model's gener
     ["Alder: Export capabilities", "Birch: Export capabilities"],
   );
 });
+
+test("a release comparison can repair a missing historical evidence link without inventing a baseline", async () => {
+  let attempt = 0,
+    clock = Date.now();
+  const quote = "Effective 2026-11-12, Alder now supports CSV export.";
+  const p = createProviders({
+    groqKey: "fixture",
+    clock: () => (clock += 10000),
+    fetcher: (async () =>
+      Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "CSV export was added.",
+                citations: ["web"],
+                comparisons: [
+                  {
+                    claim: "Alder releases",
+                    status: "CHANGED_WITH_DATED_EVIDENCE",
+                    explanation: "The baseline supported JSON only.",
+                    baselineSourceIds: attempt++ ? ["old"] : [],
+                    evidenceIds: ["web"],
+                    effectiveAt: "2026-11-12",
+                    effectiveDateEvidence: { sourceId: "web", quote },
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      })) as typeof fetch,
+  });
+  const answer = await p.answer({
+    question: "Has Alder shipped new features since Monday?",
+    now: "2026-11-13",
+    baseline: [
+      {
+        id: "old",
+        title: "Monday",
+        text: "Alder supports JSON only.",
+        observedAt: "2026-11-09",
+      },
+    ],
+    evidence: [
+      { id: "web", title: "Release", text: quote, observedAt: "2026-11-13" },
+    ],
+  });
+  assert.equal(answer.comparisons[0].status, "CHANGED_WITH_DATED_EVIDENCE");
+  assert.deepEqual(answer.comparisons[0].baselineSourceIds, ["old"]);
+});

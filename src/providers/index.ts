@@ -605,6 +605,23 @@ export function createProviders(options: ProviderOptions = {}) {
         "The model's attributed quotation did not match the retained source. Please inspect the original or retry.",
       );
     }
+    const missingComparisonLinks =
+      !!input.baseline?.length &&
+      !!input.evidence?.length &&
+      data.comparisons.some(
+        (c: any) =>
+          c &&
+          (c.status !== "UNVERIFIED" ||
+            /\bbaseline\b/i.test(String(c.explanation || ""))) &&
+          (!c.baselineSourceIds?.length || !c.evidenceIds?.length),
+      );
+    if (allowRepair && missingComparisonLinks)
+      return queueRepair(
+        repairKey,
+        input,
+        usage,
+        `Evidence-link repair: the comparison refers to historical/current facts without linking both records. Allowed historical IDs: ${JSON.stringify(input.baseline!.map((s) => s.id))}; allowed current IDs: ${JSON.stringify(input.evidence!.map((s) => s.id))}. Link only passages that actually support the comparison. If no historical passage supports a baseline claim, remove that unsupported claim and use UNVERIFIED with the actual gap. Preserve the effective date and exact supporting quote when established. Do not invent records or upgrade unsupported conclusions.`,
+      );
     let invalidComparison = false;
     const hydratePrice = (value: any) => {
       if (
@@ -688,11 +705,14 @@ export function createProviders(options: ProviderOptions = {}) {
             "The generated comparison could not be validated. Retry or inspect the retained sources.",
         };
       }
-      if (
-        c.status !== "UNVERIFIED" &&
-        (!c.evidenceIds?.length || !c.baselineSourceIds?.length)
-      )
+      if (!c.evidenceIds?.length || !c.baselineSourceIds?.length) {
+        if (c.status !== "UNVERIFIED" || /\bbaseline\b/i.test(c.explanation)) {
+          invalidComparison = true;
+          c.explanation =
+            "No linked historical and current passages established this comparison. Inspect the retained evidence; the change remains unverified.";
+        }
         c.status = "UNVERIFIED";
+      }
       c.baselinePrice = hydratePrice(c.baselinePrice);
       c.currentPrice = hydratePrice(c.currentPrice);
       if (Array.isArray(c.currentAlternatives))
