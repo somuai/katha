@@ -14,6 +14,7 @@ if (!process.argv.includes("--run-live")) {
   process.exit(0);
 }
 if (!process.env.GROQ_API_KEY) throw new Error("Configured Groq key required.");
+const withReleases = process.argv.includes("--with-releases");
 const stamp = new Date().toISOString();
 const directory = await mkdtemp(join(tmpdir(), "katha-known-price-"));
 const names = ["AsterCRM", "BerylCRM", "CedarCRM", "DuneCRM", "ElmCRM"];
@@ -34,6 +35,9 @@ const fixtures: SearchResult[] = names.map((name, i) => ({
   content: [
     "SYNTHETIC CONTROLLED EVIDENCE. Not a real vendor or live website.",
     terms(name, currentAmounts[i]),
+    withReleases
+      ? `Effective 2026-11-12, ${name} now supports CSV export; before that, ${name} supported JSON export only.`
+      : "",
     i === 0
       ? `Effective 2026-11-10, ${name} Core changes from USD 10 to USD 12 per seat per month.`
       : "",
@@ -170,7 +174,7 @@ try {
     baselineSources.push(
       await app.evidence.import({
         name: `${names[i]} Monday offer`,
-        content: `SYNTHETIC historical offer retained on 2026-11-09.\n${terms(names[i], baselineAmounts[i])}`,
+        content: `SYNTHETIC historical offer retained on 2026-11-09.\n${terms(names[i], baselineAmounts[i])}${withReleases ? `\n${names[i]} supports JSON export only.` : ""}`,
         occurredAt: "2026-11-09",
         timezone: "UTC",
       }),
@@ -179,11 +183,13 @@ try {
   seeding = false;
   result = await ask(
     chat.id,
-    `On Monday we shortlisted ${names.slice(0, -1).join(", ")} and ${names.at(-1)}. Has pricing changed since? Compare all five individually using the controlled current evidence and retained Monday offers. Give exact commercial terms and effective-date support where available. The fixture vendors are invented; do not use outside knowledge.`,
+    `On Monday we shortlisted ${names.slice(0, -1).join(", ")} and ${names.at(-1)}. Has pricing changed ${withReleases ? "or shipped anything big " : ""}since? Compare all five individually using the controlled current evidence and retained Monday offers. Give exact commercial terms and effective-date support where available. The fixture vendors are invented; do not use outside knowledge.`,
   );
 } finally {
   await mkdir("data/evaluations", { recursive: true });
-  const destination = "data/evaluations/synthetic-known-price.json";
+  const destination = withReleases
+    ? "data/evaluations/synthetic-price-and-release.json"
+    : "data/evaluations/synthetic-known-price.json";
   try {
     await copyFile(
       destination,
@@ -217,7 +223,21 @@ try {
       deterministicComparisonProvided: model.some(
         (c: any) => c.extractionMethod === "explicit-offer-parser",
       ),
-      expectedStatusMatched: final.some((c) => c.status === expected[i]),
+      expectedStatusMatched: final.some(
+        (c) =>
+          c.status === expected[i] &&
+          (!withReleases || c.extractionMethod === "explicit-offer-parser"),
+      ),
+      ...(withReleases
+        ? {
+            releaseStatusMatched: final.some(
+              (c) =>
+                c.extractionMethod !== "explicit-offer-parser" &&
+                c.status === "CHANGED_WITH_DATED_EVIDENCE" &&
+                c.effectiveAt === "2026-11-12",
+            ),
+          }
+        : {}),
       final,
     };
   });
@@ -225,6 +245,8 @@ try {
     destination,
     JSON.stringify(
       {
+        withReleases,
+        generationCalls: calls.filter((c: any) => c.kind === "generate").length,
         controlledSharedEvidence: true,
         liveWeb: false,
         realModel: wireContexts.length > 0,
