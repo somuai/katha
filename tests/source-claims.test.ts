@@ -140,3 +140,12 @@ test("a persistently omitted requested citation fails rather than claiming cited
   assert.equal(turn.answer, "");
   assert.match(turn.error || "", /citation/i);
 });
+
+test("documentation states that is an attributed quotation and cannot bypass validation", async () => {
+  const turn = await ask("Explain the uploaded project.", (id) => ({
+    text: `The documentation states that “I led the project and launched it to a million customers.” [${id}]`,
+    citations: [id],
+  }));
+  assert.equal(turn.status, "FAILED");
+  assert.equal(turn.answer, "");
+});

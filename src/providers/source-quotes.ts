@@ -24,7 +24,7 @@ export function unsupportedSourceQuotes(
     );
   const prose = text.replace(/```[\s\S]*?```/g, "");
   const attributed = (prefix: string) =>
-    /\b(?:(?:the|this|your|my|our)\s+)?(?:report|document|source|record|file|pdf|author)\s+(?:says?|said|states?|reads?|wrote|recorded)\s*[:,—-]?\s*$/i.test(
+    /\b(?:(?:the|this|your|my|our)\s+)?(?:report|document|documentation|source|record|file|pdf|author)\s+(?:says?|said|states?|reads?|wrote|recorded)(?:\s+that)?\s*[:,—-]?\s*$/i.test(
       prefix,
     ) ||
     /\b(?:your|my|our)\s+contribution\s+(?:was|is)\s*[:,—-]?\s*$/i.test(
