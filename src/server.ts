@@ -43,8 +43,13 @@ app.addHook("onRequest", async (req, reply) => {
 registerHttpLimits(app);
 app.setErrorHandler((e: any, req, reply) => {
   if (e.retryAfter) reply.header("Retry-After", String(e.retryAfter));
+  if (e.code === "RATE_LIMIT" && Number.isFinite(e.retryAt))
+    reply.header(
+      "Retry-After",
+      String(Math.max(1, Math.ceil((e.retryAt - Date.now()) / 1000))),
+    );
   reply
-    .code(e.status || e.statusCode || 400)
+    .code(e.status || e.statusCode || (e.code === "RATE_LIMIT" ? 429 : 400))
     .send({ error: e.message, code: e.code || "REQUEST_FAILED" });
 });
 app.get("/api/workspace", async () => ({
@@ -142,7 +147,12 @@ app.post("/api/sources", async (req) => {
     part.filename,
     part.mimetype,
     { providers },
-  );
+  ).catch((error: any) => {
+    if (error.code === "RATE_LIMIT")
+      error.message =
+        "File processing is temporarily rate limited. No file was imported; retry after the indicated cooldown.";
+    throw error;
+  });
   const fields = part.fields as any;
   const date = fields.occurredAt?.value;
   const originalPath = path.join(directory, "uploads", randomUUID());

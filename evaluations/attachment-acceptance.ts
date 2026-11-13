@@ -74,15 +74,26 @@ async function api(
   return value;
 }
 async function upload(name: string, mime: string, bytes: Uint8Array) {
-  const form = new FormData();
-  form.append("file", new Blob([bytes as BlobPart], { type: mime }), name);
-  const response = await fetch(base + "/api/sources", {
-    method: "POST",
-    body: form,
-  });
-  const value: any = await response.json();
-  if (!response.ok)
+  let value: any;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const form = new FormData();
+    form.append("file", new Blob([bytes as BlobPart], { type: mime }), name);
+    const response = await fetch(base + "/api/sources", {
+      method: "POST",
+      body: form,
+    });
+    value = await response.json();
+    if (response.ok) break;
+    const delay = Number(response.headers.get("retry-after"));
+    if (response.status === 429 && attempt < 2 && delay > 0 && delay <= 60) {
+      console.log(
+        JSON.stringify({ event: "upload-quota-wait", name, seconds: delay }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay * 1000));
+      continue;
+    }
     throw Error(`Upload ${name}: ${response.status} ${value.error}`);
+  }
   const source = value.source;
   uploads.push({
     name,
