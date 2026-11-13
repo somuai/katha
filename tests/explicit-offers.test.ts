@@ -111,3 +111,15 @@ test("incomplete, mixed-region, historical and future offers do not become false
     "DIFFERS_CHANGE_TIME_UNKNOWN",
   );
 });
+
+test("monthly display prices billed annually do not use the explicit monthly-offer path", () => {
+  assert.equal(
+    explicitOfferAnswer(
+      input(
+        "Acme",
+        line("Acme", 20).replace("billed monthly", "billed annually"),
+      ),
+    ),
+    undefined,
+  );
+});

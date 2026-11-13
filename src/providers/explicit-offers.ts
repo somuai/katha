@@ -28,6 +28,18 @@ function offers(sources: Evidence[]): Offer[] {
       /([A-Za-z][A-Za-z0-9 .&/-]{0,99})(?::\s*|\s+costs\s+)([A-Z]{3})\s*(\d+(?:\.\d{1,2})?)\s+per seat per (month|year)\b([^\n]{0,400}?)\btax\s+(included|excluded)\b\.?/g;
     for (const match of raw.matchAll(pattern)) {
       const tail = match[5];
+      // A monthly display price with an annual commitment is not a monthly
+      // subscription. The compact price model cannot represent both dimensions.
+      const billsYearly =
+        /\bbilled\s+(?:annually|yearly|(?:per\s+)?year)\b/i.test(tail);
+      const billsMonthly = /\bbilled\s+(?:monthly|(?:per\s+)?month)\b/i.test(
+        tail,
+      );
+      if (
+        (match[4] === "month" && billsYearly) ||
+        (match[4] === "year" && billsMonthly)
+      )
+        continue;
       const regions = [
         ...[...tail.matchAll(/\bregion\s*[:=]?\s*(US|IN|EU|CA|GB)\b/gi)].map(
           (m) => m[1].toUpperCase(),
