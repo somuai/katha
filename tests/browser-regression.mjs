@@ -149,6 +149,49 @@ try {
     .getByText("Hello Katha", { exact: true })
     .waitFor();
   await page.keyboard.press("Escape");
+  const workspaceBeforeRetry = await (
+    await context.request.get(base + "/api/workspace")
+  ).json();
+  const retryChat = workspaceBeforeRetry.conversations[0];
+  const parent = await (
+    await context.request.get(base + "/api/turns/" + retryChat.tailId)
+  ).json();
+  assert.equal(
+    parent.status,
+    "PARTIAL",
+    "Missing inference is visibly partial",
+  );
+  // Reopen persisted history so this does not depend on an in-memory last request.
+  await page.getByRole("button", { name: "New chat", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Conversations", exact: true })
+    .click();
+  await page
+    .locator(".history-item")
+    .filter({ hasText: retryChat.title })
+    .click();
+  await page
+    .getByRole("button", { name: "Retry this question", exact: true })
+    .click();
+  await page
+    .getByText("Editing a retry · Send creates a new linked turn.")
+    .waitFor();
+  assert.equal(
+    await page.getByRole("textbox", { name: "Message Katha" }).inputValue(),
+    "Hello Katha",
+  );
+  const retryResponse = page.waitForResponse(
+    (r) => r.request().method() === "POST" && r.url().endsWith("/turns"),
+  );
+  await page.getByRole("button", { name: "Send message" }).click();
+  const receipt = await (await retryResponse).json();
+  assert.notEqual(receipt.turnId, parent.id);
+  const linked = await (
+    await context.request.get(base + "/api/turns/" + receipt.turnId)
+  ).json();
+  assert.equal(linked.retryOf, parent.id);
+  assert.deepEqual(linked.attachmentIds, parent.attachmentIds);
+  await page.getByText("Retried question", { exact: true }).waitFor();
   await page.screenshot({ path: "qa/conversation-reference.png" });
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 812 });
@@ -178,6 +221,7 @@ try {
       "assertion correction",
       "original preservation",
       "typed turn",
+      "persisted linked retry with attachments",
       "keyboard Escape",
       "responsive overflow",
       "reduced motion",

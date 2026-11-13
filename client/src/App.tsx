@@ -126,6 +126,8 @@ export default function App() {
     [recording, setRecording] = useState(false),
     [transcribing, setTranscribing] = useState(false),
     [jump, setJump] = useState(false);
+  const [retryOf, setRetryOf] = useState<string | undefined>();
+  const lastAcceptedTurn = useRef<string | null>(null);
   const lastSubmitted = useRef(""),
     requestDraft = useRef<{
       fingerprint: string;
@@ -174,6 +176,10 @@ export default function App() {
   }, [drawer]);
   function newChat() {
     if (busy) return;
+    setRetryOf(undefined);
+    requestDraft.current = null;
+    lastAcceptedTurn.current = null;
+    lastSubmitted.current = "";
     setChat(null);
     setMessages([]);
     setEvidence([]);
@@ -188,15 +194,75 @@ export default function App() {
     if (busy) return;
     try {
       const data = await api("/api/conversations/" + c.id);
-      setChat(data.conversation || c);
+      const selected = data.conversation || c;
+      setChat(selected);
+      setRetryOf(undefined);
+      requestDraft.current = null;
+      lastAcceptedTurn.current = selected.tailId || null;
+      lastSubmitted.current = "";
+      setDraft("");
+      setAttachments([]);
+      setStream("");
       setMessages(data.messages || []);
       setEvidence([]);
       setAudit(null);
       setDrawer(false);
       setError("");
       setJump(false);
+      if (selected.tailId) {
+        const snapshot = await api("/api/turns/" + selected.tailId);
+        if (
+          ![
+            "COMPLETED",
+            "PARTIAL",
+            "FAILED",
+            "CANCELLED",
+            "INTERRUPTED",
+          ].includes(snapshot.status)
+        ) {
+          setBusy(true);
+          setTurn(snapshot.id);
+          setStream(snapshot.answer || "");
+          setStatus(snapshot.status);
+          watch(snapshot.id, selected);
+        }
+      }
     } catch (e: any) {
       setError(e.message);
+    }
+  }
+  async function prepareRetry(id: string) {
+    if (busy) return;
+    try {
+      const original = await api("/api/turns/" + id);
+      if (!original.originalInputAvailable)
+        throw Error("Restore the original question before retrying.");
+      if (
+        ![
+          "COMPLETED",
+          "PARTIAL",
+          "FAILED",
+          "CANCELLED",
+          "INTERRUPTED",
+        ].includes(original.status)
+      )
+        throw Error("Stop or finish the original turn before retrying.");
+      const files = await Promise.all(
+        (original.attachmentIds || []).map((sourceId: string) =>
+          api("/api/sources/" + sourceId),
+        ),
+      );
+      if (files.some((file: Item) => file.deletedAt || file.invalidated))
+        throw Error("Restore the original attachments before retrying.");
+      setDraft(original.text || "");
+      setAttachments(files);
+      setScope(original.memoryScope || "workspace");
+      setRetryOf(id);
+      requestDraft.current = null;
+      setError("");
+      field.current?.focus();
+    } catch (error: any) {
+      setError(error.message);
     }
   }
   async function inspect(id: string) {
@@ -262,7 +328,7 @@ export default function App() {
           kind = data.type || data.kind || raw.type,
           payload = data.data || data;
         if (kind === "snapshot") {
-          setStream(payload.answer || payload.text || "");
+          setStream(payload.answer || "");
           setStatus(payload.status || "");
           if (payload.sources) setEvidence(payload.sources);
           if (
@@ -400,6 +466,7 @@ export default function App() {
         text,
         used.map((a) => a.id),
         scope,
+        retryOf,
       ]);
       if (requestDraft.current?.fingerprint !== fingerprint)
         requestDraft.current = {
@@ -427,11 +494,14 @@ export default function App() {
             sourceIds: used.map((a) => a.id),
             attachmentIds: used.map((a) => a.id),
             memoryScope: scope,
+            retryOf,
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           }),
         },
       );
       requestDraft.current = null;
+      lastAcceptedTurn.current = response.turnId || response.id;
+      setRetryOf(undefined);
       setDraft("");
       setAttachments([]);
       setTurn(response.turnId || response.id);
@@ -811,6 +881,26 @@ export default function App() {
                         Original & corrections
                       </button>
                     )}
+                    {m.role === "user" && m.retryOf && (
+                      <span className="record-inspect">Retried question</span>
+                    )}
+                    {m.role === "user" &&
+                      m.turnId &&
+                      [
+                        "FAILED",
+                        "PARTIAL",
+                        "CANCELLED",
+                        "INTERRUPTED",
+                      ].includes(m.status || "") && (
+                        <button
+                          type="button"
+                          className="record-inspect"
+                          disabled={busy}
+                          onClick={() => prepareRetry(m.turnId)}
+                        >
+                          Retry this question
+                        </button>
+                      )}
                     {m.attachments?.length > 0 && (
                       <div className="attached-files">
                         {m.attachments.map((a: Item) => (
@@ -913,6 +1003,18 @@ export default function App() {
           )}
           <div className="composer-wrap">
             <form className="composer" onSubmit={send}>
+              {retryOf && (
+                <div className="input-status" role="status">
+                  Editing a retry · Send creates a new linked turn.
+                  <button
+                    type="button"
+                    className="record-inspect"
+                    onClick={() => setRetryOf(undefined)}
+                  >
+                    Send as a new question instead
+                  </button>
+                </div>
+              )}
               {attachments.length > 0 && (
                 <div className="file-chips">
                   {attachments.map((a) => (
@@ -1191,9 +1293,15 @@ export default function App() {
                         type="button"
                         className="retry-draft"
                         onClick={() => {
-                          setDraft(lastSubmitted.current);
-                          setError("");
-                          field.current?.focus();
+                          if (
+                            !requestDraft.current &&
+                            lastAcceptedTurn.current
+                          ) {
+                            void prepareRetry(lastAcceptedTurn.current);
+                          } else {
+                            setError("");
+                            field.current?.focus();
+                          }
                         }}
                       >
                         Edit & retry ↗

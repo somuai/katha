@@ -49,3 +49,9 @@ Turn traces retain reported planning and generation tokens separately and togeth
 - Reliability and cost: terminal failures, abstentions, evidence coverage, token usage, search attempts and cache reuse.
 
 The 13 November controlled shared-evidence review passes its numerical 90% supported-claim threshold (60/61) under a coding-agent rubric; task completion is 34/40. This is neither independent certification nor production answer accuracy. See docs/evaluations/final-shared-evidence-review.md for all failures and scope.
+
+## Workspace ownership and retries
+
+A workspace has one lifetime SQLite owner connection. Exclusive locking is acquired before migrations or restart recovery, so a second Katha process cannot mark the first process's active turns interrupted. Competing connections (including read-only database inspectors) receive a workspace-in-use error; use Katha's read APIs while it runs, or stop it before inspecting SQLite directly. This targets local filesystems. No network request holds a database transaction. Process termination releases OS locks; startup recovery preserves committed inputs and marks unfinished turns interrupted without automatically repeating provider calls.
+
+A deliberate retry creates a fresh turn with a retained `retryOf` link, current acceptance cutoff and a new request identity. The UI restores eligible original attachments for review before sending. Active/foreign parents and removed original questions are rejected. Replaying the same accepted request remains idempotent, even if its parent's availability later changes. Reopening an active conversation reattaches its observer; it does not restart execution.

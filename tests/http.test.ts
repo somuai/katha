@@ -136,7 +136,8 @@ test("HTTP persists a turn and exposes complete replay without configured provid
     ).then((r) => r.text());
     assert.match(stream, /'?complete'?/);
     const snapshot = await api(`/api/turns/${t.turnId}`);
-    assert.equal(snapshot.status, "COMPLETED");
+    assert.equal(snapshot.status, "PARTIAL");
+    assert.equal(snapshot.trace.modelFallback.generatedAnswer, false);
     const chat = await api(`/api/conversations/${c.id}`);
     assert.equal(chat.messages.filter((m: any) => m.role === "user").length, 1);
   } finally {

@@ -83,6 +83,11 @@ export interface TurnEvent {
   createdAt: string;
 }
 export interface TurnSnapshot {
+  retryOf?: string;
+  originalInputAvailable?: boolean;
+  attachmentIds?: string[];
+  memoryScope?: "workspace" | "conversation";
+  timezone?: string;
   id: string;
   conversationId: string;
   status: TurnStatus;

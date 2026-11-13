@@ -9,8 +9,7 @@ import {
   supportedPriceConflict,
 } from "./pricing.js";
 import { seedAssertions } from "./assertions.js";
-import { migrate } from "./migrations.js";
-import Database from "better-sqlite3";
+import { openWorkspaceDatabase } from "./database.js";
 import { randomUUID, createHash } from "node:crypto";
 import { mkdirSync, writeFileSync, unlinkSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -65,18 +64,8 @@ const terms = (text: string) =>
 export function createKatha(options: KathaOptions) {
   mkdirSync(options.directory, { recursive: true });
   mkdirSync(join(options.directory, "sources"), { recursive: true });
-  const db = new Database(join(options.directory, "katha.sqlite"));
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
-  db.pragma("synchronous = FULL");
-  db.pragma("busy_timeout = 3000");
-  try {
-    migrate(db);
-  } catch (error) {
-    db.close();
-    throw error;
-  }
   const now = () => iso(options.clock?.() || new Date());
+  const db = openWorkspaceDatabase(options.directory, now);
   const epoch = () =>
     Number(
       (db.prepare("SELECT value FROM meta WHERE key='epoch'").get() as any)
@@ -122,9 +111,6 @@ export function createKatha(options: KathaOptions) {
     );
     event(id, "status", { status, error });
   };
-  db.prepare(
-    "UPDATE turns SET status='INTERRUPTED',error='The process stopped before this turn completed.',updated_at=? WHERE status NOT IN ('COMPLETED','PARTIAL','FAILED','CANCELLED','INTERRUPTED')",
-  ).run(now());
   function source(row: any): Source {
     return {
       id: row.id,
@@ -309,7 +295,6 @@ export function createKatha(options: KathaOptions) {
     }
   }
   // A process crash cannot leave enrichment permanently marked running.
-  db.prepare("UPDATE jobs SET status='pending' WHERE status='running'").run();
   function eligibleSql(
     q: RecallQuery,
     cutoff?: number,
@@ -617,10 +602,14 @@ export function createKatha(options: KathaOptions) {
         messages: (
           db
             .prepare(
-              "SELECT s.*,t.status FROM sources s LEFT JOIN turns t ON t.id=s.turn_id WHERE s.conversation_id=? AND s.kind='message' AND s.deleted_at IS NULL ORDER BY s.ordinal",
+              "SELECT s.*,t.status,json_extract(t.input_json,'$.retryOf') AS retry_of FROM sources s LEFT JOIN turns t ON t.id=s.turn_id WHERE s.conversation_id=? AND s.kind='message' AND s.deleted_at IS NULL ORDER BY s.ordinal",
             )
             .all(id) as any[]
-        ).map((r) => ({ ...source(r), status: r.status })),
+        ).map((r) => ({
+          ...source(r),
+          status: r.status,
+          retryOf: r.retry_of || undefined,
+        })),
       };
     },
     async renameConversation(id: string, title: string) {
@@ -943,11 +932,24 @@ export function createKatha(options: KathaOptions) {
     const row = db.prepare("SELECT * FROM turns WHERE id=?").get(id) as any;
     if (!row) throw new KathaError("TURN_NOT_FOUND", "Turn not found.", 404);
     const ids = JSON.parse(row.source_ids_json) as string[];
+    const input = JSON.parse(row.input_json) as TurnInput;
+    const original = db
+      .prepare(
+        "SELECT * FROM sources WHERE turn_id=? AND role='user' AND kind='message'",
+      )
+      .get(id) as any;
+    const available =
+      !!original && !original.deleted_at && !original.invalidated;
     return {
       id: row.id,
       conversationId: row.conversation_id,
       status: row.status,
-      text: JSON.parse(row.input_json).text,
+      text: available ? original.content : "",
+      originalInputAvailable: available,
+      retryOf: input.retryOf,
+      attachmentIds: input.attachmentIds || [],
+      memoryScope: input.memoryScope || "workspace",
+      timezone: input.timezone || "UTC",
       answer: row.answer,
       error: row.error,
       createdAt: row.created_at,
@@ -1925,13 +1927,23 @@ export function createKatha(options: KathaOptions) {
               .map((s) => `**${s.title}**\n${compact(s.content, 600)}`)
               .join("\n\n")
           : "Your message is saved. Add GROQ_API_KEY for model-based answers and TAVILY_API_KEY for live web verification. Historical date recall and your retained sources remain available.";
-        update(id, { answer });
+        update(id, {
+          answer,
+          trace: {
+            ...getTurn(id).trace,
+            modelFallback: {
+              generatedAnswer: false,
+              reasonCode: "MODEL_UNCONFIGURED",
+              mode: "retained-evidence-only",
+            },
+          },
+        });
         saveAnswer(
           id,
           answer,
           local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
         );
-        setStatus(id, "COMPLETED");
+        setStatus(id, "PARTIAL");
         event(id, "complete", getTurn(id));
         return;
       }
@@ -2545,6 +2557,33 @@ export function createKatha(options: KathaOptions) {
             "This conversation changed in another tab. Reload and review it.",
             409,
           );
+        if (input.retryOf !== undefined) {
+          if (typeof input.retryOf !== "string" || !input.retryOf.trim())
+            throw new KathaError(
+              "INVALID_RETRY",
+              "Select an original turn to retry.",
+            );
+          const parent = db
+            .prepare("SELECT conversation_id,status FROM turns WHERE id=?")
+            .get(input.retryOf) as any;
+          if (!parent || parent.conversation_id !== input.conversationId)
+            throw new KathaError(
+              "INVALID_RETRY",
+              "The original turn must belong to this conversation.",
+            );
+          if (!TERMINAL.has(parent.status))
+            throw new KathaError(
+              "RETRY_NOT_AVAILABLE",
+              "Stop or finish the original turn before retrying.",
+              409,
+            );
+          if (!getTurn(input.retryOf).originalInputAvailable)
+            throw new KathaError(
+              "RETRY_SOURCE_DELETED",
+              "Restore the original question before retrying.",
+              409,
+            );
+        }
         for (const attachmentId of input.attachmentIds || []) {
           const s = requireSource(attachmentId);
           if (s.deleted_at || s.invalidated)
