@@ -1,6 +1,60 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProviders } from "../src/providers/index.ts";
+test("per-vendor comparison retains completed work across a quota retry", async () => {
+  let time = 1000;
+  const questions: string[] = [];
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async (_url, init) => {
+      const body = JSON.parse(String(init?.body));
+      const question = JSON.parse(body.messages[1].content).question;
+      questions.push(question);
+      time += 2000;
+      if (questions.length === 2)
+        return Response.json(
+          { error: { message: "Temporary capacity" } },
+          { status: 429, headers: { "Retry-After": "1" } },
+        );
+      return Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: question.includes("ONLY Alder")
+                  ? "Alder checked"
+                  : "Birch checked",
+                citations: [],
+                comparisons: [],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const input = {
+    question: "We shortlisted Alder and Birch. Has anything changed?",
+    evidence: ["Alder", "Birch"].map((title) => ({
+      id: title,
+      title,
+      text: `${title} current evidence`,
+      observedAt: "2026-11-13",
+    })),
+  };
+  await assert.rejects(p.answer(input), { code: "RATE_LIMIT" });
+  time += 60000;
+  const answer = await p.answer(input);
+  assert.equal(questions.length, 3);
+  assert.ok(questions[0].includes("ONLY Alder"));
+  assert.ok(
+    questions[1].includes("ONLY Birch") && questions[2].includes("ONLY Birch"),
+  );
+  assert.match(answer.text, /Alder checked/);
+  assert.match(answer.text, /Birch checked/);
+});
 test("a request that exceeds the provider's fixed allowance fails without a futile quota wait", async () => {
   const p = createProviders({
     groqKey: "test",

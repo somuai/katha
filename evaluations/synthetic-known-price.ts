@@ -192,7 +192,9 @@ try {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
-  const generated = calls.find((c: any) => c.kind === "generate") as any;
+  const generated = [...calls]
+    .reverse()
+    .find((c: any) => c.kind === "generate" && c.output) as any;
   const coverage = names.map((vendor, i) => {
     const model =
       generated?.output?.comparisons?.filter((c: any) =>

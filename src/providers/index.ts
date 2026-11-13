@@ -317,7 +317,80 @@ export function createProviders(options: ProviderOptions = {}) {
         typeof data.clarification === "string" ? data.clarification : undefined,
     };
   }
+  const comparisonBatches = new Map<
+    string,
+    { at: number; answers: Answer[] }
+  >();
   async function answer(input: ModelInput): Promise<Answer> {
+    const group = [input.question, ...(input.baseline || []).map((e) => e.text)]
+      .map(
+        (text) =>
+          text.match(
+            /\bshortlisted\s+([^.!?\n]+?)(?=\s+for\b|[.!?\n]|$)/i,
+          )?.[1],
+      )
+      .find(Boolean);
+    const names = [
+      ...new Set(
+        group
+          ?.split(/\s*,\s*|\s+and\s+/i)
+          .map((name) => name.trim())
+          .filter((name) => /^[A-Z][A-Za-z0-9 .&-]{0,35}$/.test(name)) || [],
+      ),
+    ];
+    if (names.length < 2 || names.length > 10 || !input.evidence?.length)
+      return answerOne(input);
+    // Completed entity assessments survive a quota retry of this same turn.
+    // They are disposable: a process restart explicitly interrupts the turn.
+    const key = createHash("sha256")
+      .update(JSON.stringify({ ...input, signal: undefined }))
+      .digest("hex");
+    for (const [id, batch] of comparisonBatches)
+      if (now() - batch.at > 300000) comparisonBatches.delete(id);
+    if (!comparisonBatches.has(key) && comparisonBatches.size >= 32)
+      comparisonBatches.delete(comparisonBatches.keys().next().value!);
+    const batch = comparisonBatches.get(key) || { at: now(), answers: [] };
+    comparisonBatches.set(key, batch);
+    try {
+      for (let i = batch.answers.length; i < names.length; i++) {
+        input.signal?.throwIfAborted();
+        const name = names[i];
+        const relevant = (e: Evidence) =>
+          `${e.title} ${e.text} ${e.query || ""}`
+            .toLowerCase()
+            .includes(name.toLowerCase());
+        batch.answers.push(
+          await answerOne({
+            ...input,
+            question: `Assess ONLY ${name}. Request: ${input.question.replace(group!, name)}. Return one individual comparison for ${name}; other vendors are handled separately.`,
+            baseline: input.baseline?.filter(relevant),
+            evidence: input.evidence.filter(relevant),
+          }),
+        );
+      }
+      comparisonBatches.delete(key);
+      return {
+        text: batch.answers.map((a) => a.text).join("\n\n"),
+        citations: [...new Set(batch.answers.flatMap((a) => a.citations))],
+        comparisons: batch.answers.flatMap((a) => a.comparisons),
+        usage: {
+          inputTokens: batch.answers.reduce(
+            (sum, a) => sum + (a.usage?.inputTokens || 0),
+            0,
+          ),
+          outputTokens: batch.answers.reduce(
+            (sum, a) => sum + (a.usage?.outputTokens || 0),
+            0,
+          ),
+        },
+      };
+    } catch (error) {
+      if (!(error instanceof ProviderError) || error.code !== "RATE_LIMIT")
+        comparisonBatches.delete(key);
+      throw error;
+    }
+  }
+  async function answerOne(input: ModelInput): Promise<Answer> {
     const { data, usage } = await model(
       [
         {
