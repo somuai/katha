@@ -136,7 +136,9 @@ async function ask(
       pass: !pattern.test(turn.answer),
     })),
   ];
+  const evidenceOnly = !!turn.trace?.modelFallback;
   const passed =
+    !evidenceOnly &&
     ["COMPLETED", "PARTIAL"].includes(turn.status) &&
     !!turn.answer.trim() &&
     assertions.every((a) => a.pass);
@@ -147,6 +149,7 @@ async function ask(
     error: turn.error,
     answer: turn.answer,
     citations: turn.citations,
+    evidenceOnly,
     assertions,
     passed,
     trace: turn.trace,
@@ -179,6 +182,7 @@ async function save() {
         uploads,
         passed: results.filter((r) => r.passed).length,
         total: results.length,
+        evidenceOnlyResponses: results.filter((r) => r.evidenceOnly).length,
         results,
       },
       null,

@@ -1,3 +1,4 @@
+import { retainedEvidenceResponse } from "./evidence-recovery.js";
 import { selectPassages, documentNamedPeople } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
 import {
@@ -1078,6 +1079,16 @@ export function createKatha(options: KathaOptions) {
     let lastDelta = 0,
       deltaBuffer = "",
       streamed = "";
+    let recoveryContext:
+      | {
+          sources: Source[];
+          question: string;
+          hint: string;
+          verification: boolean;
+          trace: Record<string, unknown>;
+          dependencies: string[];
+        }
+      | undefined;
     async function withQuota<T>(operation: () => Promise<T>): Promise<T> {
       for (let attempt = 0; ; attempt++) {
         try {
@@ -1319,7 +1330,7 @@ export function createKatha(options: KathaOptions) {
       ) {
         const prior = db
           .prepare(
-            "SELECT input_json FROM turns WHERE conversation_id=? AND seq<? AND status='COMPLETED' AND json_array_length(json_extract(input_json,'$.attachmentIds'))>0 ORDER BY seq DESC LIMIT 1",
+            "SELECT input_json FROM turns WHERE conversation_id=? AND seq<? AND status IN ('COMPLETED','PARTIAL','FAILED','CANCELLED','INTERRUPTED') AND json_array_length(json_extract(input_json,'$.attachmentIds'))>0 ORDER BY seq DESC LIMIT 1",
           )
           .all(input.conversationId, row.seq) as { input_json: string }[];
         const previous = prior
@@ -1421,7 +1432,7 @@ export function createKatha(options: KathaOptions) {
         );
         const previous = db
           .prepare(
-            "SELECT trace_json FROM turns WHERE conversation_id=? AND seq<? AND status='COMPLETED' ORDER BY seq DESC LIMIT 1",
+            "SELECT trace_json FROM turns WHERE conversation_id=? AND seq<? AND status IN ('COMPLETED','PARTIAL','FAILED','CANCELLED','INTERRUPTED') ORDER BY seq DESC LIMIT 1",
           )
           .get(input.conversationId, row.seq) as
           { trace_json: string } | undefined;
@@ -1502,6 +1513,14 @@ export function createKatha(options: KathaOptions) {
         }
         trace.documentReferences = references;
       }
+      recoveryContext = {
+        sources: local.filter((s) => s.id !== own.id),
+        question: input.text,
+        hint: retrievalHints.join(" "),
+        verification,
+        trace,
+        dependencies: [...referenceDependencies],
+      };
       let web: Source[] = [],
         searches: any[] = [];
       const sourcesOnly =
@@ -1542,6 +1561,7 @@ export function createKatha(options: KathaOptions) {
           (hasPrivateSources && (!verification || privateRecordQuestion)) ||
           (personalMemory && privateRecordQuestion));
       if (privateFileTask || sourcesOnly) verification = false;
+      if (recoveryContext) recoveryContext.verification = verification;
       let currentQuestion =
         !sourcesOnly &&
         !privateFileTask &&
@@ -2089,6 +2109,94 @@ export function createKatha(options: KathaOptions) {
           const cancelled =
             controller.signal.aborted ||
             (error instanceof KathaError && error.code === "TURN_CANCELLED");
+          const code = (error as { code?: string }).code;
+          if (
+            !cancelled &&
+            epoch() === initialEpoch &&
+            recoveryContext &&
+            [
+              "RATE_LIMIT",
+              "QUOTA_WAIT_EXCEEDED",
+              "MODEL_UNAVAILABLE",
+              "CONTEXT_LIMIT",
+            ].includes(code || "")
+          ) {
+            const eligible = recoveryContext.sources.filter((s) => {
+              const row = db
+                .prepare(
+                  "SELECT version,deleted_at,invalidated FROM sources WHERE id=?",
+                )
+                .get(s.id) as any;
+              return (
+                row &&
+                row.version === s.version &&
+                !row.deleted_at &&
+                !row.invalidated
+              );
+            });
+            const recovery = retainedEvidenceResponse(
+              eligible,
+              recoveryContext.question,
+              recoveryContext.hint,
+              recoveryContext.verification,
+            );
+            if (recovery) {
+              valid();
+              const vendors = shortlistedVendors([
+                recoveryContext.question,
+                ...eligible.map((s) => s.content),
+              ]);
+              const comparisons: Comparison[] = recoveryContext.verification
+                ? (vendors.length >= 2
+                    ? vendors
+                    : [recoveryContext.question]
+                  ).map((claim) => ({
+                    claim:
+                      vendors.length >= 2 ? claim + " verification" : claim,
+                    status: "UNVERIFIED",
+                    baselineSourceIds: recovery.sourceIds,
+                    evidenceSourceIds: [],
+                    explanation:
+                      "The model was unavailable; no comparison was established.",
+                  }))
+                : [];
+              if (recoveryContext.verification && vendors.length >= 2)
+                recoveryContext.trace.vendorCoverage = {
+                  requested: vendors.length,
+                  individuallyCompared: 0,
+                  unresolved: vendors,
+                };
+              update(id, {
+                answer: recovery.answer,
+                citations: recovery.sourceIds.map((sourceId) => ({ sourceId })),
+                sourceIds: recovery.sourceIds,
+                comparisons,
+                trace: {
+                  ...recoveryContext.trace,
+                  modelFallback: {
+                    reasonCode: code,
+                    mode: "retained-evidence-only",
+                    generatedAnswer: false,
+                  },
+                },
+              });
+              saveAnswer(id, recovery.answer, [
+                ...recoveryContext.dependencies,
+                ...eligible
+                  .filter((s) => recovery.sourceIds.includes(s.id))
+                  .flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
+              ]);
+              setStatus(
+                id,
+                "PARTIAL",
+                error instanceof Error
+                  ? error.message
+                  : "The model is unavailable.",
+              );
+              event(id, "complete", getTurn(id));
+              return;
+            }
+          }
           setStatus(
             id,
             cancelled ? "CANCELLED" : "FAILED",

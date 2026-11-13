@@ -72,20 +72,29 @@ try {
   });
   const chat = await app.workspace.createConversation();
   const results = [];
-  for (const [i, question] of [
-    "what's my contribution in this project",
-    "i think its there on page 44",
-    ...(person
-      ? [
-          `what did ${person} do`,
-          "yes what he did in the project",
-          "what were his findings?",
-        ]
-      : []),
-    ...(knownName
-      ? [`My name is ${knownName}. What was my contribution?`]
-      : []),
-  ].entries()) {
+  const personOnly = process.argv.includes("--person-only");
+  if (personOnly && !person) throw Error("--person-only requires --person");
+  const questions = personOnly
+    ? [
+        `what did ${person} do`,
+        "yes what he did in the project",
+        "what were his findings?",
+      ]
+    : [
+        "what's my contribution in this project",
+        "i think its there on page 44",
+        ...(person
+          ? [
+              `what did ${person} do`,
+              "yes what he did in the project",
+              "what were his findings?",
+            ]
+          : []),
+        ...(knownName
+          ? [`My name is ${knownName}. What was my contribution?`]
+          : []),
+      ];
+  for (const [i, question] of questions.entries()) {
     const current = await app.workspace.getConversation(chat.id);
     const receipt = await app.turns.start({
       conversationId: chat.id,
