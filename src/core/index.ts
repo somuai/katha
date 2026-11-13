@@ -1,6 +1,10 @@
 import { selectPassages } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
-import { comparePrices, priceHasNumericSupport } from "./pricing.js";
+import {
+  comparePrices,
+  priceHasNumericSupport,
+  supportedPriceConflict,
+} from "./pricing.js";
 import { seedAssertions } from "./assertions.js";
 import { migrate } from "./migrations.js";
 import Database from "better-sqlite3";
@@ -1784,7 +1788,17 @@ export function createKatha(options: KathaOptions) {
             const currentTexts = web
               .filter((s) => evidenceIds.includes(s.id))
               .map((s) => s.content);
-            if (!priceCheck.comparable) {
+            if (
+              status === "CONFLICTING" &&
+              supportedPriceConflict(c.currentAlternatives, currentTexts)
+            ) {
+              priceCheck = {
+                comparable: false,
+                reason:
+                  "Conflicting like-for-like current offers are each supported by retained evidence.",
+              };
+              explanation = priceCheck.reason;
+            } else if (!priceCheck.comparable) {
               status = "UNVERIFIED";
               explanation = priceCheck.reason;
             } else if (

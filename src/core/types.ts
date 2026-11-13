@@ -51,6 +51,7 @@ export interface Comparison {
   effectiveDateEvidence?: { sourceId: string; quote: string };
   baselinePrice?: PriceTerms;
   currentPrice?: PriceTerms;
+  currentAlternatives?: PriceTerms[];
   priceCheck?: ReturnType<typeof import("./pricing.js").comparePrices>;
   claim: string;
   status: ComparisonStatus;

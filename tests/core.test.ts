@@ -44,6 +44,70 @@ const wait = async (app: any, id: string) => {
   }
   throw new Error("Turn did not terminate");
 };
+test("supported conflicting current offers remain conflicting without a fictitious single current amount", async () => {
+  const offer = (amount: number) => ({
+    plan: "Core",
+    amount,
+    currency: "USD",
+    region: "US",
+    cadence: "month",
+    seats: 20,
+    basis: "per_seat",
+    limits: "unlimited contacts",
+    tax: "excluded",
+    sourceQuote: `Core USD ${amount} per seat per month, US, 20 seats, unlimited contacts, tax excluded.`,
+  });
+  const a = offer(60),
+    b = offer(70);
+  const { app, cleanup } = setup({
+    clock: () => new Date("2026-11-13T12:00:00Z"),
+    search: {
+      search: async () => [
+        {
+          title: "Two current offers",
+          url: "https://example.com/pricing",
+          content: `${a.sourceQuote} ${b.sourceQuote}`,
+        },
+      ],
+    },
+    model: {
+      generate: async (c: any) => ({
+        answer: "Offers conflict.",
+        comparisons: [
+          {
+            claim: "Vendor pricing",
+            status: "CONFLICTING",
+            explanation: "Two current offers disagree.",
+            baselineSourceIds: [c.baseline[0].id],
+            evidenceSourceIds: [
+              c.evidence.find((s: any) => s.kind === "web").id,
+            ],
+            currentAlternatives: [a, b],
+          },
+        ],
+      }),
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Old offer",
+      content: offer(50).sourceQuote,
+      occurredAt: "2026-11-03",
+    });
+    const chat = await app.workspace.createConversation();
+    const r = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "conflict",
+      expectedTailId: null,
+      text: "Has Vendor pricing changed since 3 November?",
+    });
+    const t = await wait(app, r.turnId);
+    assert.equal(t.comparisons[0].status, "CONFLICTING");
+    assert.match(t.answer, /conflicting/i);
+  } finally {
+    cleanup();
+  }
+});
 
 test("pending-turn capacity rejects atomically but allows replay of the accepted request", async () => {
   const { app, cleanup } = setup({

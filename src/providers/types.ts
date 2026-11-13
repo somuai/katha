@@ -30,6 +30,7 @@ export type Comparison = {
   effectiveDateEvidence?: { sourceId: string; quote: string };
   baselinePrice?: PriceTerms;
   currentPrice?: PriceTerms;
+  currentAlternatives?: PriceTerms[];
   claim: string;
   baselineSourceIds: string[];
   evidenceIds: string[];

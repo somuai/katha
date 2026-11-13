@@ -20,7 +20,7 @@ const dimensions = [
   "limits",
   "tax",
 ] as const;
-function valid(value: any): value is PriceTerms {
+export function completePriceTerms(value: any): value is PriceTerms {
   return (
     !!value &&
     typeof value === "object" &&
@@ -44,7 +44,7 @@ function valid(value: any): value is PriceTerms {
   );
 }
 export function comparePrices(baseline: unknown, current: unknown) {
-  if (!valid(baseline) || !valid(current))
+  if (!completePriceTerms(baseline) || !completePriceTerms(current))
     return {
       comparable: false,
       reason:
@@ -73,6 +73,30 @@ export function comparePrices(baseline: unknown, current: unknown) {
     currentMonthlyPerSeat:
       current.cadence === "one_time" ? null : monthlyPerSeat(current),
   };
+}
+export function supportedPriceConflict(
+  alternatives: unknown,
+  texts: string[],
+): boolean {
+  if (
+    !Array.isArray(alternatives) ||
+    alternatives.length < 2 ||
+    alternatives.length > 5 ||
+    !alternatives.every(completePriceTerms)
+  )
+    return false;
+  if (
+    !alternatives.every((offer) =>
+      texts.some((text) => priceHasNumericSupport(offer, text)),
+    )
+  )
+    return false;
+  return alternatives.some((offer, i) =>
+    alternatives.slice(i + 1).some((other) => {
+      const comparison = comparePrices(offer, other);
+      return comparison.comparable && comparison.equal === false;
+    }),
+  );
 }
 // Extracted numbers must at least occur in their linked records. Semantic support still needs review.
 export function priceHasNumericSupport(quote: PriceTerms, text: string) {

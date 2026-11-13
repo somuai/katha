@@ -1,6 +1,118 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProviders } from "../src/providers/index.ts";
+test("structured extraction selects model-supported reasoning controls and never returns reasoning text", async () => {
+  for (const model of ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"]) {
+    let request: any;
+    const p = createProviders({
+      groqKey: "test",
+      model,
+      fetcher: (async (_url, init) => {
+        request = JSON.parse(String(init?.body));
+        return Response.json({
+          choices: [
+            {
+              message: {
+                reasoning: "private reasoning",
+                content: JSON.stringify({
+                  text: "Answer",
+                  citations: [],
+                  comparisons: [],
+                }),
+              },
+            },
+          ],
+        });
+      }) as typeof fetch,
+    });
+    const answer = await p.answer({ question: "A question" });
+    assert.equal(
+      request.reasoning_effort,
+      model.startsWith("qwen") ? "none" : "low",
+    );
+    assert.equal(
+      request.reasoning_format,
+      model.startsWith("qwen") ? "hidden" : undefined,
+    );
+    assert.equal(JSON.stringify(answer).includes("private reasoning"), false);
+  }
+});
+test("incomplete price extraction gets one bounded repair rather than invented terms", async () => {
+  let calls = 0,
+    time = 1000;
+  const terms = (amount: number) => ({
+    plan: "Core",
+    amount,
+    currency: "USD",
+    region: "US",
+    cadence: "month",
+    seats: 20,
+    basis: "per_seat",
+    limits: "unlimited contacts",
+    tax: "excluded",
+    sourceQuote: `USD ${amount} per seat per month, US, 20 seats, unlimited contacts, tax excluded.`,
+  });
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async () => {
+      calls++;
+      time += 2000;
+      if (calls === 2)
+        return Response.json(
+          { error: { message: "Temporary quota" } },
+          { status: 429, headers: { "Retry-After": "1" } },
+        );
+      const comparison = {
+        claim: "Vendor price",
+        status: "DIFFERS_CHANGE_TIME_UNKNOWN",
+        explanation: "Amounts differ.",
+        baselineSourceIds: ["b"],
+        evidenceIds: ["c"],
+        baselinePrice: terms(20),
+        ...(calls > 1 ? { currentPrice: terms(25) } : {}),
+      };
+      return Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Compared",
+                citations: ["b", "c"],
+                comparisons: [comparison],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const input = {
+    question: "Has Vendor price changed?",
+    baseline: [
+      {
+        id: "b",
+        title: "Old",
+        text: terms(20).sourceQuote,
+        observedAt: "2026-11-09",
+      },
+    ],
+    evidence: [
+      {
+        id: "c",
+        title: "New",
+        text: terms(25).sourceQuote,
+        observedAt: "2026-11-13",
+      },
+    ],
+  };
+  await assert.rejects(p.answer(input), { code: "RATE_LIMIT" });
+  time += 60000;
+  const answer = await p.answer(input);
+  assert.equal(calls, 3);
+  assert.equal(answer.comparisons[0].currentPrice?.amount, 25);
+});
 test("per-vendor comparison retains completed work across a quota retry", async () => {
   let time = 1000;
   const questions: string[] = [];
