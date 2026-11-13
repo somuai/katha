@@ -220,3 +220,51 @@ test("a partial file cannot pass without a declared expected case set", () => {
   const r = summarizeEvaluation({ results: [row()] }).models[0];
   assert.equal(r.claimSupportGate, "CASE_SET_UNDECLARED");
 });
+
+test("source-only quota recovery cannot pass the full answer support gate or inflate claims", () => {
+  const report = summarizeEvaluation({
+    expectedCaseIds: ["one"],
+    results: [
+      row({
+        snapshot: {
+          status: "PARTIAL",
+          answer: "Evidence only — not a generated answer.",
+          error: "Quota exhausted",
+          trace: { modelFallback: { generatedAnswer: false } },
+          sources: [{ id: "source-1", content: "Original record" }],
+        },
+      }),
+    ],
+  }).models[0];
+  assert.equal(report.evidenceOnlyCases, 1);
+  assert.equal(report.executionErrorCases, 1);
+  assert.equal(report.taskSuccesses, 0);
+  assert.equal(report.claims.precision, null);
+  assert.equal(report.claimSupportGate, "EXECUTION_LIMITED");
+  assert.equal(report.latency.medianFirstUsefulMs, null);
+});
+test("a failed case cannot disappear behind perfect support on the cases that answered", () => {
+  const report = summarizeEvaluation({
+    expectedCaseIds: ["one", "two"],
+    results: [
+      row(),
+      row({
+        id: "two",
+        snapshot: {
+          status: "FAILED",
+          answer: "",
+          error: "Provider unavailable",
+        },
+        review: {
+          reviewed: true,
+          taskSuccess: false,
+          abstained: false,
+          factualAnswer: false,
+          claims: [],
+        },
+      }),
+    ],
+  }).models[0];
+  assert.equal(report.claims.precision, 1);
+  assert.equal(report.claimSupportGate, "EXECUTION_LIMITED");
+});

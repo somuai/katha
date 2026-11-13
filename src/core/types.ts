@@ -97,6 +97,7 @@ export interface TurnSnapshot {
   trace: Record<string, unknown>;
 }
 export interface SearchResult {
+  extractionMethod?: string;
   title: string;
   url: string;
   content: string;

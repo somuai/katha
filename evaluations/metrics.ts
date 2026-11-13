@@ -13,6 +13,8 @@ export interface EvaluationRow {
   snapshot?: {
     status?: string;
     answer?: string;
+    error?: string | null;
+    trace?: { modelFallback?: { generatedAnswer?: boolean } };
     sources?: { id: string; content?: string }[];
   };
   review?: {
@@ -93,7 +95,9 @@ export function summarizeEvaluation(
       reviewed = 0,
       taskSuccess = 0,
       abstentions = 0,
-      factualAnswerCases = 0;
+      factualAnswerCases = 0,
+      evidenceOnlyCases = 0,
+      executionErrorCases = 0;
     const wall: number[] = [],
       active: number[] = [],
       first: number[] = [],
@@ -105,10 +109,21 @@ export function summarizeEvaluation(
         ["COMPLETED", "PARTIAL"].includes(row.snapshot?.status || "");
       if (completed) executionCompleted++;
       const usable = completed && !!row.snapshot?.answer?.trim();
+      const evidenceOnly =
+        row.snapshot?.trace?.modelFallback?.generatedAnswer === false;
+      if (evidenceOnly) evidenceOnlyCases++;
+      if (
+        row.error ||
+        row.snapshot?.error ||
+        ["FAILED", "CANCELLED", "INTERRUPTED"].includes(
+          row.snapshot?.status || "",
+        )
+      )
+        executionErrorCases++;
       if (finite(row.completionMs)) terminal.push(row.completionMs);
       if (usable) {
         answered++;
-        if (finite(row.completionMs)) {
+        if (!evidenceOnly && finite(row.completionMs)) {
           wall.push(row.completionMs);
           const waiting = row.quotaMs;
           if (finite(waiting) && waiting <= row.completionMs) {
@@ -154,10 +169,10 @@ export function summarizeEvaluation(
         );
       if (!completeReview) continue;
       reviewed++;
-      if (usable && review.taskSuccess) taskSuccess++;
+      if (usable && !evidenceOnly && review.taskSuccess) taskSuccess++;
       if (review.abstained === true) abstentions++;
       // An empty/error result cannot earn factual support through fabricated review claims.
-      if (!usable) continue;
+      if (!usable || evidenceOnly) continue;
       let factual = false;
       for (const claim of review.claims!) {
         counts[claim.verdict as Verdict]++;
@@ -174,13 +189,15 @@ export function summarizeEvaluation(
       ? "INCOMPLETE_RUN"
       : !allReviewsComplete
         ? "NOT_REVIEWED"
-        : precision === null
-          ? "NO_FACTUAL_CLAIMS"
-          : !expectedCaseSetDeclared
-            ? "CASE_SET_UNDECLARED"
-            : precision >= target
-              ? "PASSED"
-              : "BELOW_TARGET";
+        : executionErrorCases || evidenceOnlyCases
+          ? "EXECUTION_LIMITED"
+          : precision === null
+            ? "NO_FACTUAL_CLAIMS"
+            : !expectedCaseSetDeclared
+              ? "CASE_SET_UNDECLARED"
+              : precision >= target
+                ? "PASSED"
+                : "BELOW_TARGET";
     return {
       model,
       expectedCases: expected.length,
@@ -188,6 +205,8 @@ export function summarizeEvaluation(
       missingCaseIds,
       duplicateCaseIds: [...duplicates],
       executionCompleted,
+      executionErrorCases,
+      evidenceOnlyCases,
       answered,
       answerCoverage: expected.length ? answered / expected.length : 0,
       reviewedCases: reviewed,
@@ -222,7 +241,7 @@ export function summarizeEvaluation(
       taskSuccess:
         "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
       latency:
-        "Useful-answer medians exclude failed, cancelled and empty responses; quota waits are reported separately",
+        "Useful-answer medians exclude failed, cancelled, empty and evidence-only fallback responses; quota waits are reported separately",
     },
     models,
   };

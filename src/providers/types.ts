@@ -1,5 +1,6 @@
 import type { PriceTerms } from "../core/pricing.js";
 export type Evidence = {
+  extractionMethod?: string;
   id: string;
   csvSummary?: string;
   title: string;

@@ -1409,6 +1409,28 @@ export function createKatha(options: KathaOptions) {
         trace,
       });
       event(id, "sources", { sources: local });
+      const asksRetainedPast =
+        explicitChatRecall ||
+        /\bwhat\b.{0,100}\b(?:did|have)\s+(?:i|we)\b.{0,60}\b(?:discuss|record|say|decide|shortlist)\b/i.test(
+          input.text,
+        );
+      const asksPersonalFile =
+        /\b(?:summarize|quote|read|analy[sz]e|extract)\b.{0,60}\b(?:my|this|that|attached|uploaded|removed|deleted)\b.{0,60}\b(?:file|pdf|csv|note|report|document|image)\b/i.test(
+          input.text,
+        );
+      if (
+        !historical &&
+        !local.length &&
+        (asksRetainedPast || asksPersonalFile)
+      ) {
+        const answer =
+          "I could not find an eligible retained source for that request. Attach or import the earlier file or notes, or choose another retained source; I cannot reconstruct missing or deleted content.";
+        update(id, { answer, trace: { ...trace, missingBaseline: true } });
+        saveAnswer(id, answer, []);
+        setStatus(id, "COMPLETED");
+        event(id, "complete", getTurn(id));
+        return;
+      }
       if (historical && !local.length) {
         update(id, {
           answer: `I could not find a retained conversation or dated source for ${window!.label}. I cannot reconstruct that history or verify changes without a baseline. You can import the earlier notes and confirm their date.`,
@@ -1772,6 +1794,7 @@ export function createKatha(options: KathaOptions) {
                 publishedAt: result.publishedAt || null,
                 effectiveAt: result.effectiveAt || null,
                 observedAt: result.observedAt,
+                method: result.extractionMethod || "search observation",
                 query: output.query,
                 cached: !!output.cached,
               },

@@ -101,33 +101,63 @@ export function selectPassages(
     ),
   );
   const terms = [
-    ...new Set(question.toLowerCase().match(/[a-z0-9_]+/g) || []),
-  ].filter((t) => t.length > 2 && !stop.has(t));
+    ...new Set(
+      question
+        .replace(/\bsite:\S+/gi, "")
+        .toLowerCase()
+        .match(/[a-z0-9_]+/g) || [],
+    ),
+  ]
+    .filter((t) => t.length > 2 && !stop.has(t))
+    .map((t) => (t.length > 4 && !/ss$/.test(t) ? t.replace(/s$/, "") : t));
   const paragraphs = text
     .split(/\n\s*\n/)
     .flatMap((p) =>
-      p.length > Math.min(1400, limit) ? p.split(/(?<=[.!?])\s+|\n/) : [p],
+      p.length > Math.min(1400, limit) && !/^\s*```/.test(p)
+        ? p.split(/(?<=[.!?])\s+|\n/)
+        : [p],
     )
     .map((p, i) => {
-      const lower = p.toLowerCase(),
+      const lower = p
+          .replace(/\]\([^)]*\)/g, "]")
+          .replace(/https?:\/\/\S+/g, "")
+          .toLowerCase(),
         hits = terms.filter((t) => lower.includes(t)).length;
       const linkDensity = (p.match(/\]\(/g) || []).length;
       return {
         text: p,
+        hits,
         index: i,
         score:
           hits * 8 +
           Math.min(p.length, 400) / 100 -
-          (linkDensity > 3 ? linkDensity * 3 : 0),
+          (linkDensity > 3 ? linkDensity * 3 : 0) -
+          (/^\s*```/.test(p) &&
+          !/\b(code|implement|script|syntax|snippet|write)\b/i.test(question)
+            ? 12
+            : 0),
       };
     })
     .filter((p) => p.text.trim())
     .sort((a, b) => b.score - a.score || a.index - b.index);
   if (!paragraphs.length) return text.slice(0, limit);
+  const relevant = paragraphs.filter((p) => p.hits > 0);
+  const candidates = relevant.length
+    ? paragraphs.filter(
+        (p) =>
+          p.hits > 0 ||
+          (/^\s*(?:however|except|unless|but|although|note|also note)\b/i.test(
+            p.text,
+          ) &&
+            relevant.some((previous) => previous.index === p.index - 1)),
+      )
+    : paragraphs;
   let output = "";
-  for (const p of paragraphs) {
-    if (output.length >= limit) break;
-    output += (output ? "\n\n" : "") + p.text.slice(0, limit - output.length);
+  for (const p of candidates) {
+    const separator = output ? "\n\n" : "";
+    const available = limit - output.length - separator.length;
+    if (available <= 0) break;
+    output += separator + p.text.slice(0, available);
   }
   return output;
 }

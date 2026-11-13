@@ -1310,3 +1310,30 @@ test("generic five-tools follow-up uses the original named list for individual a
     ["Alder", "Birch", "Cedar", "Elm", "Fir"],
   );
 });
+
+test("search retains available page text instead of discarding qualifications behind a short snippet", async () => {
+  const provider = createProviders({
+    tavilyKey: "fixture",
+    fetcher: (async () =>
+      Response.json({
+        results: [
+          {
+            title: "Official isolation documentation",
+            url: "https://example.org/isolation",
+            content: "A SELECT sees committed data.",
+            raw_content:
+              "A SELECT sees committed data. However, it also sees its own earlier uncommitted updates. This exception is essential.",
+          },
+        ],
+      })) as typeof fetch,
+  });
+  const result = await provider.search([
+    { query: "SELECT snapshot isolation" },
+  ]);
+  assert.match(result[0].evidence[0].text, /own earlier uncommitted updates/);
+  assert.match(result[0].evidence[0].text, /However/);
+  assert.equal(
+    result[0].evidence[0].extractionMethod,
+    "query-ranked raw-page excerpt",
+  );
+});

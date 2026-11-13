@@ -19,6 +19,8 @@ Selected attachments (including eligible follow-ups) are promoted ahead of unrel
 
 Explicit/attributed quotations are checked against retained source text (normalizing layout whitespace and apostrophe typography). Unknown citation IDs, omitted explicitly requested citations, and invalid quotations share a maximum of one repair attempt per answer. Invalid repairs fail closed. This is a narrow string/provenance check, not semantic verification of arbitrary prose. It does not certify that a valid citation entails every generated claim.
 
+Search requests ask for page text. When available, a query-ranked raw-page excerpt is retained instead of the shorter search snippet, up to 12,000 characters from a 200,000-character candidate buffer. If raw text is unavailable, the snippet remains explicitly identified. Passage budgets include separators; URL destinations do not score as visible prose, ordinary plural matching is supported, and conceptual questions down-rank incidental code. Source inspectors retain the extraction method. This is bounded evidence selection, not a guarantee that every exception or page detail is present.
+
 ## Inference outages
 
 When inference quota or a model service prevents answering, already-materialized eligible records can be returned as a clearly labelled `PARTIAL` evidence-only response. No model answer or current verification is claimed; the trace records `generatedAnswer: false`. Cancellation and source deletion still take precedence. This does not restore provider capacity or replace model-based recommendations. Upload preparation that is throttled returns HTTP429 and Retry-After without claiming that a file was imported.
@@ -32,6 +34,7 @@ The app is designed for a local workspace. Its admission controls are single-pro
 - Retrieval recall@5: whether the expected original record is among the first five retrieved records.
 - Answer coverage: nonempty completed/partial answers divided by expected cases; execution success alone is not task success.
 - Reviewed task success: reviewer-labelled completion of the actual question, including missing vendors and omissions.
+- Execution limitations: source-only fallback and terminal/provider errors are counted separately; they prevent a passed full-run support gate. Source-only recovery cannot inflate factual-claim support, task success or useful-answer latency.
 - Supported-claim precision: supported factual claims divided by supported, unsupported and unverifiable factual claims; inferences excluded.
 - Review coverage: complete, traceable reviews divided by expected cases. Unreviewed cases remain unreviewed.
 - Latency: first-useful-answer and completion timings; quota waiting reported separately; failed/empty answers excluded from useful-answer latency.

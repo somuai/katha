@@ -113,3 +113,42 @@ for (const scenario of [
     }
   });
 }
+
+test("a deleted private note gets an actionable missing-source explanation rather than a generic refusal", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "katha-deleted-note-"));
+  const app = createKatha({
+    directory,
+    model: {
+      async generate() {
+        return { answer: "I am sorry, I cannot provide that information." };
+      },
+    },
+  });
+  try {
+    const note = await app.evidence.import({
+      name: "crm-note.md",
+      content: "Private shortlist: Alder and Birch.",
+    });
+    await app.evidence.trash(note.sourceId);
+    const chat = await app.workspace.createConversation();
+    const request = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "removed",
+      expectedTailId: null,
+      text: "Summarize my deleted CRM note.",
+    });
+    for await (const event of app.turns.events(request.turnId))
+      if (event.type === "complete") break;
+    const result = await app.turns.get(request.turnId);
+    assert.equal(result.status, "COMPLETED");
+    assert.match(
+      result.answer,
+      /retained (?:file|source)|eligible (?:file|source)/i,
+    );
+    assert.match(result.answer, /attach|import/i);
+    assert.doesNotMatch(result.answer, /Alder|Birch/);
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
