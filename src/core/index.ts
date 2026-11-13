@@ -1,4 +1,4 @@
-import { selectPassages } from "./passages.js";
+import { selectPassages, documentNamedPeople } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
 import {
   comparePrices,
@@ -1170,7 +1170,17 @@ export function createKatha(options: KathaOptions) {
           /\b(observation|snapshot|search failure)\b/i.test(input.text) &&
           /\b(establish|prove|mean)\b/i.test(input.text)
         );
+      const explicitChatRecall =
+        /\bwhat (?:did|have) (?:i|we) (?:ask|say|tell|decide|record|discuss|shortlist|upload|attach)\b|\bwhat (?:was|were) (?:my|our) (?:questions?|decisions?)\b/i.test(
+          input.text,
+        );
+      const fileContentDate =
+        !explicitChatRecall &&
+        /\b(attendance|rows?|columns?|csv|spreadsheet|pdf|document|attached|uploaded)\b/i.test(
+          input.text,
+        );
       const historical =
+        !fileContentDate &&
         !!window &&
         (/\b(what|asked?|said|discuss|shortlist|decid|remember)\b/i.test(
           input.text,
@@ -1190,7 +1200,7 @@ export function createKatha(options: KathaOptions) {
         original: historical,
         asOf: row.created_at,
       };
-      if (window) {
+      if (historical && window) {
         query.from = window.from;
         query.to = window.to;
         query.timeField = "occurred";
@@ -1204,7 +1214,8 @@ export function createKatha(options: KathaOptions) {
       let local: Source[] = recalled.sources.filter(
         (s) => s.id !== own.id && s.kind !== "web",
       );
-      const identityHints: string[] = [];
+      const retrievalHints: string[] = [];
+      const referenceDependencies = new Set<string>();
       if (
         !historical &&
         /\b(my (?:name|contributions?|role|identity)|who am i|about me|what did i (?:do|build|contribute))\b/i.test(
@@ -1232,7 +1243,7 @@ export function createKatha(options: KathaOptions) {
             /\bmy name is\b/i.test(s.interpretation || s.content),
         );
         for (const source of stated.slice(0, 3)) {
-          identityHints.push(source.interpretation || source.content);
+          retrievalHints.push(source.interpretation || source.content);
           if (!local.some((s) => s.id === source.id)) local.unshift(source);
         }
       }
@@ -1302,7 +1313,7 @@ export function createKatha(options: KathaOptions) {
       if (
         !historical &&
         !input.attachmentIds?.length &&
-        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet|pages?|contributions?|role)\b/i.test(
+        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet|pages?|contributions?|role|he|she|his|her|they|their|them)\b/i.test(
           input.text,
         )
       ) {
@@ -1404,6 +1415,93 @@ export function createKatha(options: KathaOptions) {
       )
         .reverse()
         .map(source);
+      if (!historical) {
+        const pronoun = /\b(he|she|his|her|they|their|them)\b/i.test(
+          input.text,
+        );
+        const previous = db
+          .prepare(
+            "SELECT trace_json FROM turns WHERE conversation_id=? AND seq<? AND status='COMPLETED' ORDER BY seq DESC LIMIT 1",
+          )
+          .get(input.conversationId, row.seq) as
+          { trace_json: string } | undefined;
+        const previousRefs = previous
+          ? JSON.parse(previous.trace_json).documentReferences || []
+          : [];
+        const references: {
+          sourceId: string;
+          version: number;
+          names: string[];
+          mentionSourceId: string;
+        }[] = [];
+        const documents = local.filter(
+          (s) => s.kind === "attachment" && /\[Page\s+\d+\]/.test(s.content),
+        );
+        for (const document of documents) {
+          const content = document.interpretation || document.content;
+          let names = documentNamedPeople(content, input.text),
+            mentionSourceId = own.id;
+          if (!names.length && pronoun) {
+            const retained = previousRefs.find(
+              (ref: any) =>
+                ref.sourceId === document.id &&
+                ref.version === document.version &&
+                Array.isArray(ref.names) &&
+                ref.names.length &&
+                ref.names.every(
+                  (name: unknown) =>
+                    typeof name === "string" &&
+                    documentNamedPeople(content, name).includes(name),
+                ),
+            );
+            if (retained) {
+              const mention = db
+                .prepare(
+                  "SELECT s.* FROM sources s LEFT JOIN turns t ON t.id=s.turn_id WHERE s.id=? AND s.conversation_id=? AND s.role='user' AND s.deleted_at IS NULL AND s.invalidated=0 AND (s.ordinal<=? OR (t.seq<? AND t.status='COMPLETED'))",
+                )
+                .get(
+                  retained.mentionSourceId,
+                  input.conversationId,
+                  row.cutoff,
+                  row.seq,
+                ) as any;
+              if (mention) {
+                names = retained.names;
+                mentionSourceId = mention.id;
+              }
+            }
+            if (!names.length)
+              for (const prior of [...history].reverse()) {
+                if (prior.role !== "user") continue;
+                const found = documentNamedPeople(
+                  content,
+                  prior.interpretation || prior.content,
+                );
+                if (found.length) {
+                  names = found;
+                  mentionSourceId = prior.id;
+                  break;
+                }
+              }
+            if (names.length)
+              retrievalHints.push(
+                names.length === 1
+                  ? `Document follow-up about ${names[0]}.`
+                  : `Ambiguous document follow-up: ${names.join(" or ")}. Ask which person.`,
+              );
+          }
+          if (names.length) {
+            references.push({
+              sourceId: document.id,
+              version: document.version,
+              names,
+              mentionSourceId,
+            });
+            referenceDependencies.add(mentionSourceId);
+          }
+        }
+        trace.documentReferences = references;
+      }
       let web: Source[] = [],
         searches: any[] = [];
       const sourcesOnly =
@@ -1713,7 +1811,7 @@ export function createKatha(options: KathaOptions) {
       const result = await withQuota(() =>
         options.model!.generate({
           question: input.text,
-          retrievalHint: identityHints.join(" "),
+          retrievalHint: retrievalHints.join(" "),
           history,
           baseline: local,
           timezone: input.timezone,
@@ -1722,7 +1820,7 @@ export function createKatha(options: KathaOptions) {
             ...s,
             content: selectPassages(
               s.content,
-              input.text + " " + identityHints.join(" "),
+              input.text + " " + retrievalHints.join(" "),
               1800,
             ),
           })),
@@ -1962,6 +2060,7 @@ export function createKatha(options: KathaOptions) {
         trace,
       });
       saveAnswer(id, answer, [
+        ...referenceDependencies,
         ...new Set(
           [...local, ...web].flatMap((s) => [
             s.id,

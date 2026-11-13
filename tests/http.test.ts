@@ -54,6 +54,20 @@ test("HTTP persists a turn and exposes complete replay without configured provid
     };
     const workspace = await api("/api/workspace");
     assert.deepEqual(workspace.conversations, []);
+    const malformed = new FormData();
+    malformed.append(
+      "file",
+      new Blob(["name,amount\nA,1,unexpected\n"], { type: "text/csv" }),
+      "malformed.csv",
+    );
+    const rejected = await fetch(`http://localhost:${port}/api/sources`, {
+      method: "POST",
+      body: malformed,
+    });
+    assert.equal(rejected.status, 400);
+    assert.equal(((await rejected.json()) as any).code, "INVALID_FILE");
+    assert.deepEqual((await api("/api/workspace")).sources, []);
+
     assert.deepEqual((await api("/api/connections")).connections, []);
     const catalog = await api("/api/connections/providers");
     assert.equal(catalog.localWorkspace, true);

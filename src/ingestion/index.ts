@@ -1,3 +1,4 @@
+import { parse } from "csv-parse/sync";
 import { ProviderError, type Providers } from "../providers/index.ts";
 export type ExtractedAttachment = {
   content: string;
@@ -165,6 +166,32 @@ export async function extractAttachment(
       "UNSUPPORTED_FILE",
       "Binary content is not a text document.",
     );
+  const warnings: string[] = [];
+  if (ext === "csv") {
+    let rows: string[][];
+    try {
+      rows = parse(text, {
+        skip_empty_lines: true,
+        relax_column_count: false,
+        bom: true,
+      });
+    } catch {
+      throw new ProviderError(
+        "INVALID_FILE",
+        "The CSV has malformed quoting or inconsistent column counts. Correct the file and upload it again.",
+      );
+    }
+    if (rows.length > 100001 || (rows[0]?.length || 0) > 100)
+      throw new ProviderError(
+        "UPLOAD_LIMIT",
+        "CSV files are limited to 100 columns and 100,000 data rows.",
+      );
+    const headers = (rows[0] || []).map((h) => h.trim().toLowerCase());
+    if (headers.some((h) => !h) || new Set(headers).size !== headers.length)
+      warnings.push(
+        "CSV column names are blank or duplicated; named-column calculations are ambiguous.",
+      );
+  }
   if (ext === "json") {
     try {
       JSON.parse(text);
@@ -181,6 +208,6 @@ export async function extractAttachment(
     content: text,
     mimeType: base || "text/plain",
     method: "utf8-text",
-    warnings: [],
+    warnings,
   };
 }

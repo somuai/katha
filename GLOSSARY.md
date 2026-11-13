@@ -10,3 +10,5 @@
 - **Connection**: a user's authorization for Katha to read selected material from an external provider.
 - **Import selection**: the particular external records a user chooses to retain as sources; distinct from the broader permission granted by the provider.
 - **Routing**: choosing retained evidence, current external evidence, or both for a question.
+
+- **Document reference**: a contributor name resolved from a literal user mention and a retained document, linked to that message and document version; not an inferred identity or an assistant assertion.

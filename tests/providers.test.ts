@@ -1206,3 +1206,46 @@ test("provider rate limiting reports retry-after without an early retry", async 
   assert.equal(calls, 1);
   assert.match(result[0].error!, /retry after 30/i);
 });
+
+test("a permanently invalid citation still fails closed after the bounded repair", async () => {
+  let fixtureClock = Date.now();
+  const providers = createProviders({
+    groqKey: "fixture",
+    clock: () => (fixtureClock += 2000),
+    fetcher: (async () =>
+      new Response(
+        JSON.stringify({
+          usage: {
+            prompt_tokens: 100,
+            completion_tokens: 20,
+            total_tokens: 120,
+          },
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  text: "An unsupported reference [11111111-1111-1111-1111-111111111111]",
+                  citations: ["kept"],
+                  comparisons: [],
+                }),
+              },
+            },
+          ],
+        }),
+      )) as typeof fetch,
+  });
+  await assert.rejects(
+    providers.answer({
+      question: "What is the budget?",
+      baseline: [
+        {
+          id: "kept",
+          title: "Budget",
+          text: "The budget is USD 4200.",
+          observedAt: "2026-11-13",
+        },
+      ],
+    }),
+    { code: "INVALID_CITATION" },
+  );
+});

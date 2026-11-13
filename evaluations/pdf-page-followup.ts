@@ -19,6 +19,9 @@ const directory = await mkdtemp(join(tmpdir(), "katha-pdf-followup-"));
 const knownName = process.argv.includes("--name")
   ? process.argv[process.argv.indexOf("--name") + 1]
   : undefined;
+const person = process.argv.includes("--person")
+  ? process.argv[process.argv.indexOf("--person") + 1]
+  : undefined;
 let seeding = false;
 const adapters = createKathaAdapters({
   groqKey: process.env.GROQ_API_KEY,
@@ -72,6 +75,13 @@ try {
   for (const [i, question] of [
     "what's my contribution in this project",
     "i think its there on page 44",
+    ...(person
+      ? [
+          `what did ${person} do`,
+          "yes what he did in the project",
+          "what were his findings?",
+        ]
+      : []),
     ...(knownName
       ? [`My name is ${knownName}. What was my contribution?`]
       : []),
