@@ -103,7 +103,7 @@ async function ask(
   const current = await api(`/api/conversations/${chat.id}`);
   const receipt = await api(`/api/conversations/${chat.id}/turns`, {
     clientRequestId: randomUUID(),
-    expectedTailId: current.tailId,
+    expectedTailId: current.conversation.tailId,
     text: question,
     attachmentIds,
     timezone: "Asia/Kolkata",

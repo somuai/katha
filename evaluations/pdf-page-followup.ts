@@ -109,7 +109,7 @@ try {
   }
   await mkdir("data/evaluations", { recursive: true });
   await writeFile(
-    "data/evaluations/pdf-page-followup.json",
+    `data/evaluations/pdf-page-followup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`,
     JSON.stringify(
       { filename: basename(path), pages: extracted.pages, results },
       null,
