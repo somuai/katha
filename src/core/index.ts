@@ -1197,6 +1197,12 @@ export function createKatha(options: KathaOptions) {
           input.text,
         ) ||
           verification);
+      const originalRequested =
+        historical ||
+        (/\boriginal(?:ly)?\b/i.test(input.text) &&
+          /\b(?:say|said|record|statement|quote|message|note|file|document|report|pdf)\b/i.test(
+            input.text,
+          ));
       const own = db
         .prepare(
           "SELECT id FROM sources WHERE turn_id=? AND role='user' LIMIT 1",
@@ -1208,7 +1214,7 @@ export function createKatha(options: KathaOptions) {
         text: input.text,
         conversationId: scope,
         limit: historical ? 200 : 20,
-        original: historical,
+        original: originalRequested,
         asOf: row.created_at,
       };
       if (historical && window) {
@@ -1322,7 +1328,7 @@ export function createKatha(options: KathaOptions) {
           ...(existing >= 0 ? local.splice(existing, 1)[0] : attachment),
           ...effectiveInterpretation(
             requireSource(attachmentId),
-            historical,
+            originalRequested,
             row.created_at,
             row.cutoff,
           ),
@@ -1364,7 +1370,7 @@ export function createKatha(options: KathaOptions) {
                 : source(eligible)),
               ...effectiveInterpretation(
                 eligible,
-                false,
+                originalRequested,
                 row.created_at,
                 row.cutoff,
               ),
@@ -1389,6 +1395,7 @@ export function createKatha(options: KathaOptions) {
       }
       const trace: Record<string, unknown> = {
         activeSourceIds: [...activeSourceIds],
+        recordView: originalRequested ? "original" : "effective",
         resolvedDate: window || null,
         referenceClock: row.created_at,
         timezone: input.timezone || "UTC",

@@ -268,3 +268,60 @@ test("an attachment correction recorded after a queued turn cannot leak into its
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("an undated original-record request quotes the original attachment, then current recall still applies its correction", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "katha-original-view-"));
+  const app = createKatha({
+    directory,
+    model: {
+      async generate(c) {
+        return {
+          answer: c.evidence
+            .map((s) => s.interpretation || s.content)
+            .join("\n"),
+          citations: c.evidence.map((s) => ({ sourceId: s.id })),
+        };
+      },
+    },
+  });
+  try {
+    const source = await app.evidence.import({
+      name: "decision.pdf",
+      content: "[Page 1]\nWe selected Alder.",
+    });
+    await app.evidence.correct({
+      sourceId: source.sourceId,
+      mode: "CORRECT_PAST_RECORD",
+      content: "[Page 1]\nWe selected Cedar.",
+    });
+    const chat = await app.workspace.createConversation();
+    for (const [index, text] of [
+      "Quote the original record from my attached PDF.",
+      "What does that PDF say now?",
+    ].entries()) {
+      const current = await app.workspace.getConversation(chat.id);
+      const receipt = await app.turns.start({
+        conversationId: chat.id,
+        clientRequestId: `view-${index}`,
+        expectedTailId: current.tailId,
+        text,
+        attachmentIds: index === 0 ? [source.sourceId] : [],
+      });
+      for await (const event of app.turns.events(receipt.turnId))
+        if (event.type === "complete") break;
+      const result = await app.turns.get(receipt.turnId);
+      assert.equal(result.status, "COMPLETED");
+      assert.match(
+        result.answer,
+        index === 0 ? /We selected Alder/ : /We selected Cedar/,
+      );
+      assert.doesNotMatch(
+        result.answer,
+        index === 0 ? /We selected Cedar/ : /We selected Alder/,
+      );
+    }
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
