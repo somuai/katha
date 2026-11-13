@@ -1,4 +1,4 @@
-import { shortlistedVendors } from "./shortlist.js";
+import { shortlistedVendors, verificationTopics } from "./shortlist.js";
 import { retainedEvidenceResponse } from "./evidence-recovery.js";
 import { selectPassages, documentNamedPeople } from "./passages.js";
 import { effectiveDateInQuote } from "./dated-evidence.js";
@@ -1625,6 +1625,10 @@ export function createKatha(options: KathaOptions) {
             input.text,
           ) &&
             !personalMemory));
+      const explicitWebRequest =
+        /\b(?:use|using|search|check|browse)\s+(?:on\s+)?(?:the\s+)?(?:web|internet|online)\b/i.test(
+          input.text,
+        );
       let queries: string[] = [];
       // Explicitly labelled decisions are stronger evidence than a guessed
       // search target. This deliberately covers labels, not inferred topics.
@@ -1681,15 +1685,25 @@ export function createKatha(options: KathaOptions) {
           }),
         );
         valid();
-        if (plan.clarification?.trim()) {
+        const clarification =
+          typeof plan.clarification === "string"
+            ? plan.clarification.trim()
+            : "";
+        const validClarification =
+          clarification.length <= 240 &&
+          /[?？]$/.test(clarification) &&
+          !/\n\s*\n/.test(clarification);
+        if (clarification && !validClarification)
+          trace.rejectedPlannerClarification = true;
+        if (clarification && validClarification) {
           update(id, {
-            answer: plan.clarification.trim(),
+            answer: clarification,
             sourceIds: local.map((s) => s.id),
             trace: { ...trace, clarification: true },
           });
           saveAnswer(
             id,
-            plan.clarification.trim(),
+            clarification,
             local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
           );
           setStatus(id, "COMPLETED");
@@ -1703,12 +1717,17 @@ export function createKatha(options: KathaOptions) {
           currentQuestion = verification;
         else if (plan.queries.length) currentQuestion = true;
       }
-      if (liveMarketQuote && !sourcesOnly && !privateFileTask)
+      if (
+        (liveMarketQuote || explicitWebRequest) &&
+        !sourcesOnly &&
+        !privateFileTask
+      )
         currentQuestion = true;
       if (sourcesOnly) currentQuestion = false;
       trace.routing = {
         sourcesOnly,
         privateFileTask,
+        explicitWebRequest,
         usesWeb: currentQuestion,
       };
       if (currentQuestion) {
@@ -2089,10 +2108,12 @@ export function createKatha(options: KathaOptions) {
               names.filter((n) => mentions(comparisons[i].claim, n)).length > 1
             )
               comparisons.splice(i, 1);
+          const topics = verificationTopics(input.text);
           const omitted = names.filter(
             (name) => !comparisons.some((c) => mentions(c.claim, name)),
           );
           for (const name of omitted) {
+            if (topics.length === 2) continue;
             comparisons.push({
               claim: name + " verification",
               status: "UNVERIFIED",
@@ -2109,6 +2130,46 @@ export function createKatha(options: KathaOptions) {
             individuallyCompared: names.length - omitted.length,
             unresolved: omitted,
           };
+          if (topics.length === 2) {
+            const unresolved: string[] = [];
+            for (const name of names)
+              for (const topic of topics) {
+                const covered = comparisons.some((c) => {
+                  if (!mentions(c.claim, name)) return false;
+                  const price = !!(
+                    c.baselinePrice ||
+                    c.currentPrice ||
+                    /\b(?:pric(?:e|es|ing)|cost|billing|per seat)\b/i.test(
+                      c.claim,
+                    )
+                  );
+                  return topic === "price"
+                    ? price
+                    : !price &&
+                        /\b(?:releases?|launch|shipped|features?|capabilit(?:y|ies)|exports?|updates?)\b/i.test(
+                          c.claim,
+                        );
+                });
+                if (!covered) {
+                  unresolved.push(`${name} ${topic}`);
+                  comparisons.push({
+                    claim: `${name} ${topic === "price" ? "pricing" : "product releases"}`,
+                    status: "UNVERIFIED",
+                    baselineSourceIds: local
+                      .filter((s) => mentions(s.content, name))
+                      .map((s) => s.id),
+                    evidenceSourceIds: [],
+                    explanation: `No individual ${topic === "price" ? "price" : "product release"} comparison was established. The other topic does not establish this one.`,
+                  });
+                }
+              }
+            trace.topicCoverage = {
+              requested: names.length * topics.length,
+              individuallyAssessed:
+                names.length * topics.length - unresolved.length,
+              unresolved,
+            };
+          }
           result.answer = comparisons
             .map(
               (c) =>

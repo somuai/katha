@@ -17,3 +17,17 @@ export function shortlistedVendors(texts: string[]) {
   }
   return [];
 }
+
+/** Verification topics are independent: missing prices cannot suppress a release check. */
+export function verificationTopics(question: string): ("price" | "release")[] {
+  const topics: ("price" | "release")[] = [];
+  if (/\b(?:price|prices|pricing|cost|costs|billing)\b/i.test(question))
+    topics.push("price");
+  if (
+    /\b(?:releases?|launche?s?|launched|shipp?ed|shipping|features?|capabilit(?:y|ies))\b|something big|anything big/i.test(
+      question,
+    )
+  )
+    topics.push("release");
+  return topics;
+}

@@ -21,6 +21,8 @@ Explicit/attributed quotations are checked against retained source text (normali
 
 Search requests ask for page text. When available, a query-ranked raw-page excerpt is retained instead of the shorter search snippet, up to 12,000 characters from a 200,000-character candidate buffer. If raw text is unavailable, the snippet remains explicitly identified. Passage budgets include separators; URL destinations do not score as visible prose, ordinary plural matching is supported, and conceptual questions down-rank incidental code. Source inspectors retain the extraction method. This is bounded evidence selection, not a guarantee that every exception or page detail is present.
 
+Mixed pricing/release questions keep separate assessments. Explicit offer parsing can establish a price comparison but cannot short-circuit the requested release check. Missing per-vendor topics are exposed as UNVERIFIED with topic coverage in the audit. A planner clarification must be a short question, not an unvalidated factual answer; explicit web requests cannot be downgraded to general conversation (sources-only and private-data restrictions still apply).
+
 ## Inference outages
 
 When inference quota or a model service prevents answering, already-materialized eligible records can be returned as a clearly labelled `PARTIAL` evidence-only response. No model answer or current verification is claimed; the trace records `generatedAnswer: false`. Cancellation and source deletion still take precedence. This does not restore provider capacity or replace model-based recommendations. Upload preparation that is throttled returns HTTP429 and Retry-After without claiming that a file was imported.

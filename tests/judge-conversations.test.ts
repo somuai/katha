@@ -152,3 +152,72 @@ test("a deleted private note gets an actionable missing-source explanation rathe
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("a model price-only response leaves explicit release gaps for every shortlisted vendor", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "katha-topic-coverage-"));
+  const app = createKatha({
+    directory,
+    clock: () => new Date("2026-11-13T10:00:00Z"),
+    search: {
+      async search() {
+        return [
+          {
+            title: "Official information",
+            url: "https://example.org/updates",
+            content:
+              "Alder and Birch have pricing pages; release timing is not established.",
+          },
+        ];
+      },
+    },
+    model: {
+      async generate(c) {
+        return {
+          answer: "Price evidence incomplete.",
+          comparisons: ["Alder", "Birch"].map((name) => ({
+            claim: `${name} pricing`,
+            status: "UNVERIFIED" as const,
+            explanation: "Missing old terms.",
+            baselineSourceIds: (c.baseline || []).map((s) => s.id),
+            evidenceSourceIds: c.evidence
+              .filter((s) => s.kind === "web")
+              .map((s) => s.id),
+          })),
+        };
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Monday shortlist",
+      content: "We shortlisted Alder and Birch.",
+      occurredAt: "2026-11-09",
+    });
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "topics",
+      expectedTailId: null,
+      text: "On Monday we shortlisted Alder and Birch. Has pricing changed or shipped anything big?",
+      timezone: "UTC",
+    });
+    for await (const event of app.turns.events(receipt.turnId))
+      if (event.type === "complete") break;
+    const result = await app.turns.get(receipt.turnId);
+    assert.equal(result.status, "COMPLETED");
+    for (const name of ["Alder", "Birch"]) {
+      const release = result.comparisons.find(
+        (c) => c.claim === `${name} product releases`,
+      );
+      assert.ok(release);
+      assert.equal(release.status, "UNVERIFIED");
+    }
+    assert.deepEqual((result.trace.topicCoverage as any).unresolved, [
+      "Alder release",
+      "Birch release",
+    ]);
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});

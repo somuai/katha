@@ -320,3 +320,80 @@ test("latest stock price searches even if planner mistakenly says general", asyn
   assert.equal(turn.answer, "Quote evidence found.");
   assert.equal((turn.trace.searches as any[]).length, 1);
 });
+
+test("a planner cannot smuggle an unsupported answer through its clarification field", async () => {
+  const turn = await run(
+    "Using the web, explain snapshot isolation and cite sources.",
+    {
+      model: {
+        plan: async () => ({
+          mode: "general",
+          queries: [],
+          clarification:
+            "Snapshot isolation always prevents every concurrency error.",
+        }),
+        generate: async (c: any) => ({
+          answer: c.evidence.some((s: any) => s.kind === "web")
+            ? "Answered from actual retained web evidence."
+            : "No web evidence.",
+        }),
+      },
+      search: {
+        search: async () => [
+          {
+            title: "Official database documentation",
+            url: "https://example.org/snapshots",
+            content: "Snapshot isolation has documented constraints.",
+          },
+        ],
+      },
+    },
+  );
+  assert.equal(turn.answer, "Answered from actual retained web evidence.");
+  assert.equal(turn.trace.rejectedPlannerClarification, true);
+  assert.doesNotMatch(turn.answer, /prevents every/);
+});
+test("an explicit web request is honored even when planning says general", async () => {
+  const turn = await run("Using the web, explain snapshot isolation.", {
+    model: {
+      plan: async () => ({ mode: "general", queries: [] }),
+      generate: async (c: any) => ({
+        answer: c.evidence.some((s: any) => s.kind === "web")
+          ? "Web evidence retained."
+          : "No web evidence.",
+      }),
+    },
+    search: {
+      search: async () => [
+        {
+          title: "Documentation",
+          url: "https://example.org/snapshots",
+          content: "Snapshot information.",
+        },
+      ],
+    },
+  });
+  assert.equal(turn.answer, "Web evidence retained.");
+});
+
+test("a short genuine planner question remains a clarification", async () => {
+  const turn = await run("Can you check its latest price?", {
+    model: {
+      plan: async () => ({
+        mode: "current",
+        queries: [],
+        clarification: "Which product do you mean?",
+      }),
+      generate: async () => {
+        throw Error("Must clarify before answering");
+      },
+    },
+    search: {
+      search: async () => {
+        throw Error("Must clarify before search");
+      },
+    },
+  });
+  assert.equal(turn.answer, "Which product do you mean?");
+  assert.equal(turn.trace.clarification, true);
+});

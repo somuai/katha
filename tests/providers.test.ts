@@ -1337,3 +1337,82 @@ test("search retains available page text instead of discarding qualifications be
     "query-ranked raw-page excerpt",
   );
 });
+
+test("an explicit price comparison cannot swallow a requested product release assessment", async () => {
+  let clock = Date.now();
+  const p = createProviders({
+    groqKey: "fixture",
+    clock: () => (clock += 10000),
+    fetcher: (async (_url, init) => {
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      const name = context.question.match(/^Assess ONLY ([^.]+)\./)?.[1];
+      const quote = `Effective 2026-11-10, ${name} adds CSV exports.`;
+      return Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: `${name} launched CSV exports.`,
+                citations: ["current"],
+                comparisons: [
+                  {
+                    claim: `${name} product releases`,
+                    status: "CHANGED_WITH_DATED_EVIDENCE",
+                    baselineSourceIds: ["old"],
+                    evidenceIds: ["current"],
+                    explanation: quote,
+                    effectiveAt: "2026-11-10",
+                    effectiveDateEvidence: { sourceId: "current", quote },
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const offer = (name: string, amount: number) =>
+    `${name} Team: USD ${amount} per seat per month, US region, 20 seats, unlimited contacts, tax excluded.`;
+  const result = await p.answer({
+    question:
+      "We shortlisted Alder and Birch for our team. Has pricing changed or shipped anything big since Monday?",
+    now: "2026-11-13T10:00:00Z",
+    baseline: [
+      {
+        id: "old",
+        title: "Original offer",
+        text: [offer("Alder", 20), offer("Birch", 20)].join("\n"),
+        observedAt: "2026-11-09",
+      },
+    ],
+    evidence: [
+      {
+        id: "current",
+        title: "Current official offers and release notes",
+        text: [
+          offer("Alder", 25),
+          offer("Birch", 25),
+          "Effective 2026-11-10, Alder adds CSV exports.",
+          "Effective 2026-11-10, Birch adds CSV exports.",
+        ].join("\n"),
+        observedAt: "2026-11-13",
+      },
+    ],
+  });
+  for (const name of ["Alder", "Birch"]) {
+    assert.ok(
+      result.comparisons.some(
+        (c) => c.claim.includes(name) && /pricing/.test(c.claim),
+      ),
+    );
+    assert.ok(
+      result.comparisons.some(
+        (c) => c.claim.includes(name) && /releases/.test(c.claim),
+      ),
+    );
+  }
+});
