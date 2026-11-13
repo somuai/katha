@@ -92,7 +92,9 @@ async function upload(name: string, mime: string, bytes: Uint8Array) {
       await new Promise((resolve) => setTimeout(resolve, delay * 1000));
       continue;
     }
-    throw Error(`Upload ${name}: ${response.status} ${value.error}`);
+    throw Error(
+      `Upload ${name}: ${response.status} ${value.error} (Retry-After: ${delay}s)`,
+    );
   }
   const source = value.source;
   uploads.push({
