@@ -1433,9 +1433,15 @@ export function createKatha(options: KathaOptions) {
       const hasPrivateSources =
         !!input.attachmentIds?.length ||
         local.some((s) => s.kind === "attachment");
+      const retainedDecisionQuestion =
+        /\b(?:our|my|retained|saved)\s+records?\b/i.test(input.text) &&
+        /\b(?:selected|selection|decided|decision|chose|chosen)\b/i.test(
+          input.text,
+        );
       const privateFileTask =
         !publicFactQuestion &&
-        ((hasPrivateSources && (!verification || privateRecordQuestion)) ||
+        (retainedDecisionQuestion ||
+          (hasPrivateSources && (!verification || privateRecordQuestion)) ||
           (personalMemory && privateRecordQuestion));
       if (privateFileTask || sourcesOnly) verification = false;
       let currentQuestion =

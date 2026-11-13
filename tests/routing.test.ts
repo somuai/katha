@@ -24,7 +24,11 @@ test("asking which vendor our records selected does not invoke external planning
         },
       },
     },
-    { text: "The selected vendor is Cedar." },
+    {
+      text: "The selected vendor is Alder.",
+      name: "Synthetic original record",
+      correction: "The selected vendor is Cedar.",
+    },
   );
   assert.equal(turn.answer, "Cedar");
   assert.deepEqual(turn.trace.searches, []);
@@ -55,7 +59,12 @@ test("an unspecified shortlist asks which retained decision before web search", 
 async function run(
   question: string,
   options: any = {},
-  source?: { text: string; attach?: boolean },
+  source?: {
+    text: string;
+    attach?: boolean;
+    name?: string;
+    correction?: string;
+  },
 ) {
   const directory = mkdtempSync(join(tmpdir(), "katha-route-"));
   const app = createKatha({ directory, ...options });
@@ -63,9 +72,16 @@ async function run(
     let attachmentIds: string[] = [];
     if (source) {
       const s = await app.evidence.import({
-        name: "private.csv",
+        name: source.name || "private.csv",
         content: source.text,
       });
+      if (source.correction)
+        await app.evidence.correct({
+          sourceId: s.sourceId,
+          content: source.correction,
+          mode: "CHANGE_FROM_NOW",
+          effectiveAt: "2026-11-10T00:00:00Z",
+        });
       if (source.attach) attachmentIds = [s.sourceId];
     }
     const chat = await app.workspace.createConversation();
