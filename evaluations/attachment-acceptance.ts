@@ -231,13 +231,19 @@ try {
     "csv-monday",
     chat,
     "What was Monday attendance: how many were present and absent in this CSV?",
-    [/40/, /20/],
+    [
+      /\b40\b[^.\n]{0,35}\bpresent\b|\bpresent\b[^.\n]{0,35}\b40\b/i,
+      /\b20\b[^.\n]{0,35}\babsent\b|\babsent\b[^.\n]{0,35}\b20\b/i,
+    ],
   );
   await ask(
     "csv-tuesday",
     chat,
     "How many were present and absent on Tuesday in this CSV?",
-    [/60/, /(?:0|zero|none|no\s+(?:one|absen))/i],
+    [
+      /\b60\b[^.\n]{0,35}\bpresent\b|\bpresent\b[^.\n]{0,35}\b60\b/i,
+      /\b(?:0|zero|no|none)\b[^.\n]{0,30}\babsen(?:t|ce|ces)\b|\babsen(?:t|ce|ces)\b[^.\n]{0,30}\b(?:0|zero|none)\b/i,
+    ],
   );
   await ask(
     "csv-recommendation",
