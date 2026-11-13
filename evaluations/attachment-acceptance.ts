@@ -15,6 +15,24 @@ if (!process.argv.includes("--run-live")) {
 if (!process.env.GROQ_API_KEY)
   throw Error("Configure the server Groq key first.");
 const textOnly = process.argv.includes("--text-only");
+const imageOnly = process.argv.includes("--image-only");
+if (textOnly && imageOnly)
+  throw Error("Choose either --text-only or --image-only, not both.");
+const expectedCaseIds = [
+  ...(!textOnly
+    ? ["image-initial", "image-followup", "image-after-restart"]
+    : []),
+  ...(!imageOnly
+    ? [
+        "csv-decimal-total",
+        "csv-late-row",
+        "csv-monday",
+        "csv-tuesday",
+        "csv-recommendation",
+      ]
+    : []),
+  ...(!textOnly ? ["image-deleted", "image-restored"] : []),
+];
 const directory = await mkdtemp(join(tmpdir(), "katha-attachment-acceptance-"));
 const port = 37000 + Math.floor(Math.random() * 500),
   base = `http://localhost:${port}`;
@@ -178,10 +196,20 @@ async function save() {
         }).trim(),
         startedAt,
         model: process.env.GROQ_MODEL || "qwen/qwen3.8-27b",
-        mode: textOnly ? "CSV text comparison" : "image and CSV acceptance",
+        mode: textOnly
+          ? "CSV text comparison"
+          : imageOnly
+            ? "image retention acceptance"
+            : "image and CSV acceptance",
         uploads,
         passed: results.filter((r) => r.passed).length,
-        total: results.length,
+        total: expectedCaseIds.length,
+        expectedCaseIds,
+        recordedCases: results.filter((r) => expectedCaseIds.includes(r.id))
+          .length,
+        missingCaseIds: expectedCaseIds.filter(
+          (id) => !results.some((r) => r.id === id),
+        ),
         evidenceOnlyResponses: results.filter((r) => r.evidenceOnly).length,
         results,
       },
@@ -228,54 +256,56 @@ try {
       [/Falcon/i, /700/],
     );
   }
-  const csv =
-    "customer,day,status,stage,amount\n" +
-    Array.from(
-      { length: 120 },
-      (_, i) =>
-        `Customer${i + 1},${i < 60 ? "Monday" : "Tuesday"},${i < 40 || i >= 60 ? "present" : "absent"},${i < 90 ? "qualified" : "new"},${i === 119 ? "120.20" : "0.10"}`,
-    ).join("\n");
-  const file = await upload("crm.csv", "text/csv", Buffer.from(csv));
-  const chat = await api("/api/conversations", {});
-  await ask(
-    "csv-decimal-total",
-    chat,
-    "What is the exact sum of amount across all 120 rows in this CSV?",
-    [/132\.1(?:0)?\b/],
-    [file],
-  );
-  await ask(
-    "csv-late-row",
-    chat,
-    "What amount is listed for Customer120 in this CSV?",
-    [/120\.2(?:0)?\b/],
-  );
-  await ask(
-    "csv-monday",
-    chat,
-    "What was Monday attendance: how many were present and absent in this CSV?",
-    [
-      /\b40\b[^.\n]{0,35}\bpresent\b|\bpresent\b[^.\n]{0,35}\b40\b/i,
-      /\b20\b[^.\n]{0,35}\babsent\b|\babsent\b[^.\n]{0,35}\b20\b/i,
-    ],
-  );
-  await ask(
-    "csv-tuesday",
-    chat,
-    "How many were present and absent on Tuesday in this CSV?",
-    [
-      /\b60\b[^.\n]{0,35}\bpresent\b|\bpresent\b[^.\n]{0,35}\b60\b/i,
-      /\b(?:0|zero|no|none)\b[^.\n]{0,30}\babsen(?:t|ce|ces)\b|\babsen(?:t|ce|ces)\b[^.\n]{0,30}\b(?:0|zero|none)\b/i,
-    ],
-  );
-  await ask(
-    "csv-recommendation",
-    chat,
-    "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
-    [/suggest|recommend|could|consider|next step/i],
-    [],
-    [/your (?:sales )?team (?:of|has) 120|120 employees/i],
-  );
+  if (!imageOnly) {
+    const csv =
+      "customer,day,status,stage,amount\n" +
+      Array.from(
+        { length: 120 },
+        (_, i) =>
+          `Customer${i + 1},${i < 60 ? "Monday" : "Tuesday"},${i < 40 || i >= 60 ? "present" : "absent"},${i < 90 ? "qualified" : "new"},${i === 119 ? "120.20" : "0.10"}`,
+      ).join("\n");
+    const file = await upload("crm.csv", "text/csv", Buffer.from(csv));
+    const chat = await api("/api/conversations", {});
+    await ask(
+      "csv-decimal-total",
+      chat,
+      "What is the exact sum of amount across all 120 rows in this CSV?",
+      [/132\.1(?:0)?\b/],
+      [file],
+    );
+    await ask(
+      "csv-late-row",
+      chat,
+      "What amount is listed for Customer120 in this CSV?",
+      [/120\.2(?:0)?\b/],
+    );
+    await ask(
+      "csv-monday",
+      chat,
+      "What was Monday attendance: how many were present and absent in this CSV?",
+      [
+        /\b40\b[^.\n]{0,35}\bpresent\b|\bpresent\b[^.\n]{0,35}\b40\b/i,
+        /\b20\b[^.\n]{0,35}\babsent\b|\babsent\b[^.\n]{0,35}\b20\b/i,
+      ],
+    );
+    await ask(
+      "csv-tuesday",
+      chat,
+      "How many were present and absent on Tuesday in this CSV?",
+      [
+        /\b60\b[^.\n]{0,35}\bpresent\b|\bpresent\b[^.\n]{0,35}\b60\b/i,
+        /\b(?:0|zero|no|none)\b[^.\n]{0,30}\babsen(?:t|ce|ces)\b|\babsen(?:t|ce|ces)\b[^.\n]{0,30}\b(?:0|zero|none)\b/i,
+      ],
+    );
+    await ask(
+      "csv-recommendation",
+      chat,
+      "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+      [/suggest|recommend|could|consider|next step/i],
+      [],
+      [/your (?:sales )?team (?:of|has) 120|120 employees/i],
+    );
+  }
   if (image) {
     await api(`/api/sources/${image}/trash`, {});
     const deletedChat = await api("/api/conversations", {});
