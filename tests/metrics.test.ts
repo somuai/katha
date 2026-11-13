@@ -1,17 +1,53 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { summarizeEvaluation } from "../evaluations/metrics.ts";
+test("an empty or untraceable claim review cannot establish support", () => {
+  for (const review of [
+    { reviewed: true, taskSuccess: true, claims: [] },
+    { reviewed: true, taskSuccess: true, claims: [{ verdict: "supported" }] },
+    {
+      reviewed: true,
+      taskSuccess: true,
+      claims: [
+        {
+          text: "Price is twenty dollars",
+          verdict: "supported",
+          evidenceIds: ["missing"],
+        },
+      ],
+    },
+  ]) {
+    const r = summarizeEvaluation({
+      expectedCaseIds: ["one"],
+      results: [row({ review })],
+    }).models[0];
+    assert.equal(r.claimSupportGate, "NOT_REVIEWED");
+    assert.equal(r.claims.precision, null);
+  }
+});
 const row = (extra: any = {}) => ({
   id: "one",
   model: "A",
   completionMs: 100,
   firstUsefulMs: 80,
   quotaMs: 20,
-  snapshot: { status: "COMPLETED", answer: "Answer" },
+  snapshot: {
+    status: "COMPLETED",
+    answer: "Answer",
+    sources: [
+      { id: "source-1", content: "Retained evidence supports this claim." },
+    ],
+  },
   review: {
     reviewed: true,
     taskSuccess: true,
-    claims: [{ verdict: "supported" }],
+    claims: [
+      {
+        text: "Supported claim",
+        verdict: "supported",
+        evidenceIds: ["source-1"],
+      },
+    ],
   },
   ...extra,
 });
@@ -25,6 +61,27 @@ test("empty failed turns never acquire useful-answer latency", () => {
   assert.equal(report.models[0].latency.medianFirstUsefulMs, null);
   assert.equal(report.models[0].answered, 0);
   assert.equal(report.models[0].executionCompleted, 0);
+});
+test("reviewed provider failures count as failed tasks rather than abstentions", () => {
+  const report = summarizeEvaluation({
+    models: ["A"],
+    results: [
+      row({
+        snapshot: { status: "FAILED", answer: "" },
+        review: {
+          reviewed: true,
+          taskSuccess: false,
+          abstained: false,
+          factualAnswer: false,
+          claims: [],
+        },
+      }),
+    ],
+  });
+  assert.equal(report.models[0].reviewedCases, 1);
+  assert.equal(report.models[0].taskSuccessRate, 0);
+  assert.equal(report.models[0].abstentions, 0);
+  assert.equal(report.models[0].claims.precision, null);
 });
 test("unreviewed claims cannot establish the ninety-percent gate", () => {
   const report = summarizeEvaluation({
@@ -51,6 +108,7 @@ test("inferences and abstentions do not inflate factual claim precision", () => 
           reviewed: true,
           taskSuccess: false,
           abstained: true,
+          factualAnswer: false,
           claims: [],
         },
       }),
@@ -60,10 +118,26 @@ test("inferences and abstentions do not inflate factual claim precision", () => 
           reviewed: true,
           taskSuccess: true,
           claims: [
-            { verdict: "supported" },
-            { verdict: "unsupported" },
-            { verdict: "unverifiable" },
-            { verdict: "inference" },
+            {
+              text: "A supported claim",
+              verdict: "supported",
+              evidenceIds: ["source-1"],
+            },
+            {
+              text: "A unsupported claim",
+              verdict: "unsupported",
+              evidenceIds: ["source-1"],
+            },
+            {
+              text: "A unverifiable claim",
+              verdict: "unverifiable",
+              evidenceIds: ["source-1"],
+            },
+            {
+              text: "A inference claim",
+              verdict: "inference",
+              evidenceIds: ["source-1"],
+            },
           ],
         },
       }),
@@ -112,6 +186,8 @@ test("a fully reviewed score at the target can pass without calling task complet
           reviewed: true,
           taskSuccess: false,
           claims: Array.from({ length: 10 }, (_, i) => ({
+            text: `Claim ${i}`,
+            evidenceIds: ["source-1"],
             verdict: i < 9 ? "supported" : "unsupported",
           })),
         },
@@ -125,7 +201,15 @@ test("a fully reviewed score at the target can pass without calling task complet
 test("a reviewed answer with no factual claims has no precision score", () => {
   const r = summarizeEvaluation({
     results: [
-      row({ review: { reviewed: true, taskSuccess: false, claims: [] } }),
+      row({
+        review: {
+          reviewed: true,
+          taskSuccess: false,
+          abstained: true,
+          factualAnswer: false,
+          claims: [],
+        },
+      }),
     ],
   }).models[0];
   assert.equal(r.claims.precision, null);

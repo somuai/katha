@@ -990,6 +990,8 @@ export function createKatha(options: KathaOptions) {
     cached?: boolean;
   }> {
     const key = hash({ query: query.trim().toLowerCase(), fresh: false });
+    // Observations remain retained sources; this table is only a disposable cache.
+    db.prepare("DELETE FROM search_cache WHERE expires_at<=?").run(now());
     const cached = db
       .prepare("SELECT * FROM search_cache WHERE key=? AND expires_at>?")
       .get(key, now()) as any;
@@ -1035,6 +1037,9 @@ export function createKatha(options: KathaOptions) {
         now(),
         new Date(Date.parse(now()) + 15 * 60000).toISOString(),
       );
+      db.prepare(
+        "DELETE FROM search_cache WHERE key NOT IN (SELECT key FROM search_cache ORDER BY expires_at DESC, key LIMIT 1000)",
+      ).run();
       return { query, results };
     } catch (error) {
       return {
@@ -1331,6 +1336,9 @@ export function createKatha(options: KathaOptions) {
       }
       if (historical && !verification) {
         const answer =
+          (/\btoday[’']s date\b/i.test(input.text)
+            ? `Today's date is ${resolveDate("today", new Date(row.created_at), input.timezone)?.label}.\n\n`
+            : "") +
           `Here is the retained record for ${window!.label}:\n\n` +
           local
             .map(
@@ -1403,6 +1411,41 @@ export function createKatha(options: KathaOptions) {
           ) &&
             !personalMemory));
       let queries: string[] = [];
+      // Explicitly labelled decisions are stronger evidence than a guessed
+      // search target. This deliberately covers labels, not inferred topics.
+      const shortlistLabels = [
+        ...new Set(
+          local.flatMap((s) =>
+            [
+              ...s.content.matchAll(
+                /\b([A-Za-z][A-Za-z0-9-]*)\s+shortlist\s*:/gi,
+              ),
+            ].map((m) => m[1]),
+          ),
+        ),
+      ];
+      const ambiguousShortlist =
+        /\bshortlist\b/i.test(input.text) &&
+        shortlistLabels.length > 1 &&
+        !shortlistLabels.some((label) =>
+          input.text.toLowerCase().includes(label.toLowerCase()),
+        );
+      if (ambiguousShortlist && !options.model?.plan) {
+        const answer = `Which shortlist do you mean: ${shortlistLabels.join(" or ")}?`;
+        update(id, {
+          answer,
+          sourceIds: local.map((s) => s.id),
+          trace: { ...trace, clarification: true },
+        });
+        saveAnswer(
+          id,
+          answer,
+          local.flatMap((s) => [s.id, ...(s.interpretationSourceIds || [])]),
+        );
+        setStatus(id, "COMPLETED");
+        event(id, "complete", getTurn(id));
+        return;
+      }
       if (options.model?.plan && !sourcesOnly && !privateFileTask) {
         event(id, "progress", {
           stage: "planning",
@@ -1422,6 +1465,8 @@ export function createKatha(options: KathaOptions) {
           }),
         );
         valid();
+        if (ambiguousShortlist && !plan.clarification?.trim())
+          plan.clarification = `Which shortlist do you mean: ${shortlistLabels.join(" or ")}?`;
         if (plan.clarification?.trim()) {
           update(id, {
             answer: plan.clarification.trim(),
@@ -1995,6 +2040,19 @@ export function createKatha(options: KathaOptions) {
             replayed: true,
           };
         }
+        const pendingCount = (
+          db
+            .prepare(
+              "SELECT COUNT(*) AS n FROM turns WHERE status IN ('QUEUED','WAITING_FOR_SOURCES','RUNNING','WAITING_FOR_QUOTA')",
+            )
+            .get() as { n: number }
+        ).n;
+        if (pendingCount >= (options.maxPendingTurns ?? 32))
+          throw new KathaError(
+            "TURN_CAPACITY",
+            "The workspace has too many pending questions. Wait for a turn to finish or cancel one.",
+            429,
+          );
         const chat = requireConversation(input.conversationId);
         if (chat.deleted_at)
           throw new KathaError(

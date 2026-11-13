@@ -35,9 +35,6 @@ export function resolveDate(
     .toPlainDate();
   const iso = text.match(/\b(\d{4}-\d{2}-\d{2})\b/);
   if (iso) return dateWindow(iso[1], timezone);
-  if (/\byesterday\b/i.test(text))
-    return dateWindow(today.subtract({ days: 1 }).toString(), timezone);
-  if (/\btoday\b/i.test(text)) return dateWindow(today.toString(), timezone);
   const weekdays = [
     "monday",
     "tuesday",
@@ -85,7 +82,12 @@ export function resolveDate(
       "i",
     ),
   );
-  if (!a && !b) return null;
+  if (!a && !b) {
+    if (/\byesterday\b/i.test(text))
+      return dateWindow(today.subtract({ days: 1 }).toString(), timezone);
+    if (/\btoday\b/i.test(text)) return dateWindow(today.toString(), timezone);
+    return null;
+  }
   const day = Number(a ? a[1] : b![2]),
     month =
       names.findIndex((name) =>

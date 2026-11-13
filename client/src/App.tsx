@@ -847,11 +847,13 @@ export default function App() {
                         <Markdown>{stream}</Markdown>
                       </div>
                     ) : (
-                      <Thinking sources={evidence} />
+                      <Thinking sources={evidence} status={statusText} />
                     )}
-                    <p className="progress" role="status">
-                      {statusText || "Picking up the thread…"}
-                    </p>
+                    {stream && (
+                      <p className="progress" role="status">
+                        {statusText || "Picking up the thread…"}
+                      </p>
+                    )}
                   </article>
                 )}
                 {evidence.length > 0 && (

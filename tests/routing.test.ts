@@ -4,6 +4,29 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createKatha } from "../src/core/index.ts";
+test("an unspecified shortlist asks which retained decision before web search", async () => {
+  const turn = await run(
+    "Did the shortlist change?",
+    {
+      model: {
+        plan: async () => ({ mode: "verify", queries: ["shortlist updates"] }),
+        generate: async () => ({ answer: "Should not generate" }),
+      },
+      search: {
+        search: async () => {
+          throw Error("Ambiguous decision must not search");
+        },
+      },
+    },
+    {
+      text: "CRM shortlist: Alder and Birch. Database shortlist: RiverDB and CloudLake. These are separate decisions.",
+    },
+  );
+  assert.match(turn.answer || "", /which shortlist/i);
+  assert.match(turn.answer || "", /CRM/);
+  assert.match(turn.answer || "", /Database/);
+  assert.deepEqual(turn.trace.searches, []);
+});
 async function run(
   question: string,
   options: any = {},

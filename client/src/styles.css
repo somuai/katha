@@ -2151,6 +2151,10 @@ body {
   overflow: hidden;
   background: #f4f4ef;
   border: 1px solid #d9ded4;
+  box-shadow: 0 1px 4px #00000012;
+}
+.thinking-details {
+  min-width: 0;
 }
 .thinking-doodle img {
   width: 34px;

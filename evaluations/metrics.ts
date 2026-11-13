@@ -10,12 +10,17 @@ export interface EvaluationRow {
   firstUsefulMs?: number | null;
   quotaMs?: number;
   error?: string;
-  snapshot?: { status?: string; answer?: string };
+  snapshot?: {
+    status?: string;
+    answer?: string;
+    sources?: { id: string; content?: string }[];
+  };
   review?: {
     reviewed?: boolean;
     taskSuccess?: boolean;
     abstained?: boolean;
-    claims?: { verdict?: string }[];
+    factualAnswer?: boolean;
+    claims?: { text?: string; verdict?: string; evidenceIds?: string[] }[];
   };
 }
 export interface EvaluationRun {
@@ -118,12 +123,34 @@ export function summarizeEvaluation(
         }
       }
       const review = row.review;
+      const retainedEvidence = new Set(
+        (row.snapshot?.sources || [])
+          .filter((s) => typeof s.content === "string" && s.content.trim())
+          .map((s) => s.id),
+      );
       const completeReview =
         review?.reviewed === true &&
         typeof review.taskSuccess === "boolean" &&
         Array.isArray(review.claims) &&
+        (review.claims.length > 0 ||
+          (review.abstained === true && review.factualAnswer === false) ||
+          (!usable &&
+            review.taskSuccess === false &&
+            review.abstained === false &&
+            review.factualAnswer === false)) &&
         review.claims.every(
-          (c) => c && typeof c.verdict === "string" && verdicts.has(c.verdict),
+          (c) =>
+            c &&
+            typeof c.text === "string" &&
+            !!c.text.trim() &&
+            typeof c.verdict === "string" &&
+            verdicts.has(c.verdict) &&
+            (c.verdict !== "supported" ||
+              (Array.isArray(c.evidenceIds) &&
+                c.evidenceIds.length > 0 &&
+                c.evidenceIds.every(
+                  (id) => typeof id === "string" && retainedEvidence.has(id),
+                ))),
         );
       if (!completeReview) continue;
       reviewed++;

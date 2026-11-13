@@ -124,6 +124,41 @@ async function authorize(gmail: ReturnType<typeof createGmailConnector>) {
   return url;
 }
 
+test("Gmail preview fetches are bounded and preserve message order", async () => {
+  const f = setup({ count: 8 });
+  let active = 0,
+    peak = 0;
+  const original = f.config.fetcher;
+  f.config.fetcher = async (input, init) => {
+    const url = new URL(String(input));
+    if (url.searchParams.get("format") !== "metadata")
+      return original(input, init);
+    active++;
+    peak = Math.max(peak, active);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 15));
+      return await original(input, init);
+    } finally {
+      active--;
+    }
+  };
+  const gmail = createGmailConnector(f.config);
+  try {
+    await authorize(gmail);
+    const result = await gmail.list();
+    assert.deepEqual(
+      result.messages.map((m) => m.id),
+      Array.from({ length: 8 }, (_, i) => `mail${i}`),
+    );
+    assert.ok(
+      peak > 1 && peak <= 4,
+      `expected 2–4 simultaneous previews, saw ${peak}`,
+    );
+  } finally {
+    f.close();
+  }
+});
+
 test("Gmail readonly PKCE consent survives restart and never exposes tokens in status", async () => {
   const f = setup();
   try {

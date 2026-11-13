@@ -180,6 +180,7 @@ export interface KathaOptions {
   search?: SearchAdapter;
   embedder?: Embedder;
   maxActiveTurns?: number;
+  maxPendingTurns?: number;
   searchAttempts?: number;
   activeTimeoutMs?: number;
 }

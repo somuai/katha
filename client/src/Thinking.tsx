@@ -6,7 +6,13 @@ type Source = {
   metadata?: { connectorId?: string; connectorLabel?: string; url?: string };
 };
 /** This describes retained evidence actually delivered by the turn, never guessed connections. */
-export function Thinking({ sources }: { sources: Source[] }) {
+export function Thinking({
+  sources,
+  status,
+}: {
+  sources: Source[];
+  status?: string;
+}) {
   const labels = new Map<
     string,
     { name: string; icon?: string; glyph: string }
@@ -61,8 +67,10 @@ export function Thinking({ sources }: { sources: Source[] }) {
           alt=""
         />
       </div>
-      <div>
-        <span className="thinking-label">Thinking it through</span>
+      <div className="thinking-details">
+        <span className="thinking-label" role="status">
+          {status || "Thinking it through…"}
+        </span>
         {labels.size > 0 && (
           <div
             className="thinking-sources"

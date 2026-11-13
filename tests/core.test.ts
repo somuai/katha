@@ -4,6 +4,22 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createKatha } from "../src/core/index.ts";
+import { resolveDate } from "../src/core/temporal.ts";
+test("historical baseline date takes precedence over today's verification endpoint", () => {
+  const now = new Date("2026-11-13T12:00:00Z");
+  assert.equal(
+    resolveDate(
+      "What did I ask on 3 November? Is your answer still correct today?",
+      now,
+    )?.date,
+    "2026-11-03",
+  );
+  assert.equal(
+    resolveDate("What is today's date and what did I shortlist on Monday?", now)
+      ?.date,
+    "2026-11-09",
+  );
+});
 const setup = (options = {}) => {
   const directory = mkdtempSync(join(tmpdir(), "katha-test-"));
   const app = createKatha({ directory, ...options });
@@ -28,6 +44,102 @@ const wait = async (app: any, id: string) => {
   }
   throw new Error("Turn did not terminate");
 };
+
+test("pending-turn capacity rejects atomically but allows replay of the accepted request", async () => {
+  const { app, cleanup } = setup({
+    maxPendingTurns: 1,
+    model: { generate: () => new Promise(() => {}) },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const input = {
+      conversationId: chat.id,
+      clientRequestId: "accepted",
+      expectedTailId: null,
+      text: "First",
+    };
+    const first = await app.turns.start(input);
+    assert.equal((await app.turns.start(input)).turnId, first.turnId);
+    const other = await app.workspace.createConversation();
+    await assert.rejects(
+      app.turns.start({
+        ...input,
+        conversationId: other.id,
+        clientRequestId: "overflow",
+        text: "Second",
+      }),
+      { code: "TURN_CAPACITY", status: 429 },
+    );
+    assert.equal(
+      (await app.workspace.getConversation(other.id)).messages.length,
+      0,
+    );
+    await app.turns.cancel(first.turnId);
+    const next = await app.turns.start({
+      ...input,
+      conversationId: other.id,
+      clientRequestId: "overflow",
+      text: "Second",
+    });
+    assert.ok(next.turnId);
+    await app.turns.cancel(next.turnId);
+  } finally {
+    cleanup();
+  }
+});
+
+test("judge-style recall returns original November 3 questions across conversations and excludes November 4", async () => {
+  let date = "2026-11-03T10:00:00Z";
+  const { app, cleanup } = setup({
+    clock: () => new Date(date),
+    model: {
+      async generate() {
+        return {
+          answer: "We need a dated official price before comparing offers.",
+        };
+      },
+    },
+  });
+  try {
+    const first = await app.workspace.createConversation();
+    const original = "Which Postgres host fits our 20-person team?";
+    const receipt = await app.turns.start({
+      conversationId: first.id,
+      clientRequestId: "nov3",
+      expectedTailId: null,
+      text: original,
+      timezone: "Asia/Kolkata",
+    });
+    await wait(app, receipt.turnId);
+    date = "2026-11-04T10:00:00Z";
+    const later = await app.workspace.createConversation();
+    const other = await app.turns.start({
+      conversationId: later.id,
+      clientRequestId: "nov4",
+      expectedTailId: null,
+      text: "Unrelated Wednesday procurement",
+      timezone: "Asia/Kolkata",
+    });
+    await wait(app, other.turnId);
+    date = "2026-11-12T10:00:00Z";
+    const review = await app.workspace.createConversation();
+    const question = await app.turns.start({
+      conversationId: review.id,
+      clientRequestId: "recall",
+      expectedTailId: null,
+      text: "What is today's date and what did I ask you on 3 November?",
+      timezone: "Asia/Kolkata",
+    });
+    const result = await wait(app, question.turnId);
+    assert.match(result.answer, /Which Postgres host fits our 20-person team/);
+    assert.match(result.answer, /Today's date is 2026-11-12/);
+    assert.doesNotMatch(result.answer, /Unrelated Wednesday procurement/);
+    assert.ok(result.citations.length > 0);
+    assert.equal(result.trace.resolvedDate.date, "2026-11-03");
+  } finally {
+    cleanup();
+  }
+});
 
 test("duplicate submission returns one durable user message even with a stale tail", async () => {
   const { app, cleanup } = setup();

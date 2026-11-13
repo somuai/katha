@@ -1,5 +1,21 @@
 # Implementation status
 
+## Final local hardening and rerun
+
+The latest targeted synthetic run completes without provider or context errors. Compound today/Monday recall answers both today's date and the correct Monday record. Five-CRM search executes ten queries and returns thirty pages; query-diverse selection supplies pricing/release evidence across all five vendors. Shortlist answers reserve 1,800 output tokens with shorter per-page excerpts. The model produces four individual assessments; Folk still requires the explicit missing-assessment fallback. All five final outcomes are UNVERIFIED because like-for-like historical pricing is not established. This is honest coverage, not proof of successful price-change detection.
+
+Local admission controls now cap pending turns at 32, turn HTTP submissions at 30/minute/client and uploads at 12/minute/client; disposable caches prune expired entries and cap retention. Recovery/read routes remain available. Both older model runs now have complete separate agent-assisted retrospective reviews: Qwen 32/40 full tasks and 69/72 supported factual claims; GPT-OSS 27/40 tasks and 56/64 supported factual claims, preserving two execution failures. These results do not independently certify the current release's 90% target. See the reports under docs/evaluations. Independent human evidence review and fresh cross-platform verification remain release limitations.
+
+## Judge-scenario audit follow-up
+
+A fresh eight-turn live synthetic run correctly counted Monday attendance (3 present, 2 absent), retained CRM attachment context for recommendations, extracted the PDF deadline/budget, summed 100 CSV amounts to 5050, recovered Customer100's value (100), and recalled original November 2 questions. The recommendations still inferred that qualified deals were closer to closing; that is a suggestion, not an established conversion probability. The shortlist acknowledgement incorrectly called Monday November 2 in a November 9 turn. The final five-vendor pricing turn failed with `Invalid comparison`. Neither counts as a successful judge-case answer.
+
+Follow-up fixes add deterministic question-date context to model requests and fail safely to explicit UNVERIFIED comparisons when generated comparison fields are malformed, suppressing unvalidated prose. Regression tests cover both, but the failed live case has not yet been rerun successfully. A real cross-conversation November 3 original-question recall test also passes. Transcription now has a six-request rolling-minute dispatch limit and honors upstream cooldowns. Evaluation reviews require claim text and traceable evidence for supported verdicts; semantic support remains a human review task. See docs/OPERATING_LIMITS.md and docs/research/open-source-comparison.md.
+
+## Gmail connection follow-up
+
+The local Google OAuth client has been authorized by the owner in Google testing mode. A live search returned 20 message previews; no messages were imported during that check. Preview metadata is fetched in batches of at most four, retaining result order. One local request took 5.3 seconds; this is a single observation, not a performance benchmark. Broader distribution remains subject to Google's verification requirements for restricted scopes. Shopify is deferred until an account and store are available.
+
 Implemented: durable SQLite turns and replay, idempotent acceptance, scoped/date recall, async lexical+semantic indexing, immutable original records, sentence-located assertion candidates, effective-dated corrections and lineage UI, deletion invalidation/purging, numbered transactional migrations, bounded search/cache/quotas, normalized commercial-term comparison, verbatim dated-change evidence validation, attachment/voice/image processing, and responsive React UI.
 
 Correction policy: original quotations remain unchanged. Default current recall excludes superseded whole records and obsolete corrections. Assertion edits target the latest record. A whole-record replacement that would strand a scheduled assertion correction is rejected with a conflict instead of silently discarding it. Sentence assertions are located candidates, not automatically verified facts. Effective time and the turn's acceptance cutoff are separate.

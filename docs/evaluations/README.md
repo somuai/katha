@@ -20,10 +20,16 @@ Live image and scanned-PDF checks both read a generated document fixture contain
 
 ## Browser and platform checks
 
+The paragraph below records the initial local checks. A later GitHub Actions run passed Windows, Linux, macOS, Chromium, Firefox and WebKit: https://github.com/somuai/katha/actions/runs/43186378636 . The owner subsequently confirmed VoiceOver and physical microphone use; physical mobile testing remains deferred. These historical results do not automatically validate later revisions.
+
 Chromium and WebKit passed upload, assertion correction, original preservation, typed conversation, Escape dismissal, reduced-motion and 375/768/1280/1440px overflow checks, with zero automated WCAG A/AA findings in the tested states. This does not replace a screen-reader or real-device audit. Firefox automation could not launch on this host (profile-folder error); it is not marked passed.
 
 A fresh macOS install without `.env` passed `npm ci`, TypeScript, tests and build. Windows/Linux checks are configured in `.github/workflows/check.yml` but have not run here. Do not claim cross-platform validation from a workflow definition alone.
 
 ## Reviewed metrics
+
+The captured two-model answer comparison supplies the same stored evidence per case regardless of the candidate's query. This isolates answering against shared snippets; it does not measure end-to-end search planning quality. The recall cases use synthetic imported documents, with original conversation recall exercised separately through public-interface tests.
+
+Review annotations now require claim text and, for supported claims, evidence IDs resolving to nonempty retained sources. An empty claim list counts as a complete review only for an explicitly labelled nonfactual abstention. This prevents sparse reviews from inflating coverage; semantic entailment still requires a reviewer to read the evidence.
 
 Run `npx tsx evaluations/metrics.ts data/evaluations/answers-reviewed/results.json data/evaluations/answers-reviewed/metrics.json evaluations/answer-cases.json` to summarize the captured run without consuming provider quotas. It separates execution completion, reviewed task success, factual support, review coverage, and useful-answer latency; failures and empty outputs never count as useful answers. Inferences and abstentions do not inflate factual precision. Missing case declarations or incomplete claim reviews prevent a passed 90% gate. The existing run currently reports NOT_REVIEWED and null precision for both candidates.

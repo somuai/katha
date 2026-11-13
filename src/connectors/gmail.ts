@@ -544,30 +544,39 @@ export function createGmailConnector(options: GmailOptions) {
           date: string;
           snippet: string;
         }[] = [];
-      for (const entry of (Array.isArray(data.messages)
-        ? data.messages
-        : []
-      ).slice(0, 20)) {
-        messageId(entry.id);
-        const mail = (await api(
-          API +
-            "/" +
-            encodeURIComponent(entry.id) +
-            "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date",
-        )) as Mail;
+      const entries = (Array.isArray(data.messages) ? data.messages : []).slice(
+        0,
+        20,
+      );
+      for (let offset = 0; offset < entries.length; offset += 4) {
+        const batch = entries.slice(offset, offset + 4);
+        for (const entry of batch) messageId(entry.id);
+        const previews = await Promise.all(
+          batch.map(async (entry: { id: string }) => ({
+            entry,
+            mail: (await api(
+              API +
+                "/" +
+                encodeURIComponent(entry.id) +
+                "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date",
+            )) as Mail,
+          })),
+        );
         current(value.generation);
-        messages.push({
-          id: entry.id,
-          threadId: mail.threadId,
-          subject: header(mail.payload, "subject").slice(0, 500),
-          from: header(mail.payload, "from").slice(0, 500),
-          date: header(mail.payload, "date").slice(0, 200),
-          snippet: (mail.snippet || "").slice(0, 500),
-        });
-        selected.set(entry.id, {
-          generation: value.generation,
-          expiresAt: clock() + 300000,
-        });
+        for (const { entry, mail } of previews) {
+          messages.push({
+            id: entry.id,
+            threadId: mail.threadId,
+            subject: header(mail.payload, "subject").slice(0, 500),
+            from: header(mail.payload, "from").slice(0, 500),
+            date: header(mail.payload, "date").slice(0, 200),
+            snippet: (mail.snippet || "").slice(0, 500),
+          });
+          selected.set(entry.id, {
+            generation: value.generation,
+            expiresAt: clock() + 300000,
+          });
+        }
       }
       while (selected.size > 200)
         selected.delete(selected.keys().next().value!);

@@ -1,4 +1,5 @@
 import { registerConnections } from "./connectors/routes.js";
+import { registerHttpLimits } from "./http-limits.js";
 import "dotenv/config";
 import Fastify from "fastify";
 import multipart from "@fastify/multipart";
@@ -39,6 +40,7 @@ app.addHook("onRequest", async (req, reply) => {
   )
     return reply.code(403).send({ error: "Origin not allowed" });
 });
+registerHttpLimits(app);
 app.setErrorHandler((e: any, req, reply) => {
   if (e.retryAfter) reply.header("Retry-After", String(e.retryAfter));
   reply

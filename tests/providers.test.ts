@@ -1,6 +1,193 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProviders } from "../src/providers/index.ts";
+test("answer context distributes evidence across vendor queries instead of first-page order", async () => {
+  let selected: any[] = [];
+  const p = createProviders({
+    groqKey: "test",
+    fetcher: (async (_url, init) => {
+      selected = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      ).evidence;
+      return Response.json({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Unverified",
+                citations: [],
+                comparisons: [],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  await p.answer({
+    question: "Compare five vendors",
+    evidence: Array.from({ length: 5 }, (_, vendor) =>
+      Array.from({ length: 3 }, (_, page) => ({
+        id: `${vendor}-${page}`,
+        query: `vendor${vendor}`,
+        title: "Page",
+        text: "Evidence",
+        observedAt: "2026-11-13",
+      })),
+    ).flat(),
+  });
+  assert.equal(selected.length, 10);
+  assert.equal(new Set(selected.map((e) => e.query)).size, 5);
+});
+test("shortlist answers reserve enough output for per-vendor comparisons", async () => {
+  let budget = 0;
+  const p = createProviders({
+    groqKey: "test",
+    fetcher: (async (_url, init) => {
+      budget = JSON.parse(String(init?.body)).max_tokens;
+      return Response.json({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Unverified",
+                citations: [],
+                comparisons: [],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  await p.answer({
+    question: "We shortlisted five CRM tools. Has pricing changed?",
+  });
+  assert.equal(budget, 1800);
+});
+
+test("model context grounds Monday on the current turn rather than older history", async () => {
+  let resolved: any;
+  const p = createProviders({
+    groqKey: "test",
+    fetcher: (async (_url, init) => {
+      const body = JSON.parse(String(init?.body));
+      resolved = JSON.parse(body.messages[1].content).resolvedQuestionDate;
+      return Response.json({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Recorded.",
+                citations: [],
+                comparisons: [],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  await p.answer({
+    question: "On Monday we shortlisted five CRM tools.",
+    now: "2026-11-09T10:00:00Z",
+    timezone: "UTC",
+    history: "Earlier discussion from 2026-11-02",
+  });
+  assert.equal(resolved.date, "2026-11-09");
+});
+
+test("malformed comparison cannot crash or publish unvalidated price prose", async () => {
+  const p = createProviders({
+    groqKey: "test",
+    fetcher: (async () =>
+      Response.json({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Price definitely doubled",
+                citations: [],
+                comparisons: [
+                  {
+                    claim: "CRM pricing",
+                    status: "CHANGED",
+                    explanation: null,
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      })) as typeof fetch,
+  });
+  const answer = await p.answer({ question: "Has CRM pricing changed?" });
+  assert.equal(answer.comparisons[0].status, "UNVERIFIED");
+  assert.doesNotMatch(answer.text, /definitely doubled/);
+  assert.match(answer.text, /could not validate/i);
+});
+
+test("transcription bounds requests per minute and recovers without dispatching rejected audio", async () => {
+  let time = 1000,
+    calls = 0;
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async () => {
+      calls++;
+      return Response.json({ text: "Editable transcript" });
+    }) as typeof fetch,
+  });
+  for (let i = 0; i < 6; i++)
+    assert.equal(
+      await p.transcribe(new Uint8Array([1]), "audio/webm"),
+      "Editable transcript",
+    );
+  await assert.rejects(
+    p.transcribe(new Uint8Array([1]), "audio/webm"),
+    (e: any) =>
+      e.code === "RATE_LIMIT" && e.status === 429 && e.retryAfter === 60,
+  );
+  assert.equal(calls, 6);
+  time += 60000;
+  assert.equal(
+    await p.transcribe(new Uint8Array([1]), "audio/webm"),
+    "Editable transcript",
+  );
+  assert.equal(calls, 7);
+});
+
+test("transcription respects provider cooldown and does not retry early", async () => {
+  let time = 1000,
+    calls = 0;
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async () => {
+      calls++;
+      return calls === 1
+        ? new Response("slow down", {
+            status: 429,
+            headers: { "Retry-After": "30" },
+          })
+        : Response.json({ text: "Recovered" });
+    }) as typeof fetch,
+  });
+  await assert.rejects(
+    p.transcribe(new Uint8Array([1]), "audio/webm"),
+    (e: any) => e.code === "RATE_LIMIT" && e.retryAfter === 30,
+  );
+  await assert.rejects(
+    p.transcribe(new Uint8Array([1]), "audio/webm"),
+    (e: any) => e.code === "RATE_LIMIT",
+  );
+  assert.equal(calls, 1);
+  time += 30000;
+  assert.equal(
+    await p.transcribe(new Uint8Array([1]), "audio/webm"),
+    "Recovered",
+  );
+});
 
 test("missing credentials fail explicitly, never fabricate an answer", async () => {
   const p = createProviders({});
