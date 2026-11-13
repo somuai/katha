@@ -10,6 +10,18 @@ export interface PriceTerms {
   limits: string;
   tax: "included" | "excluded" | "unknown";
 }
+export function currencyAmountPattern(
+  currency: string,
+  amount: number,
+): RegExp | null {
+  if (!/^[A-Z]{3}$/.test(currency) || !Number.isFinite(amount) || amount < 0)
+    return null;
+  const literal = String(amount).replace(".", "\\.");
+  return new RegExp(
+    `\\b${currency}\\s*${literal}${String(amount).includes(".") ? "0*" : "(?:\\.0+)?"}(?:[^\\d.]|$)`,
+    "i",
+  );
+}
 const dimensions = [
   "plan",
   "currency",
@@ -104,11 +116,9 @@ export function priceHasNumericSupport(quote: PriceTerms, text: string) {
     if (!text.includes(quote.sourceQuote)) return false;
     text = quote.sourceQuote;
   }
-  const pricePattern = new RegExp(
-    `\\b${quote.currency}\\s*${String(quote.amount).replace(".", "\\.")}(?:\\.0+)?(?:[^\\d.]|$)`,
-    "i",
+  const priceMatch = currencyAmountPattern(quote.currency, quote.amount)?.exec(
+    text.replaceAll(",", ""),
   );
-  const priceMatch = pricePattern.exec(text.replaceAll(",", ""));
   if (!priceMatch) return false;
   const passage = text.slice(
     Math.max(0, priceMatch.index - 120),

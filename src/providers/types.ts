@@ -28,6 +28,7 @@ export type Plan = {
   clarification?: string;
 };
 export type Comparison = {
+  extractionMethod?: "explicit-offer-parser";
   effectiveAt?: string;
   effectiveDateEvidence?: { sourceId: string; quote: string };
   baselinePrice?: PriceTerms;

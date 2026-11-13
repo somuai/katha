@@ -1,6 +1,122 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProviders } from "../src/providers/index.ts";
+test("a long Retry-After is preserved for the turn wait policy rather than shortened", async () => {
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => 1000,
+    fetcher: (async () =>
+      Response.json(
+        { error: { message: "Rate limited" } },
+        { status: 429, headers: { "Retry-After": "300" } },
+      )) as typeof fetch,
+  });
+  await assert.rejects(
+    p.answer({ question: "A question" }),
+    (e: any) => e.code === "RATE_LIMIT" && e.retryAt === 301000,
+  );
+});
+test("a throttled request releases its unused token reservation before a permitted retry", async () => {
+  let time = 1000,
+    calls = 0;
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async () => {
+      calls++;
+      return calls === 1
+        ? Response.json(
+            { error: { message: "Please try again in 1.5s." } },
+            { status: 429 },
+          )
+        : Response.json({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    text: "Recovered",
+                    citations: [],
+                    comparisons: [],
+                  }),
+                },
+              },
+            ],
+          });
+    }) as typeof fetch,
+  });
+  const input = { question: "x".repeat(7000) };
+  await assert.rejects(p.answer(input), { code: "RATE_LIMIT" });
+  time += 2000;
+  assert.equal((await p.answer(input)).text, "Recovered");
+  assert.equal(calls, 2);
+});
+test("an omitted effectiveAt is reconstructed only from exact current effective-date evidence", async () => {
+  for (const [quote, retained, expected] of [
+    [
+      "Effective 2026-11-10, export now supports CSV.",
+      true,
+      "CHANGED_WITH_DATED_EVIDENCE",
+    ],
+    [
+      "Published 2026-11-10: export supports CSV.",
+      true,
+      "DIFFERS_CHANGE_TIME_UNKNOWN",
+    ],
+    [
+      "Effective 2026-11-10, export now supports CSV.",
+      false,
+      "DIFFERS_CHANGE_TIME_UNKNOWN",
+    ],
+    [
+      "Effective 2027-11-10, export supports CSV.",
+      true,
+      "DIFFERS_CHANGE_TIME_UNKNOWN",
+    ],
+  ] as const) {
+    const p = createProviders({
+      groqKey: "test",
+      fetcher: (async () =>
+        Response.json({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  text: "Compared",
+                  citations: ["b", "c"],
+                  comparisons: [
+                    {
+                      claim: "Export capability",
+                      status: "DIFFERS_CHANGE_TIME_UNKNOWN",
+                      explanation: "CSV added.",
+                      baselineSourceIds: ["b"],
+                      evidenceIds: ["c"],
+                      effectiveDateEvidence: { sourceId: "c", quote },
+                    },
+                  ],
+                }),
+              },
+            },
+          ],
+        })) as typeof fetch,
+    });
+    const answer = await p.answer({
+      question: "Has export changed?",
+      now: "2026-11-13T00:00:00Z",
+      baseline: [
+        { id: "b", title: "Old", text: "JSON only", observedAt: "2026-11-03" },
+      ],
+      evidence: [
+        {
+          id: "c",
+          title: "Current",
+          text: retained ? quote : "CSV available",
+          observedAt: "2026-11-13",
+        },
+      ],
+    });
+    assert.equal(answer.comparisons[0].status, expected);
+  }
+});
 test("model quota retry uses bounded provider guidance when Retry-After is absent", async () => {
   const p = createProviders({
     groqKey: "test",
@@ -37,18 +153,18 @@ test("compact price responses bind quotes to retained sources and reject unknown
                     baselineSourceIds: [],
                     evidenceIds: [],
                     explanation: "Only one offer",
-                    baselinePrice: [
-                      "Core",
-                      20,
-                      "USD",
-                      "US",
-                      "month",
-                      20,
-                      "per_seat",
-                      "unlimited contacts",
-                      "excluded",
-                      reference,
-                    ],
+                    baselinePrice: {
+                      plan: "Core",
+                      amount: 20,
+                      currency: "USD",
+                      region: "US",
+                      cadence: "month",
+                      seats: 20,
+                      basis: "per_seat",
+                      limits: "unlimited contacts",
+                      tax: "excluded",
+                      sourceId: reference,
+                    },
                   },
                 ],
               }),

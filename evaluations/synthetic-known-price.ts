@@ -1,4 +1,4 @@
-// Opt-in real-model evaluation using controlled synthetic evidence, never live web.
+// Controlled synthetic evidence, never live web. Uses the model only when explicit parsing cannot decide.
 import "dotenv/config";
 import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -9,7 +9,7 @@ import type { ModelAdapter, SearchResult } from "../src/core/types.ts";
 
 if (!process.argv.includes("--run-live")) {
   console.log(
-    "Dry run. --run-live consumes Groq quota with fixture-only search.",
+    "Dry run. --run-live permits Groq calls when needed, with fixture-only search.",
   );
   process.exit(0);
 }
@@ -206,9 +206,17 @@ try {
     return {
       vendor,
       expected: expected[i],
-      modelStatuses: model.map((c: any) => c.status),
+      adapterStatuses: model.map((c: any) => c.status),
+      modelStatuses: model
+        .filter((c: any) => c.extractionMethod !== "explicit-offer-parser")
+        .map((c: any) => c.status),
       finalStatuses: final.map((c) => c.status),
-      modelProvidedComparison: model.length > 0,
+      modelProvidedComparison: model.some(
+        (c: any) => c.extractionMethod !== "explicit-offer-parser",
+      ),
+      deterministicComparisonProvided: model.some(
+        (c: any) => c.extractionMethod === "explicit-offer-parser",
+      ),
       expectedStatusMatched: final.some((c) => c.status === expected[i]),
       final,
     };
@@ -219,7 +227,7 @@ try {
       {
         controlledSharedEvidence: true,
         liveWeb: false,
-        realModel: true,
+        realModel: wireContexts.length > 0,
         syntheticOriginalRecords: true,
         stamp,
         model: process.env.GROQ_MODEL || "qwen/qwen3.8-27b",

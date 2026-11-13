@@ -1423,7 +1423,7 @@ export function createKatha(options: KathaOptions) {
         );
       const publicFactQuestion =
         liveMarketQuote ||
-        /\b(?:pricing|subscription|release(?:s| notes)?|hosting|vendor|product updates?|market|official (?:plans?|documentation)|CRM (?:tools?|software|options?))\b/i.test(
+        /\b(?:pricing|subscription|release(?:s| notes)?|hosting|vendor (?:pricing|releases?|updates?)|product updates?|market|official (?:plans?|documentation)|CRM (?:tools?|software|options?))\b/i.test(
           input.text,
         );
       const privateRecordQuestion =

@@ -4,6 +4,31 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createKatha } from "../src/core/index.ts";
+test("asking which vendor our records selected does not invoke external planning", async () => {
+  const turn = await run(
+    "Which vendor do our records say is selected now?",
+    {
+      model: {
+        plan: async () => {
+          throw Error("A retained decision does not need web planning");
+        },
+        generate: async (c: any) => ({
+          answer: c.baseline.some((s: any) => s.content.includes("Cedar"))
+            ? "Cedar"
+            : "No record",
+        }),
+      },
+      search: {
+        search: async () => {
+          throw Error("No search for a retained selection");
+        },
+      },
+    },
+    { text: "The selected vendor is Cedar." },
+  );
+  assert.equal(turn.answer, "Cedar");
+  assert.deepEqual(turn.trace.searches, []);
+});
 test("an unspecified shortlist asks which retained decision before web search", async () => {
   const turn = await run(
     "Did the shortlist change?",

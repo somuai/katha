@@ -1,6 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { supportedPriceConflict } from "../src/core/pricing.ts";
+import {
+  supportedPriceConflict,
+  priceHasNumericSupport,
+} from "../src/core/pricing.ts";
+test("equivalent monetary decimal spellings retain support without accepting a different amount", () => {
+  const terms = {
+    ...offer(25.5),
+    sourceQuote:
+      "Core USD 25.50 per seat per month, US, 20 seats, unlimited contacts, tax excluded.",
+  };
+  assert.equal(priceHasNumericSupport(terms, terms.sourceQuote), true);
+  assert.equal(
+    priceHasNumericSupport({ ...terms, amount: 25.51 }, terms.sourceQuote),
+    false,
+  );
+  assert.equal(
+    priceHasNumericSupport({ ...terms, currency: "EUR" }, terms.sourceQuote),
+    false,
+  );
+});
 const offer = (amount: number) => ({
   plan: "Core",
   amount,

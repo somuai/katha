@@ -1,5 +1,11 @@
 # Controlled five-vendor price check
 
+## Explicit-offer follow-up
+
+The strict explicit-offer path now matches all five expected outcomes in this controlled fixture through the ordinary Turns validation path. It parses only complete labelled offers with stated plan, currency, amount, per-seat cadence, region, seat count, limits and tax. Conflicting-current-offer handling requires an explicit statement that neither offer supersedes the other, plus matching commercial terms. Missing or ambiguous fields and unsupported formats fall back to the model; they receive no invented defaults. Each comparison records `extractionMethod: explicit-offer-parser`.
+
+The successful fixture run issued no generation requests. Its five successful outcomes are deterministic extraction/validation evidence, not a model-accuracy score or proof of arbitrary live pricing-page coverage. The harness now separates adapter, model and deterministic comparison coverage and reports actual model usage. Earlier real-model failures below remain historical evidence.
+
 This is a synthetic, single-run integration check using the real configured model and fixture-only search. It is not live vendor pricing research, independent accuracy certification or a production benchmark. Run `node --import tsx evaluations/synthetic-known-price.ts --run-live` with the documented server keys. Raw captures are ignored under `data/evaluations/synthetic-known-price.json`.
 
 The final per-vendor run completed and recovered from one temporary provider quota response. All five vendor comparisons were produced by the model. The harness originally selected the first failed generation attempt when reporting model coverage; it now selects the last successful attempt. That reporting bug does not alter retained raw generation outputs or final verdicts.

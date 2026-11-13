@@ -47,6 +47,7 @@ export interface Citation {
   label?: string;
 }
 export interface Comparison {
+  extractionMethod?: "explicit-offer-parser";
   effectiveAt?: string;
   effectiveDateEvidence?: { sourceId: string; quote: string };
   baselinePrice?: PriceTerms;
