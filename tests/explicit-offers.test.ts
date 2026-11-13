@@ -25,6 +25,7 @@ test("complete explicit offers cover dated, equal, undated and conflicting outco
   );
   assert.equal(dated?.comparisons[0].status, "CHANGED_WITH_DATED_EVIDENCE");
   assert.equal(dated?.comparisons[0].effectiveAt, "2026-11-10");
+  assert.match(dated?.text || "", /20.*25.*USD/);
   assert.equal(
     explicitOfferAnswer(
       input(

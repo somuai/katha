@@ -1,0 +1,46 @@
+{
+  "target": 0.9,
+  "expectedCaseSetDeclared": true,
+  "scope": "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
+  "definitions": {
+    "claimPrecision": "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
+    "taskSuccess": "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
+    "latency": "Useful-answer medians exclude failed, cancelled and empty responses; quota waits are reported separately"
+  },
+  "models": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "expectedCases": 40,
+      "recordedCases": 40,
+      "missingCaseIds": [],
+      "duplicateCaseIds": [],
+      "executionCompleted": 40,
+      "answered": 40,
+      "answerCoverage": 1,
+      "reviewedCases": 40,
+      "reviewCoverage": 1,
+      "taskSuccesses": 34,
+      "taskSuccessRate": 0.85,
+      "abstentions": 7,
+      "factualAnswerCases": 34,
+      "claims": {
+        "supported": 60,
+        "unsupported": 1,
+        "unverifiable": 0,
+        "inference": 3,
+        "factual": 61,
+        "precision": 0.9836065573770492
+      },
+      "claimSupportGate": "PASSED",
+      "latency": {
+        "medianAnswerCompletionMs": 1391.664666499984,
+        "medianActiveCompletionMs": 918.5467500000123,
+        "medianFirstUsefulMs": 1391.664666499984,
+        "medianQuotaMs": 0,
+        "medianTerminalMs": 1391.664666499984,
+        "answerSamples": 40,
+        "firstUsefulSamples": 40
+      }
+    }
+  ]
+}

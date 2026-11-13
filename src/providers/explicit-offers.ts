@@ -176,7 +176,7 @@ export function explicitOfferAnswer(
             sourceId: now.source.id,
             quote: dated[0][0],
           };
-          comparison.explanation = `The retained offer explicitly states a change effective ${dated[0][1]}.`;
+          comparison.explanation = `The stated price changes from ${baseline.terms.amount} to ${now.terms.amount} ${now.terms.currency} per seat per ${now.terms.cadence}, effective ${dated[0][1]}. The complete commercial terms match.`;
         }
       }
     }

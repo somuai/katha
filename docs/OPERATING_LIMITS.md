@@ -11,7 +11,7 @@ These are application limits, not promised provider quotas. They apply to one lo
 | Search cache | Fifteen minutes; explicit freshness bypasses cache; original observation timestamp preserved; expired entries pruned and disposable caches capped at 1,000 entries |
 | Connections | Six authorization/import operations per minute, thirty listings per minute, twelve callbacks per minute; success-only thirty-second listing cache with request coalescing |
 
-Search-call budgets should not be read as guaranteed billing credits across all providers or search depths. Cached or coalesced responses still count toward the incoming connection request limit. Limits and caches stored in memory reset on restart; the monthly search budget is stored in SQLite. API keys may have additional usage outside this process.
+Search-call budgets should not be read as guaranteed billing credits across all providers or search depths. Cached or coalesced responses still count toward the incoming connection request limit. Limits and caches stored in memory reset on restart; the monthly search budget is stored in SQLite. API keys may have additional usage outside this process. A rejected model dispatch with HTTP 429 releases its unused token reservation; RPM accounting remains conservative. Provider Retry-After values are preserved, including waits longer than the turn's quota-wait allowance. The turn fails explicitly instead of retrying before the provider permits it.
 
 HTTP ingress additionally limits turn submissions to 30/minute and uploads to 12/minute per client IP, before body processing. State is bounded to 1,024 active client/bucket entries. Read, cancellation and SSE routes remain available. Rejections expose HTTP 429 and Retry-After.
 
@@ -29,4 +29,4 @@ The app is designed for a local workspace. Its admission controls are single-pro
 - Latency: first-useful-answer and completion timings; quota waiting reported separately; failed/empty answers excluded from useful-answer latency.
 - Reliability and cost: terminal failures, abstentions, evidence coverage, token usage, search attempts and cache reuse.
 
-The 90% supported-claim gate has not been established. Existing synthetic retrieval and shared-evidence model results must not be presented as production answer accuracy.
+The 13 November controlled shared-evidence review passes its numerical 90% supported-claim threshold (60/61) under a coding-agent rubric; task completion is 34/40. This is neither independent certification nor production answer accuracy. See docs/evaluations/final-shared-evidence-review.md for all failures and scope.

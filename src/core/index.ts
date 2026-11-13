@@ -1472,7 +1472,7 @@ export function createKatha(options: KathaOptions) {
         !shortlistLabels.some((label) =>
           input.text.toLowerCase().includes(label.toLowerCase()),
         );
-      if (ambiguousShortlist && !options.model?.plan) {
+      if (ambiguousShortlist) {
         const answer = `Which shortlist do you mean: ${shortlistLabels.join(" or ")}?`;
         update(id, {
           answer,
@@ -1507,8 +1507,6 @@ export function createKatha(options: KathaOptions) {
           }),
         );
         valid();
-        if (ambiguousShortlist && !plan.clarification?.trim())
-          plan.clarification = `Which shortlist do you mean: ${shortlistLabels.join(" or ")}?`;
         if (plan.clarification?.trim()) {
           update(id, {
             answer: plan.clarification.trim(),

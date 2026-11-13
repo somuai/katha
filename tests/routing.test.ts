@@ -38,7 +38,11 @@ test("an unspecified shortlist asks which retained decision before web search", 
     "Did the shortlist change?",
     {
       model: {
-        plan: async () => ({ mode: "verify", queries: ["shortlist updates"] }),
+        plan: async () => {
+          throw Error(
+            "Explicit shortlist alternatives must not need model planning",
+          );
+        },
         generate: async () => ({ answer: "Should not generate" }),
       },
       search: {

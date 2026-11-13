@@ -1882,7 +1882,7 @@ test("a later scheduled assertion cannot be stranded by an earlier whole-record 
   }
 });
 
-test("an ambiguous verification asks the planner clarification without falling through to web search", async () => {
+test("an ambiguous verification offers retained shortlist choices without web search", async () => {
   const { app, cleanup } = setup({
     model: {
       plan: async () => ({
@@ -1913,7 +1913,9 @@ test("an ambiguous verification asks the planner clarification without falling t
     });
     const turn = await wait(app, r.turnId);
     assert.equal(turn.status, "COMPLETED");
-    assert.equal(turn.answer, "Which shortlist: CRM tools or database hosts?");
+    assert.match(turn.answer, /which shortlist/i);
+    assert.match(turn.answer, /CRM/);
+    assert.match(turn.answer, /Database/);
   } finally {
     cleanup();
   }
