@@ -134,6 +134,7 @@ export interface ModelAdapter {
   }>;
   plan?(context: Omit<ModelContext, "onDelta">): Promise<{
     queries: string[];
+    usage?: { inputTokens: number; outputTokens: number };
     clarification?: string;
     mode?: "general" | "recall" | "current" | "verify";
   }>;

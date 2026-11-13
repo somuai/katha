@@ -1595,3 +1595,24 @@ test("a release comparison can repair a missing historical evidence link without
   assert.equal(answer.comparisons[0].status, "CHANGED_WITH_DATED_EVIDENCE");
   assert.deepEqual(answer.comparisons[0].baselineSourceIds, ["old"]);
 });
+
+test("unreported provider token usage is unknown rather than a fabricated zero", async () => {
+  const p = createProviders({
+    groqKey: "fixture",
+    fetcher: (async () =>
+      Response.json({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Hello.",
+                citations: [],
+                comparisons: [],
+              }),
+            },
+          },
+        ],
+      })) as typeof fetch,
+  });
+  assert.equal((await p.answer({ question: "Hello" })).usage, undefined);
+});

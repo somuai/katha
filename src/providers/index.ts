@@ -273,10 +273,16 @@ export function createProviders(options: ProviderOptions = {}) {
         );
       return {
         data: json(content),
-        usage: {
-          inputTokens: data.usage?.prompt_tokens || 0,
-          outputTokens: data.usage?.completion_tokens || 0,
-        },
+        usage:
+          Number.isFinite(data.usage?.prompt_tokens) &&
+          Number.isFinite(data.usage?.completion_tokens) &&
+          data.usage.prompt_tokens >= 0 &&
+          data.usage.completion_tokens >= 0
+            ? {
+                inputTokens: data.usage.prompt_tokens,
+                outputTokens: data.usage.completion_tokens,
+              }
+            : undefined,
       };
     } finally {
       release();
@@ -323,7 +329,7 @@ export function createProviders(options: ProviderOptions = {}) {
       })),
     });
   async function plan(input: ModelInput): Promise<Plan> {
-    const { data } = await model(
+    const { data, usage } = await model(
       [
         {
           role: "system",
@@ -360,6 +366,7 @@ export function createProviders(options: ProviderOptions = {}) {
           q.query && !/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(q.query),
       );
     return {
+      usage,
       mode: data.mode,
       queries,
       clarification:
@@ -438,16 +445,18 @@ export function createProviders(options: ProviderOptions = {}) {
         text: batch.answers.map((a) => a.text).join("\n\n"),
         citations: [...new Set(batch.answers.flatMap((a) => a.citations))],
         comparisons: batch.answers.flatMap((a) => a.comparisons),
-        usage: {
-          inputTokens: batch.answers.reduce(
-            (sum, a) => sum + (a.usage?.inputTokens || 0),
-            0,
-          ),
-          outputTokens: batch.answers.reduce(
-            (sum, a) => sum + (a.usage?.outputTokens || 0),
-            0,
-          ),
-        },
+        usage: batch.answers.every((a) => a.usage !== undefined)
+          ? {
+              inputTokens: batch.answers.reduce(
+                (sum, a) => sum + (a.usage?.inputTokens || 0),
+                0,
+              ),
+              outputTokens: batch.answers.reduce(
+                (sum, a) => sum + (a.usage?.outputTokens || 0),
+                0,
+              ),
+            }
+          : undefined,
       };
     } catch (error) {
       if (!(error instanceof ProviderError) || error.code !== "RATE_LIMIT")
@@ -466,14 +475,17 @@ export function createProviders(options: ProviderOptions = {}) {
       pendingRepairs.delete(key);
       return {
         ...repaired,
-        usage: {
-          inputTokens:
-            (pending.usage?.inputTokens || 0) +
-            (repaired.usage?.inputTokens || 0),
-          outputTokens:
-            (pending.usage?.outputTokens || 0) +
-            (repaired.usage?.outputTokens || 0),
-        },
+        usage:
+          pending.usage && repaired.usage
+            ? {
+                inputTokens:
+                  (pending.usage?.inputTokens || 0) +
+                  (repaired.usage?.inputTokens || 0),
+                outputTokens:
+                  (pending.usage?.outputTokens || 0) +
+                  (repaired.usage?.outputTokens || 0),
+              }
+            : undefined,
       };
     } catch (error) {
       if (!(error instanceof ProviderError) || error.code !== "RATE_LIMIT")
@@ -1111,6 +1123,7 @@ export function createKathaAdapters(options: ProviderOptions = {}) {
       return {
         queries: plan.queries.map((q) => q.query),
         mode: plan.mode,
+        usage: plan.usage,
         clarification: plan.clarification,
       };
     },

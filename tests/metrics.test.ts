@@ -268,3 +268,27 @@ test("a failed case cannot disappear behind perfect support on the cases that an
   assert.equal(report.claims.precision, 1);
   assert.equal(report.claimSupportGate, "EXECUTION_LIMITED");
 });
+
+test("resource metrics distinguish reported tokens, logical search attempts, cache hits and adapter dispatches", () => {
+  const first = row();
+  first.snapshot = {
+    ...first.snapshot,
+    trace: {
+      usage: { inputTokens: 120, outputTokens: 30 },
+      usageScope: "completed planning and generation",
+      searchAttempts: 3,
+      searchAdapterDispatches: 2,
+      searches: [{ cached: true }, { cached: false }],
+    },
+  } as any;
+  const report = summarizeEvaluation({
+    expectedCaseIds: ["one", "two"],
+    results: [first, row({ id: "two" })],
+  }).models[0];
+  assert.equal(report.resources.reportedInputTokens, 120);
+  assert.equal(report.resources.reportedOutputTokens, 30);
+  assert.equal(report.resources.casesWithoutReportedModelUsage, 1);
+  assert.equal(report.resources.searchAttemptsIncludingCache, 3);
+  assert.equal(report.resources.searchAdapterDispatches, 2);
+  assert.equal(report.resources.cachedSearchQueries, 1);
+});

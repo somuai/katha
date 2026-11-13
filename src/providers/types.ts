@@ -24,6 +24,7 @@ export type SearchResult = {
   error?: string;
 };
 export type Plan = {
+  usage?: { inputTokens: number; outputTokens: number };
   mode: "general" | "recall" | "current" | "verify";
   queries: SearchQuery[];
   clarification?: string;

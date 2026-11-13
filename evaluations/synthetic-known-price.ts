@@ -76,6 +76,11 @@ const adapters = createKathaAdapters({
         (m: { role: string }) => m.role === "user",
       )?.content;
       wireContexts.push({
+        phase: String(request.messages?.[0]?.content || "").startsWith(
+          "Plan a temporal chat answer",
+        )
+          ? "planning"
+          : "generation",
         maxTokens: request.max_tokens,
         context: typeof context === "string" ? JSON.parse(context) : context,
       });
@@ -246,7 +251,14 @@ try {
     JSON.stringify(
       {
         withReleases,
-        generationCalls: calls.filter((c: any) => c.kind === "generate").length,
+        coreGenerationAttempts: calls.filter((c: any) => c.kind === "generate")
+          .length,
+        wireGenerationRequests: wireContexts.filter(
+          (c: any) => c.phase === "generation",
+        ).length,
+        wirePlanningRequests: wireContexts.filter(
+          (c: any) => c.phase === "planning",
+        ).length,
         controlledSharedEvidence: true,
         liveWeb: false,
         realModel: wireContexts.length > 0,

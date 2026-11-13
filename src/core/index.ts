@@ -989,6 +989,7 @@ export function createKatha(options: KathaOptions) {
     query: string,
     signal: AbortSignal,
     fresh: boolean,
+    onDispatch?: () => void,
   ): Promise<{
     query: string;
     results: SearchResult[];
@@ -1025,6 +1026,7 @@ export function createKatha(options: KathaOptions) {
     ).run(month);
     const combined = AbortSignal.any([signal, AbortSignal.timeout(12000)]);
     try {
+      onDispatch?.();
       const results = (
         await options.search.search(query, { signal: combined, fresh })
       )
@@ -1407,7 +1409,32 @@ export function createKatha(options: KathaOptions) {
         ]),
         previousObservationIds,
         searches: [],
+        searchAttempts: 0,
+        searchAdapterDispatches: 0,
         coverage: null,
+      };
+      const recordUsage = (
+        phase: "planning" | "generation",
+        usage?: { inputTokens: number; outputTokens: number },
+      ) => {
+        if (!usage) return;
+        const breakdown = (trace.usageBreakdown ||= {}) as Record<
+          string,
+          { inputTokens: number; outputTokens: number }
+        >;
+        breakdown[phase] = usage;
+        trace.usage = {
+          inputTokens: Object.values(breakdown).reduce(
+            (sum, u) => sum + u.inputTokens,
+            0,
+          ),
+          outputTokens: Object.values(breakdown).reduce(
+            (sum, u) => sum + u.outputTokens,
+            0,
+          ),
+        };
+        trace.usageScope =
+          "reported completed planning and generation responses; excludes unreported failed attempts";
       };
       update(id, {
         sourceIds: local.flatMap((s) => [
@@ -1686,6 +1713,7 @@ export function createKatha(options: KathaOptions) {
           }),
         );
         valid();
+        recordUsage("planning", plan.usage);
         const clarification =
           typeof plan.clarification === "string"
             ? plan.clarification.trim()
@@ -1778,6 +1806,10 @@ export function createKatha(options: KathaOptions) {
                 queries[n],
                 controller.signal,
                 verification || /fresh|latest|today/i.test(input.text),
+                () => {
+                  trace.searchAdapterDispatches =
+                    Number(trace.searchAdapterDispatches || 0) + 1;
+                },
               );
               if (
                 outputs[n].error &&
@@ -1793,6 +1825,10 @@ export function createKatha(options: KathaOptions) {
                   queries[n],
                   controller.signal,
                   true,
+                  () => {
+                    trace.searchAdapterDispatches =
+                      Number(trace.searchAdapterDispatches || 0) + 1;
+                  },
                 );
               }
             }
@@ -1940,7 +1976,7 @@ export function createKatha(options: KathaOptions) {
         }),
       );
       valid();
-      if (result.usage) trace.usage = result.usage;
+      recordUsage("generation", result.usage);
       if (deltaBuffer) {
         streamed += deltaBuffer;
         update(id, { answer: streamed });

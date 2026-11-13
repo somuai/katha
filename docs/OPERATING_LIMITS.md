@@ -33,6 +33,10 @@ When inference quota or a model service prevents answering, already-materialized
 
 The app is designed for a local workspace. Its admission controls are single-process and do not provide distributed quota enforcement or user authentication. Hosting it for unrelated public users requires authentication, per-user isolation and ingress limits before exposing private connected accounts.
 
+## Usage reporting
+
+Turn traces retain reported planning and generation tokens separately and together. Missing provider usage stays unknown, never an invented zero. Deterministic offer extraction reports zero model tokens because it makes no inference request. Usage covers completed adapter responses, not a billing invoice: unreported failed attempts, earlier attachment preparation/transcription and unrelated key usage can be absent. Search traces distinguish logical attempts/cache hits from search-adapter dispatches. The controlled runner separately counts core generation attempts and actual planning/generation HTTP requests.
+
 ## Evaluation definitions
 
 - Retrieval recall@5: whether the expected original record is among the first five retrieved records.

@@ -14,7 +14,14 @@ export interface EvaluationRow {
     status?: string;
     answer?: string;
     error?: string | null;
-    trace?: { modelFallback?: { generatedAnswer?: boolean } };
+    trace?: {
+      modelFallback?: { generatedAnswer?: boolean };
+      usage?: { inputTokens?: number; outputTokens?: number };
+      usageScope?: string;
+      searchAttempts?: number;
+      searchAdapterDispatches?: number;
+      searches?: { cached?: boolean }[];
+    };
     sources?: { id: string; content?: string }[];
   };
   review?: {
@@ -98,12 +105,47 @@ export function summarizeEvaluation(
       factualAnswerCases = 0,
       evidenceOnlyCases = 0,
       executionErrorCases = 0;
+    const resources = {
+      reportedInputTokens: 0,
+      reportedOutputTokens: 0,
+      casesWithReportedModelUsage: 0,
+      casesWithoutReportedModelUsage: 0,
+      searchAttemptsIncludingCache: 0,
+      searchAdapterDispatches: 0,
+      casesWithReportedDispatchCount: 0,
+      cachedSearchQueries: 0,
+      reportedSearchQueries: 0,
+      usageScopes: [] as string[],
+    };
     const wall: number[] = [],
       active: number[] = [],
       first: number[] = [],
       quota: number[] = [],
       terminal: number[] = [];
     for (const row of rows) {
+      const trace = row.snapshot?.trace,
+        usage = trace?.usage;
+      if (finite(usage?.inputTokens) && finite(usage?.outputTokens)) {
+        resources.reportedInputTokens += usage.inputTokens;
+        resources.reportedOutputTokens += usage.outputTokens;
+        resources.casesWithReportedModelUsage++;
+        const scope =
+          trace?.usageScope || "legacy or unspecified response usage";
+        if (!resources.usageScopes.includes(scope))
+          resources.usageScopes.push(scope);
+      }
+      if (finite(trace?.searchAttempts))
+        resources.searchAttemptsIncludingCache += trace.searchAttempts;
+      if (finite(trace?.searchAdapterDispatches)) {
+        resources.searchAdapterDispatches += trace.searchAdapterDispatches;
+        resources.casesWithReportedDispatchCount++;
+      }
+      if (Array.isArray(trace?.searches)) {
+        resources.reportedSearchQueries += trace.searches.length;
+        resources.cachedSearchQueries += trace.searches.filter(
+          (s) => s.cached === true,
+        ).length;
+      }
       const completed =
         !row.error &&
         ["COMPLETED", "PARTIAL"].includes(row.snapshot?.status || "");
@@ -180,6 +222,8 @@ export function summarizeEvaluation(
       }
       if (factual) factualAnswerCases++;
     }
+    resources.casesWithoutReportedModelUsage =
+      expected.length - resources.casesWithReportedModelUsage;
     const factual = counts.supported + counts.unsupported + counts.unverifiable;
     const precision = factual ? counts.supported / factual : null;
     const completeRun =
@@ -219,6 +263,7 @@ export function summarizeEvaluation(
       factualAnswerCases,
       claims: { ...counts, factual, precision },
       claimSupportGate,
+      resources,
       latency: {
         medianAnswerCompletionMs: median(wall),
         medianActiveCompletionMs: median(active),
@@ -236,6 +281,8 @@ export function summarizeEvaluation(
     scope:
       "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
     definitions: {
+      resources:
+        "Reported response tokens only, not a billing total; absent usage is unknown, not zero. Search attempts include cache/budget checks; adapter dispatches are separate and are not invoice credits. Attachment preparation and unreported failed responses are outside turn usage.",
       claimPrecision:
         "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
       taskSuccess:
