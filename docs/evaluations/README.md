@@ -1,5 +1,7 @@
 # Evaluation evidence
 
+The [attachment audit](../ATTACHMENT_AUDIT.md) adds 13 scoped default-model live checks and a separate CSV comparison, including the mechanically-passing recommendation later rejected by manual review. It is distinct from the controlled 40-case support evaluation below. Source-only recovery is reported separately from full answers.
+
 ## Latest review and platform proof
 
 The [13 November full-turn review](final-shared-evidence-review.md) covers 40 cases at `cb1368f`: 34 full tasks met and 60/61 factual propositions supported under a coding-agent review. This passes the numerical 90% threshold for that controlled shared-evidence set only, not independent or production certification. The complete sanitized synthetic/public-source ledger and metrics are committed alongside the report. Follow-up clarity fixes are identified separately; frozen results are not retroactively changed.

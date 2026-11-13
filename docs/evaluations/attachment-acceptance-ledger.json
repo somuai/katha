@@ -1,0 +1,960 @@
+{
+  "label": "Targeted real-provider HTTP acceptance episodes; not statistical accuracy or independent certification. All exported file data is synthetic.",
+  "reviewer": "Coding-agent review against known fixture values; the recommendation false-positive is retained, not erased.",
+  "fixtureFacts": {
+    "csvDataRows": 120,
+    "blankCells": 0,
+    "totalAmount": "132.10",
+    "Customer120Amount": "120.20",
+    "Monday": {
+      "present": 40,
+      "absent": 20
+    },
+    "Tuesday": {
+      "present": 60,
+      "absent": 0
+    },
+    "overallStatus": {
+      "present": 100,
+      "absent": 20
+    },
+    "stage": {
+      "qualified": 90,
+      "new": 30
+    },
+    "image": {
+      "customer": "Falcon",
+      "budget": "USD 700"
+    }
+  },
+  "runs": [
+    {
+      "revision": "3dd691640df0529b22ebfc7db536f70d8633101d",
+      "startedAt": "2026-11-13T11:18:38.789Z",
+      "model": "qwen/qwen3.8-27b (default configuration for this earlier capture)",
+      "mode": null,
+      "uploads": [
+        {
+          "name": "crm-card.png",
+          "sha256": "c297a5127d8bb05b8d92e4e614f3ba190f23ffe8524be22392df9397447c0e27",
+          "method": "model-image-description",
+          "warnings": [
+            "Description is derived from the image. Review uncertain text against the original."
+          ]
+        },
+        {
+          "name": "crm.csv",
+          "sha256": "03edda38a0063ee61e930394f55e2b372b3251f28af2e7fca7f282d120fd12c3",
+          "method": "utf8-text",
+          "warnings": []
+        }
+      ],
+      "passed": 3,
+      "total": 10,
+      "recordedCases": null,
+      "missingCaseIds": null,
+      "evidenceOnlyResponses": null,
+      "id": "default_mixed_quota",
+      "sourceCapture": "attachment-acceptance-2026-11-13T11-18-38-789Z.json",
+      "sourceSha256": "a19ed54defe989e93e31bf6a1456d0808a4f7c0fa093f318649967b1e0cacc6f",
+      "mechanicalChecksPassed": 3,
+      "manualFullTasksMet": 3,
+      "reviewNotes": "Seven cases blocked by provider daily quota before evidence-only recovery was added.",
+      "results": [
+        {
+          "id": "image-initial",
+          "question": "Which customer and budget are shown in this image?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The image shows customer **Falcon** with a budget of **USD 700** [af48ad6b-71e1-4d32-b3f6-969dc5ec2887].",
+          "citations": [
+            {
+              "sourceId": "af48ad6b-71e1-4d32-b3f6-969dc5ec2887"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "Falcon",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "image-followup",
+          "question": "What was that budget again?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The budget for customer Falcon is USD 700 [af48ad6b-71e1-4d32-b3f6-969dc5ec2887].",
+          "citations": [
+            {
+              "sourceId": "af48ad6b-71e1-4d32-b3f6-969dc5ec2887"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "image-after-restart",
+          "question": "What customer and budget were shown in crm-card.png?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The image shows customer **Falcon** with a budget of **USD 700** [af48ad6b-71e1-4d32-b3f6-969dc5ec2887].",
+          "citations": [
+            {
+              "sourceId": "af48ad6b-71e1-4d32-b3f6-969dc5ec2887"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "Falcon",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-decimal-total",
+          "question": "What is the exact sum of amount across all 120 rows in this CSV?",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "132\\.1(?:0)?\\b",
+              "expected": "present",
+              "pass": false
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        },
+        {
+          "id": "csv-late-row",
+          "question": "What amount is listed for Customer120 in this CSV?",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "120\\.2(?:0)?\\b",
+              "expected": "present",
+              "pass": false
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        },
+        {
+          "id": "csv-monday",
+          "question": "What was Monday attendance: how many were present and absent in this CSV?",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "\\b40\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b40\\b",
+              "expected": "present",
+              "pass": false
+            },
+            {
+              "pattern": "\\b20\\b[^.\\n]{0,35}\\babsent\\b|\\babsent\\b[^.\\n]{0,35}\\b20\\b",
+              "expected": "present",
+              "pass": false
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        },
+        {
+          "id": "csv-tuesday",
+          "question": "How many were present and absent on Tuesday in this CSV?",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "\\b60\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b60\\b",
+              "expected": "present",
+              "pass": false
+            },
+            {
+              "pattern": "\\b(?:0|zero|no|none)\\b[^.\\n]{0,30}\\babsen(?:t|ce|ces)\\b|\\babsen(?:t|ce|ces)\\b[^.\\n]{0,30}\\b(?:0|zero|none)\\b",
+              "expected": "present",
+              "pass": false
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        },
+        {
+          "id": "csv-recommendation",
+          "question": "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "suggest|recommend|could|consider|next step",
+              "expected": "present",
+              "pass": false
+            },
+            {
+              "pattern": "your (?:sales )?team (?:of|has) 120|120 employees",
+              "expected": "absent",
+              "pass": true
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        },
+        {
+          "id": "image-deleted",
+          "question": "What customer and budget were shown in crm-card.png? Use retained sources only.",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "no |not |cannot|can't|missing|unavailable",
+              "expected": "present",
+              "pass": false
+            },
+            {
+              "pattern": "Falcon",
+              "expected": "absent",
+              "pass": true
+            },
+            {
+              "pattern": "\\b700\\b",
+              "expected": "absent",
+              "pass": true
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        },
+        {
+          "id": "image-restored",
+          "question": "What customer and budget were shown in crm-card.png?",
+          "status": "FAILED",
+          "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+          "answer": "",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "Falcon",
+              "expected": "present",
+              "pass": false
+            },
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": false
+            }
+          ],
+          "passed": false,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        }
+      ]
+    },
+    {
+      "revision": "08ce413827906367cb4217fe5345f04ad32dd493",
+      "startedAt": "2026-11-13T11:24:12.864Z",
+      "model": "openai/gpt-oss-120b",
+      "mode": "CSV text comparison",
+      "uploads": [
+        {
+          "name": "crm.csv",
+          "sha256": "03edda38a0063ee61e930394f55e2b372b3251f28af2e7fca7f282d120fd12c3",
+          "method": "utf8-text",
+          "warnings": []
+        }
+      ],
+      "passed": 5,
+      "total": 5,
+      "recordedCases": null,
+      "missingCaseIds": null,
+      "evidenceOnlyResponses": null,
+      "id": "candidate_csv_before_quality_fix",
+      "sourceCapture": "attachment-acceptance-2026-11-13T11-24-12-864Z.json",
+      "sourceSha256": "14201216c55f2a91381f184f54ccdaad8525624046882685c4b0f77e1dd6f26e",
+      "mechanicalChecksPassed": 5,
+      "manualFullTasksMet": 4,
+      "reviewNotes": "Mechanical checks passed 5/5, but manual review rejected the unsupported claim that an unshown row was incomplete.",
+      "results": [
+        {
+          "id": "csv-decimal-total",
+          "question": "What is the exact sum of amount across all 120 rows in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The exact sum of the\u202famount\u202fcolumn across all 120 rows is\u202f132.10\u202f[ d2a28e1e-81e8-4950-b23d-93d9d8fabb38 ]",
+          "citations": [
+            {
+              "sourceId": "d2a28e1e-81e8-4950-b23d-93d9d8fabb38"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "132\\.1(?:0)?\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-late-row",
+          "question": "What amount is listed for Customer120 in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The amount listed for Customer120 is\u202f120.20\u202f[ d2a28e1e-81e8-4950-b23d-93d9d8fabb38 ]",
+          "citations": [
+            {
+              "sourceId": "d2a28e1e-81e8-4950-b23d-93d9d8fabb38"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "120\\.2(?:0)?\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-monday",
+          "question": "What was Monday attendance: how many were present and absent in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "For Monday there were 40 present and 20 absent attendees.",
+          "citations": [
+            {
+              "sourceId": "d2a28e1e-81e8-4950-b23d-93d9d8fabb38"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "\\b40\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b40\\b",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "\\b20\\b[^.\\n]{0,35}\\babsent\\b|\\babsent\\b[^.\\n]{0,35}\\b20\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-tuesday",
+          "question": "How many were present and absent on Tuesday in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "On Tuesday there were 60 present and 0 absent attendees.",
+          "citations": [
+            {
+              "sourceId": "d2a28e1e-81e8-4950-b23d-93d9d8fabb38"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "\\b60\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b60\\b",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "\\b(?:0|zero|no|none)\\b[^.\\n]{0,30}\\babsen(?:t|ce|ces)\\b|\\babsen(?:t|ce|ces)\\b[^.\\n]{0,30}\\b(?:0|zero|none)\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-recommendation",
+          "question": "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "Observed facts:\n- The CSV contains 120 rows covering customers across Monday and Tuesday, with 60 entries for each day. [d2a28e1e-81e8-4950-b23d-93d9d8fabb38]\n- Overall status counts are 100 present and 20 absent. [d2a28e1e-81e8-4950-b23d-93d9d8fabb38]\n- Stage distribution is 90 qualified and 30 new. [d2a28e1e-81e8-4950-b23d-93d9d8fabb38]\n- The sum of the \"amount\" column across all rows is 132.10. [d2a28e1e-81e8-4950-b23d-93d9d8fabb38]\n\nSuggestions (next steps):\n1. Verify the incomplete rows at the end of the file (e.g., Customer77) and fill missing fields to ensure data integrity.\n2. Segment customers by stage (qualified vs. new) and prioritize follow\u2011up actions for qualified customers with higher amounts.\n3. Analyze the 20 absent entries to understand reasons for non\u2011attendance and develop re\u2011engagement strategies.\n4. Since Tuesday has the same number of entries as Monday, consider balancing outreach efforts across both days to avoid over\u2011loading any single day.\n5. Use the total amount (132.10) as a baseline for revenue forecasting and compare future periods to track growth.\n6. Implement a regular data audit process to catch incomplete or malformed rows early.",
+          "citations": [
+            {
+              "sourceId": "d2a28e1e-81e8-4950-b23d-93d9d8fabb38"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "suggest|recommend|could|consider|next step",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "your (?:sales )?team (?:of|has) 120|120 employees",
+              "expected": "absent",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": false
+        }
+      ]
+    },
+    {
+      "revision": "0e074f83e834fadae7298db92c6fb2caaec62f94",
+      "startedAt": "2026-11-13T11:29:30.498Z",
+      "model": "openai/gpt-oss-120b",
+      "mode": "CSV text comparison",
+      "uploads": [
+        {
+          "name": "crm.csv",
+          "sha256": "03edda38a0063ee61e930394f55e2b372b3251f28af2e7fca7f282d120fd12c3",
+          "method": "utf8-text",
+          "warnings": []
+        }
+      ],
+      "passed": 5,
+      "total": 5,
+      "recordedCases": null,
+      "missingCaseIds": null,
+      "evidenceOnlyResponses": null,
+      "id": "candidate_csv_after_quality_fix",
+      "sourceCapture": "attachment-acceptance-2026-11-13T11-29-30-498Z.json",
+      "sourceSha256": "e336362a5ca2d09ecb59917554055836d822716ac613258789a2e91b4cd7f21e",
+      "mechanicalChecksPassed": 5,
+      "manualFullTasksMet": 5,
+      "reviewNotes": "All numeric facts match the synthetic file. Recommendations are suggestions; field semantics remain a user/domain concern.",
+      "results": [
+        {
+          "id": "csv-decimal-total",
+          "question": "What is the exact sum of amount across all 120 rows in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The sum of the\u202famount\u202fcolumn across all 120 rows is\u202f132.10\u202f[1bdfb50a-4f91-436d-93a0-ee5adb43b32d].",
+          "citations": [
+            {
+              "sourceId": "1bdfb50a-4f91-436d-93a0-ee5adb43b32d"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "132\\.1(?:0)?\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-late-row",
+          "question": "What amount is listed for Customer120 in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The amount listed for Customer120 is 120.20 [1bdfb50a-4f91-436d-93a0-ee5adb43b32d].",
+          "citations": [
+            {
+              "sourceId": "1bdfb50a-4f91-436d-93a0-ee5adb43b32d"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "120\\.2(?:0)?\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-monday",
+          "question": "What was Monday attendance: how many were present and absent in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "On Monday there were 40 present and 20 absent entries in the CSV. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]",
+          "citations": [
+            {
+              "sourceId": "1bdfb50a-4f91-436d-93a0-ee5adb43b32d"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "\\b40\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b40\\b",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "\\b20\\b[^.\\n]{0,35}\\babsent\\b|\\babsent\\b[^.\\n]{0,35}\\b20\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-tuesday",
+          "question": "How many were present and absent on Tuesday in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "On Tuesday there were 60 present entries and 0 absent entries in the CSV. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]",
+          "citations": [
+            {
+              "sourceId": "1bdfb50a-4f91-436d-93a0-ee5adb43b32d"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "\\b60\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b60\\b",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "\\b(?:0|zero|no|none)\\b[^.\\n]{0,30}\\babsen(?:t|ce|ces)\\b|\\babsen(?:t|ce|ces)\\b[^.\\n]{0,30}\\b(?:0|zero|none)\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-recommendation",
+          "question": "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "Observed facts:\n- The CSV contains 120 rows covering customers, days, status, stage, and amount. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]\n- Day distribution: 60 entries for Monday and 60 for Tuesday. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]\n- Status distribution overall: 100 present, 20 absent. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]\n- Stage distribution: 90 qualified, 30 new. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]\n- Total amount summed across all rows is 132.10. [1bdfb50a-4f91-436d-93a0-ee5adb43b32d]\n- Monday attendance: 40 present, 20 absent (derived from earlier Katha response). [9cb383d8-de99-4ae3-be42-9f5b055fd69e]\n- Tuesday attendance: 60 present, 0 absent (derived from earlier Katha response). [1f90f50a-bc6a-42ef-b35f-5b884078a8ea]\n\nSuggestions (next steps):\n1. Verify the attendance counts for each day by directly counting rows in the CSV to confirm the derived numbers.\n2. Segment customers by stage (qualified vs. new) to prioritize follow\u2011up actions.\n3. Analyze the amount field per customer to identify high\u2011value accounts for targeted outreach.\n4. Create a dashboard showing day\u2011wise attendance and status trends to monitor engagement over time.\n5. If any customers are marked \"absent,\" consider reaching out to understand reasons and improve future attendance.\n6. Export the CSV to a CRM system and tag records with day, status, and stage for easier filtering and reporting.\n7. Set up regular (e.g., weekly) reviews of the CSV data to track changes in attendance, stage progression, and total amount.",
+          "citations": [
+            {
+              "sourceId": "1bdfb50a-4f91-436d-93a0-ee5adb43b32d"
+            },
+            {
+              "sourceId": "9cb383d8-de99-4ae3-be42-9f5b055fd69e"
+            },
+            {
+              "sourceId": "1f90f50a-bc6a-42ef-b35f-5b884078a8ea"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "suggest|recommend|could|consider|next step",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "your (?:sales )?team (?:of|has) 120|120 employees",
+              "expected": "absent",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": null,
+          "manualTaskSuccess": true
+        }
+      ]
+    },
+    {
+      "revision": "f7e0dc5c27025b8e6817587dfa142fac96f90a73",
+      "startedAt": "2026-11-13T14:12:23.392Z",
+      "model": "qwen/qwen3.8-27b",
+      "mode": "CSV text comparison",
+      "uploads": [
+        {
+          "name": "crm.csv",
+          "sha256": "03edda38a0063ee61e930394f55e2b372b3251f28af2e7fca7f282d120fd12c3",
+          "method": "utf8-text",
+          "warnings": []
+        }
+      ],
+      "passed": 5,
+      "total": 5,
+      "recordedCases": null,
+      "missingCaseIds": null,
+      "evidenceOnlyResponses": 0,
+      "id": "default_csv_final",
+      "sourceCapture": "attachment-acceptance-2026-11-13T14-12-23-392Z.json",
+      "sourceSha256": "08925c3a62a3c8f9ef17ee6ac142be738a555b2990acbcbf52d297edd4061f65",
+      "mechanicalChecksPassed": 5,
+      "manualFullTasksMet": 5,
+      "reviewNotes": "Default model; all five answers manually checked against complete CSV facts. No source-only recovery was used.",
+      "results": [
+        {
+          "id": "csv-decimal-total",
+          "question": "What is the exact sum of amount across all 120 rows in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The exact sum of the amount column across all 120 rows is 132.10 [46753c7b-8165-4708-aaf0-82872e1cd8ed].",
+          "citations": [
+            {
+              "sourceId": "46753c7b-8165-4708-aaf0-82872e1cd8ed"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "132\\.1(?:0)?\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-late-row",
+          "question": "What amount is listed for Customer120 in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The amount listed for Customer120 is 120.20 [46753c7b-8165-4708-aaf0-82872e1cd8ed].",
+          "citations": [
+            {
+              "sourceId": "46753c7b-8165-4708-aaf0-82872e1cd8ed"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "120\\.2(?:0)?\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-monday",
+          "question": "What was Monday attendance: how many were present and absent in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "For Monday, the CSV shows 40 present and 20 absent [46753c7b-8165-4708-aaf0-82872e1cd8ed].",
+          "citations": [
+            {
+              "sourceId": "46753c7b-8165-4708-aaf0-82872e1cd8ed"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "\\b40\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b40\\b",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "\\b20\\b[^.\\n]{0,35}\\babsent\\b|\\babsent\\b[^.\\n]{0,35}\\b20\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-tuesday",
+          "question": "How many were present and absent on Tuesday in this CSV?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "For Tuesday, the CSV shows 60 present and 0 absent [46753c7b-8165-4708-aaf0-82872e1cd8ed].",
+          "citations": [
+            {
+              "sourceId": "46753c7b-8165-4708-aaf0-82872e1cd8ed"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "\\b60\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b60\\b",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "\\b(?:0|zero|no|none)\\b[^.\\n]{0,30}\\babsen(?:t|ce|ces)\\b|\\babsen(?:t|ce|ces)\\b[^.\\n]{0,30}\\b(?:0|zero|none)\\b",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "csv-recommendation",
+          "question": "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "Observed facts from the CRM CSV: 120 customer records; 100 present and 20 absent overall; 90 qualified and 30 new; total amount 132.10 [46753c7b-8165-4708-aaf0-82872e1cd8ed]. Monday: 40 present, 20 absent [8c9aa9e4-7865-4384-b883-b30df91618db]. Tuesday: 60 present, 0 absent [199495ba-922b-4a0a-a9c8-dad3ed475e87].\n\nSuggestions (not facts): prioritize follow-up with the 30 \u201cnew\u201d customers; review the 20 absent records to confirm contact status; and segment the 90 \u201cqualified\u201d customers by amount to target higher-value opportunities. These are recommendations, not established facts.",
+          "citations": [
+            {
+              "sourceId": "46753c7b-8165-4708-aaf0-82872e1cd8ed"
+            },
+            {
+              "sourceId": "8c9aa9e4-7865-4384-b883-b30df91618db"
+            },
+            {
+              "sourceId": "199495ba-922b-4a0a-a9c8-dad3ed475e87"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "suggest|recommend|could|consider|next step",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "your (?:sales )?team (?:of|has) 120|120 employees",
+              "expected": "absent",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        }
+      ]
+    },
+    {
+      "revision": "c9e1c272cc0850608fe1e54a9d61ed20bded4fcc",
+      "startedAt": "2026-11-13T14:16:51.352Z",
+      "model": "qwen/qwen3.8-27b",
+      "mode": "image retention acceptance",
+      "uploads": [
+        {
+          "name": "crm-card.png",
+          "sha256": "c297a5127d8bb05b8d92e4e614f3ba190f23ffe8524be22392df9397447c0e27",
+          "method": "model-image-description",
+          "warnings": [
+            "Description is derived from the image. Review uncertain text against the original."
+          ]
+        }
+      ],
+      "passed": 5,
+      "total": 5,
+      "recordedCases": 5,
+      "missingCaseIds": [],
+      "evidenceOnlyResponses": 0,
+      "id": "default_image_final",
+      "sourceCapture": "attachment-acceptance-2026-11-13T14-16-51-352Z.json",
+      "sourceSha256": "46eb03ab2d4817f593ddc6f89bf620240270c3b010ffbdfc81bfd140e51a47f3",
+      "mechanicalChecksPassed": 5,
+      "manualFullTasksMet": 5,
+      "reviewNotes": "Default model; includes correct refusal after trash and successful recall after restoration. No source-only recovery was used.",
+      "results": [
+        {
+          "id": "image-initial",
+          "question": "Which customer and budget are shown in this image?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The image shows customer **Falcon** with a budget of **USD 700** [77bfb119-5f21-499d-82ce-3ec8d9773789].",
+          "citations": [
+            {
+              "sourceId": "77bfb119-5f21-499d-82ce-3ec8d9773789"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "Falcon",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "image-followup",
+          "question": "What was that budget again?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The budget for customer Falcon is USD 700 [77bfb119-5f21-499d-82ce-3ec8d9773789].",
+          "citations": [
+            {
+              "sourceId": "77bfb119-5f21-499d-82ce-3ec8d9773789"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "image-after-restart",
+          "question": "What customer and budget were shown in crm-card.png?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The image shows customer **Falcon** with a budget of **USD 700** [77bfb119-5f21-499d-82ce-3ec8d9773789].",
+          "citations": [
+            {
+              "sourceId": "77bfb119-5f21-499d-82ce-3ec8d9773789"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "Falcon",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "image-deleted",
+          "question": "What customer and budget were shown in crm-card.png? Use retained sources only.",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "I don't have the contents of crm-card.png in the retained sources, so I can't confirm the customer or budget shown.",
+          "citations": [],
+          "assertions": [
+            {
+              "pattern": "no |not |cannot|can't|missing|unavailable",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "Falcon",
+              "expected": "absent",
+              "pass": true
+            },
+            {
+              "pattern": "\\b700\\b",
+              "expected": "absent",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        },
+        {
+          "id": "image-restored",
+          "question": "What customer and budget were shown in crm-card.png?",
+          "status": "COMPLETED",
+          "error": null,
+          "answer": "The retained source for crm-card.png shows customer **Falcon** and a budget of **USD 700** [77bfb119-5f21-499d-82ce-3ec8d9773789].",
+          "citations": [
+            {
+              "sourceId": "77bfb119-5f21-499d-82ce-3ec8d9773789"
+            }
+          ],
+          "assertions": [
+            {
+              "pattern": "Falcon",
+              "expected": "present",
+              "pass": true
+            },
+            {
+              "pattern": "700",
+              "expected": "present",
+              "pass": true
+            }
+          ],
+          "passed": true,
+          "evidenceOnly": false,
+          "manualTaskSuccess": true
+        }
+      ]
+    }
+  ],
+  "privatePdfSummary": {
+    "sourceCaptureSha256": "eebcbb92f36ae78040ca86d1b861eb5395420765050e5c99dacd93a5e3126e2a",
+    "sourceCapture": "Private owner-PDF capture retained locally; document, names and responses are deliberately not exported.",
+    "pageCount": 50,
+    "checks": [
+      {
+        "id": "named-contributor",
+        "status": "COMPLETED",
+        "evidenceOnly": false,
+        "manualTaskSuccess": true
+      },
+      {
+        "id": "pronoun-followup",
+        "status": "COMPLETED",
+        "evidenceOnly": false,
+        "manualTaskSuccess": true
+      },
+      {
+        "id": "findings",
+        "status": "COMPLETED",
+        "evidenceOnly": false,
+        "manualTaskSuccess": true
+      }
+    ]
+  },
+  "latestDefaultTargetedChecks": {
+    "csv": 5,
+    "imageLifecycle": 5,
+    "privatePdf": 3,
+    "total": 13,
+    "manualTasksMet": 13,
+    "note": "Separate scoped runs, not one randomized or independently reviewed benchmark. The short-ID regression was subsequently checked by the contract suite; these live captures are pinned to their recorded revisions."
+  }
+}

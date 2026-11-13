@@ -15,6 +15,10 @@ Search-call budgets should not be read as guaranteed billing credits across all 
 
 HTTP ingress additionally limits turn submissions to 30/minute and uploads to 12/minute per client IP, before body processing. State is bounded to 1,024 active client/bucket entries. Read, cancellation and SSE routes remain available. Rejections expose HTTP 429 and Retry-After.
 
+## Inference outages
+
+When inference quota or a model service prevents answering, already-materialized eligible records can be returned as a clearly labelled `PARTIAL` evidence-only response. No model answer or current verification is claimed; the trace records `generatedAnswer: false`. Cancellation and source deletion still take precedence. This does not restore provider capacity or replace model-based recommendations. Upload preparation that is throttled returns HTTP429 and Retry-After without claiming that a file was imported.
+
 ## Remaining deployment boundaries
 
 The app is designed for a local workspace. Its admission controls are single-process and do not provide distributed quota enforcement or user authentication. Hosting it for unrelated public users requires authentication, per-user isolation and ingress limits before exposing private connected accounts.

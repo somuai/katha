@@ -1,17 +1,12 @@
-# Current continuation summary — 13 November 2026
+# Current attachment release — 13 November 2026
 
-The evaluated runtime revision `cb1368f` fixes page-specific PDF follow-ups and uses user-stated identity from eligible prior conversations, with conversation-only scope and deletion respected. It also keeps corrected retained decisions out of external planning, validates complete explicit commercial offers before using a bounded model fallback, and preserves provider quota guidance without leaking token reservations.
+Runtime `416d92e` passes **199 tests**, TypeScript, lint and production build. It fixes contributor selection, durable pronoun references, dates inside uploaded tables, exact decimal CSV calculations, complete-row excerpts, data-quality disclosure, short record IDs, and bounded citation repair. Provider outages retain clearly labelled source-only evidence without pretending to generate an answer or verify a change.
 
-- 179 public-interface/provider regression tests pass; TypeScript, formatting and production build pass.
-- Evaluated-revision CI passes clean install, tests and build on Windows/Linux/macOS, plus browser journeys on Chromium/Firefox/WebKit: https://github.com/somuai/katha/actions/runs/43402177845 .
-- The user's real 50-page PDF was checked locally using a separate synthetic conversation containing the prior stated name. The contribution and physical page 44 were recovered correctly. The private document and extracted personal material are not committed.
-- The controlled five-vendor explicit-offer fixture produces all five expected outcomes through Turns validation without generation calls. This is not arbitrary live-pricing accuracy.
-- The 40-case retrieval ablation remains recent 0/40, lexical 32/40, hybrid 40/40; the distractor fixture and retrieval metric do not establish answer accuracy.
-- The fresh 40-case shared-evidence review at this revision found 34/40 full tasks and 60/61 supported factual propositions (98.4%) under a coding-agent rubric. This is a controlled-set result, not independent or production certification. See docs/evaluations/final-shared-evidence-review.md. Historical two-model results remain historical.
-- Follow-up clarity fixes display both dated price amounts and deterministic CRM/database shortlist choices; they have passing regressions and are not retroactively included in the frozen answer score.
-- Owner-confirmed microphone and VoiceOver checks remain distinct from automated CI. Physical-mobile testing, HubSpot/Salesforce account validation and Shopify are deferred. This is a single-user local workspace, not an authenticated public multi-tenant service.
+The default model passed **13 targeted live functional checks** across a real owner PDF, synthetic CSV data and an image lifecycle. The CSV comparison also exposed and corrected an unsupported incomplete-row recommendation. Earlier quota failures remain recorded. Read [the attachment audit](ATTACHMENT_AUDIT.md) and [synthetic ledger](evaluations/attachment-acceptance-ledger.json) for exact scope and limitations.
 
-The sections below retain earlier snapshots and limitations; the dated current summary above supersedes their older platform/implementation status.
+Current runtime CI: https://github.com/somuai/katha/actions/runs/43442165345 . Physical mobile and the deferred external-account integrations remain deferred. The 40-case 98.4% support result belongs to its frozen older controlled set, not these live acceptance checks or production traffic.
+
+Earlier snapshots below are retained for history and do not override the dated current summary.
 
 # Implementation status
 

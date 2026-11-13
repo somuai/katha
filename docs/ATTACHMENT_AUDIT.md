@@ -11,24 +11,35 @@ This audit separates file retention, preparation, retrieval, answer quality and 
 - CSV summaries handled integers only. Bounded fixed-point arithmetic now computes exact decimal totals and reports excluded blank cells. Exact-value subset counts are clearly labelled separately from whole-file counts.
 - Invalid CSV shape was accepted as plain text. HTTP upload now rejects malformed quoting/inconsistent columns before import; blank/duplicate headers warn and disable named-column aggregates.
 - An invalid generated citation could fail the entire answer. One bounded repair may use only retained IDs; persistent invalid IDs, including invented inline UUIDs, fail closed. Repair reuses the existing quota/cancellation limits.
+- Rate-limited inference formerly left a blank failed answer even when relevant files were retained. It now offers explicitly labelled, source-only partial recovery; cancellation and deletion still prevent recovery of removed evidence.
 - Image-processing throttling returned HTTP400 with an incorrect saved-message claim. It now returns HTTP429 and Retry-After; no import is claimed when preparation failed.
 
-## Proof so far
+## Verification results
 
-The runtime at `ab13f57` passes 191 tests, TypeScript, formatting and production build. CI passes Windows/Linux/macOS and Chromium/Firefox/WebKit: https://github.com/somuai/katha/actions/runs/43407710485 . Twelve additional tests, plus malformed-upload assertions in the HTTP suite, cover the attachment regressions; they do not establish general model accuracy.
+- Runtime `416d92e`: **199 tests pass**, plus TypeScript, formatting and production build. The suite covers the attachment regressions, bounded source-only outage recovery, deletion/cancellation, unresolved vendor coverage, and malformed HTTP uploads.
+- The default model passed **13 targeted live checks in separate scoped runs**: three real owner-PDF questions, five synthetic CSV questions, and five synthetic image lifecycle checks. These are small functional acceptance checks, not a claim of general accuracy or an independently reviewed benchmark.
+- PDF: named contributor, repeated pronoun and findings all returned the correct section and its setup-specific qualification. The real document and raw captures remain private.
+- CSV: exact total **132.10**, late-row value **120.20**, Monday **40 present / 20 absent**, Tuesday **60 present / 0 absent**, and source-grounded recommendations separated from facts.
+- Image: Falcon / USD700 extraction, follow-up, process restart, refusal after trash, and successful recall after restoration.
+- A separate GPT-OSS CSV comparison initially passed mechanical checks 5/5 but only 4/5 under manual review: it claimed an unshown row was incomplete. After complete-row excerpts and explicit zero-blank-cell evidence, the five targeted answers passed manual fact review. This does not establish a general model winner; the default was not changed.
+- An earlier mixed default-model run returned three successful image answers and seven quota failures. Groq confirmed its daily-token limit was nearly consumed. That failure is retained in the ledger, not silently rescored as an application pass. Preparation now returns HTTP429/Retry-After honestly; accepted turns can retain readable source-only evidence when inference is unavailable.
 
-A live local run against the owner's 50-page PDF correctly answered the named teammate's contribution, the pronoun follow-up and the findings, including the report's qualification that observations apply to the tested local-model setup. That run also exposed the citation failure subsequently repaired. Private PDF extracts and captures stay ignored; synthetic names are used in committed tests.
+Read the [synthetic answer/fixture ledger](evaluations/attachment-acceptance-ledger.json). All observed factual statements in the final CSV answers were checked against the known synthetic file. Recommendations remain suggestions, not predicted business outcomes. The reviewer is the coding agent, not an independent evaluator. The separate 40-case support review remains pinned to its own revision.
 
-The synthetic HTTP acceptance runner tests real image upload, follow-up, process restart, CSV totals, late rows, weekday counts, recommendations, deletion and restoration. It uses an isolated temporary workspace and real configured inference. Initial captures retain a test-client cursor error and provider throttling; they are not passed suites. Fresh complete-run results belong below, separately from contract tests.
+### Evidence-only recovery
 
-Run:
+A `PARTIAL` response labelled **“Evidence only — not a generated answer”** quotes eligible retained records or shows locally computed CSV facts. It preserves source links, respects source/version/mention deletion and never promotes a quote to a verified current fact. Verification stays `UNVERIFIED`; all named vendors remain visibly unresolved when no comparison could be made. The live acceptance runner counts these separately and does not treat them as full generated answers.
+
+### Reproduce
 
 ```sh
+node --import tsx evaluations/attachment-acceptance.ts --run-live --text-only
+node --import tsx evaluations/attachment-acceptance.ts --run-live --image-only
 node --import tsx evaluations/attachment-acceptance.ts --run-live
-node --import tsx evaluations/pdf-page-followup.ts --run-live --pdf /absolute/report.pdf --name 'Your stated name' --person 'A contributor'
+node --import tsx evaluations/pdf-page-followup.ts --run-live --pdf /absolute/report.pdf --person 'A contributor' --person-only
 ```
 
-Both consume quota and retain timestamped local captures. The first uses synthetic data; the second sends relevant excerpts from the supplied PDF to the configured model. HTTP assertions are narrow acceptance checks, not claim-support precision; inspect every returned answer too.
+Live commands consume configured provider quota and use timestamped captures. Synthetic HTTP runs use isolated temporary workspaces. The PDF command sends relevant excerpts from the supplied file to the configured model. Expected case sets, missing cases, model configuration and source-only responses are recorded. Regex checks are only narrow acceptance assertions; manually inspect the answers as well.
 
 ## Capability limits
 
