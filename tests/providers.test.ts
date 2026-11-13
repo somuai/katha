@@ -1616,3 +1616,50 @@ test("unreported provider token usage is unknown rather than a fabricated zero",
   });
   assert.equal((await p.answer({ question: "Hello" })).usage, undefined);
 });
+
+test("a malformed search-plan shape gets one bounded repair and preserves reported usage", async () => {
+  let time = 1000;
+  let attempt = 0;
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async () => {
+      const data =
+        attempt++ === 0
+          ? { mode: "verify", queries: null }
+          : {
+              mode: "verify",
+              queries: [{ query: "AsterCRM official pricing" }],
+            };
+      time += 2000;
+      return Response.json({
+        choices: [{ message: { content: JSON.stringify(data) } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
+      });
+    }) as typeof fetch,
+  });
+  const result = await p.plan({ question: "Has AsterCRM pricing changed?" });
+  assert.equal(result.mode, "verify");
+  assert.deepEqual(result.queries, [{ query: "AsterCRM official pricing" }]);
+  assert.deepEqual(result.usage, { inputTokens: 20, outputTokens: 10 });
+});
+
+test("a second invalid search-plan shape fails closed instead of looping or searching", async () => {
+  let time = 1000;
+  let attempts = 0;
+  const p = createProviders({
+    groqKey: "test",
+    clock: () => time,
+    fetcher: (async () => {
+      attempts++;
+      time += 2000;
+      return Response.json({
+        choices: [{ message: { content: '{"mode":"execute","queries":[]}' } }],
+      });
+    }) as typeof fetch,
+  });
+  await assert.rejects(p.plan({ question: "Check a product" }), {
+    code: "INVALID_PLAN",
+  });
+  assert.equal(attempts, 2);
+});

@@ -86,6 +86,19 @@ const adapters = createKathaAdapters({
       });
     }
     const response = await fetch(input, init);
+    if (response.ok) {
+      const body = await response
+        .clone()
+        .json()
+        .catch(() => ({}));
+      const record = wireContexts.at(-1);
+      if (record)
+        Object.assign(record, {
+          visibleResponse: body?.choices?.[0]?.message?.content,
+          finishReason: body?.choices?.[0]?.finish_reason,
+          usage: body?.usage,
+        });
+    }
     if (!response.ok) {
       const body = await response
         .clone()

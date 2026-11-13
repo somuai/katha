@@ -328,7 +328,7 @@ export function createProviders(options: ProviderOptions = {}) {
         ),
       })),
     });
-  async function plan(input: ModelInput): Promise<Plan> {
+  async function plan(input: ModelInput, allowRepair = true): Promise<Plan> {
     const { data, usage } = await model(
       [
         {
@@ -344,8 +344,32 @@ export function createProviders(options: ProviderOptions = {}) {
     if (
       !["general", "recall", "current", "verify"].includes(data.mode) ||
       !Array.isArray(data.queries)
-    )
-      throw new ProviderError("INVALID_PLAN", "Invalid search plan.");
+    ) {
+      if (!allowRepair)
+        throw new ProviderError(
+          "INVALID_PLAN",
+          "Invalid search plan after one repair.",
+        );
+      const repaired = await plan(
+        {
+          ...input,
+          question:
+            input.question +
+            "\nYour preceding plan had an invalid shape. Return only the requested plan JSON: mode general|recall|current|verify and queries as an array of query objects, even if empty. Do not answer the question here.",
+        },
+        false,
+      );
+      return {
+        ...repaired,
+        usage:
+          usage && repaired.usage
+            ? {
+                inputTokens: usage.inputTokens + repaired.usage.inputTokens,
+                outputTokens: usage.outputTokens + repaired.usage.outputTokens,
+              }
+            : undefined,
+      };
+    }
     const queries = data.queries
       .slice(0, 10)
       .map((q: any) => ({
