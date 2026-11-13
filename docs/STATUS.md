@@ -1,5 +1,11 @@
 # Implementation status
 
+## Current-revision release checks
+
+Commit 09caa5e passed all six GitHub Actions jobs: Windows, Linux and macOS install/tests/build, plus Chromium, Firefox and WebKit browser checks (https://github.com/somuai/katha/actions/runs/43341910381). The owner reports reviewing both retrospective evidence reports; this confirms owner review, not a current-code accuracy certification.
+
+A controlled real-model, fixture-search-only five-vendor price evaluation exposed a fixed provider output allowance: Qwen rejected the 1,800-token request against an account limit of 1,000 output tokens/minute. The application now requests at most 1,000 output tokens and treats a fixed request-size rejection as CONTEXT_LIMIT instead of futile quota waiting. This follow-up has 159 passing local tests/check/lint/build; CI for the follow-up is separate from the completed 09caa5e run. The controlled CRM benchmark is not yet a successful comparison result.
+
 ## Final local hardening and rerun
 
 The latest targeted synthetic run completes without provider or context errors. Compound today/Monday recall answers both today's date and the correct Monday record. Five-CRM search executes ten queries and returns thirty pages; query-diverse selection supplies pricing/release evidence across all five vendors. Shortlist answers reserve 1,800 output tokens with shorter per-page excerpts. The model produces four individual assessments; Folk still requires the explicit missing-assessment fallback. All five final outcomes are UNVERIFIED because like-for-like historical pricing is not established. This is honest coverage, not proof of successful price-change detection.

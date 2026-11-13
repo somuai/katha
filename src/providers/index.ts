@@ -189,6 +189,25 @@ export function createProviders(options: ProviderOptions = {}) {
       );
       if (!response.ok) {
         if (response.status === 429) {
+          const errorBody = (await response
+            .clone()
+            .json()
+            .catch(() => null)) as any;
+          const providerMessage =
+            typeof errorBody?.error?.message === "string"
+              ? errorBody.error.message
+              : "";
+          if (
+            /request(?:'s)? (?:expected output tokens|too large)|expected output tokens exceed/i.test(
+              providerMessage,
+            )
+          ) {
+            await response.body?.cancel().catch(() => undefined);
+            throw new ProviderError(
+              "CONTEXT_LIMIT",
+              "This request exceeds the provider's per-request token allowance. Narrow the question or configure a model with a larger allowance.",
+            );
+          }
           const seconds = Number(response.headers.get("retry-after") || 60);
           const retryAt =
             now() + (Number.isFinite(seconds) ? seconds : 60) * 1000;
@@ -308,7 +327,7 @@ export function createProviders(options: ProviderOptions = {}) {
         { role: "user", content: context(input) },
       ],
       input.signal,
-      /\bshortlist(?:ed)?\b/i.test(input.question) ? 1800 : 1000,
+      1000,
     );
     if (
       typeof data.text !== "string" ||

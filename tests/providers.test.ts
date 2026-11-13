@@ -1,6 +1,24 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createProviders } from "../src/providers/index.ts";
+test("a request that exceeds the provider's fixed allowance fails without a futile quota wait", async () => {
+  const p = createProviders({
+    groqKey: "test",
+    fetcher: (async () =>
+      Response.json(
+        {
+          error: {
+            message:
+              "Request too large on output tokens per minute. The request's expected output tokens exceed the enforced limit.",
+          },
+        },
+        { status: 429 },
+      )) as typeof fetch,
+  });
+  await assert.rejects(p.answer({ question: "Compare offers" }), {
+    code: "CONTEXT_LIMIT",
+  });
+});
 test("answer context distributes evidence across vendor queries instead of first-page order", async () => {
   let selected: any[] = [];
   const p = createProviders({
@@ -63,7 +81,7 @@ test("shortlist answers reserve enough output for per-vendor comparisons", async
   await p.answer({
     question: "We shortlisted five CRM tools. Has pricing changed?",
   });
-  assert.equal(budget, 1800);
+  assert.equal(budget, 1000);
 });
 
 test("model context grounds Monday on the current turn rather than older history", async () => {
