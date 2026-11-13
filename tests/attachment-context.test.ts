@@ -243,3 +243,20 @@ test("complete CSV rows disclose zero missing cells and distinguish omitted exce
   assert.match(answer, /Customer1/);
   assert.doesNotMatch(answer, /Customer77/);
 });
+
+test("a late CSV row with a short alphanumeric identifier remains retrievable", async () => {
+  const csv =
+    "customer,amount\n" +
+    Array.from(
+      { length: 100 },
+      (_, i) =>
+        `${i === 99 ? "Z9" : `Customer${i + 1}`},${i === 99 ? "120.20" : "0.10"}`,
+    ).join("\n");
+  const answer = await inspectPreparedContext(
+    "short-ids.csv",
+    csv,
+    "What amount is listed for Z9 in this CSV?",
+  );
+  assert.match(answer, /Z9/);
+  assert.match(answer, /120\.20/);
+});

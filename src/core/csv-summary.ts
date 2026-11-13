@@ -142,12 +142,18 @@ export function prepareCsvEvidence(
         `For ${headers[column]}=${JSON.stringify(data.find((row) => row[column].trim().toLowerCase() === value)![column].trim())} (${subset.length} rows; independent exact-value filter): ${counts.join("; ")}`,
       );
     }
+    const rowTerms = new Set([
+      ...terms,
+      ...(question.toLowerCase().match(/[\p{L}\p{N}_-]+/gu) || []).filter(
+        (token) =>
+          token.length === 2 && /\p{L}/u.test(token) && /\p{N}/u.test(token),
+      ),
+    ]);
     const matched = data
       .filter((row) =>
         row.some(
           (cell) =>
-            cell.length >= 3 &&
-            terms.some((term) => cell.toLowerCase() === term),
+            cell.trim().length >= 2 && rowTerms.has(cell.trim().toLowerCase()),
         ),
       )
       .slice(0, 5);
