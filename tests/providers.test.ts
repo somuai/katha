@@ -1416,3 +1416,76 @@ test("an explicit price comparison cannot swallow a requested product release as
     );
   }
 });
+
+test("a broad search query is not evidence that every returned page describes every vendor", async () => {
+  let clock = Date.now();
+  const p = createProviders({
+    groqKey: "fixture",
+    clock: () => (clock += 10000),
+    fetcher: (async (_url, init) => {
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      const name = context.question.match(/^Assess ONLY ([^.]+)\./)?.[1];
+      const ids = context.evidence.map((s: any) => s.id);
+      return Response.json({
+        usage: { total_tokens: 100 },
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "Unverified capability.",
+                citations: ids,
+                comparisons: [
+                  {
+                    claim: `${name} capabilities`,
+                    status: "UNVERIFIED",
+                    explanation: "Scope exposed for verification.",
+                    baselineSourceIds: ["old"],
+                    evidenceIds: ids,
+                  },
+                ],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const answer = await p.answer({
+    question:
+      "We shortlisted Alder and Birch. Have their capabilities changed?",
+    baseline: [
+      {
+        id: "old",
+        title: "Monday shortlist",
+        text: "We shortlisted Alder and Birch.",
+        observedAt: "2026-11-09",
+      },
+    ],
+    evidence: [
+      {
+        id: "alder",
+        title: "Alder notes",
+        text: "Alder supports exports.",
+        query: "Alder Birch release notes",
+        observedAt: "2026-11-13",
+      },
+      {
+        id: "birch",
+        title: "Birch notes",
+        text: "Birch supports imports.",
+        query: "Alder Birch release notes",
+        observedAt: "2026-11-13",
+      },
+    ],
+  });
+  assert.deepEqual(
+    answer.comparisons.find((c) => c.claim.startsWith("Alder"))?.evidenceIds,
+    ["alder"],
+  );
+  assert.deepEqual(
+    answer.comparisons.find((c) => c.claim.startsWith("Birch"))?.evidenceIds,
+    ["birch"],
+  );
+});

@@ -405,9 +405,7 @@ export function createProviders(options: ProviderOptions = {}) {
         input.signal?.throwIfAborted();
         const name = names[i];
         const relevant = (e: Evidence) =>
-          `${e.title} ${e.text} ${e.query || ""}`
-            .toLowerCase()
-            .includes(name.toLowerCase());
+          `${e.title} ${e.text}`.toLowerCase().includes(name.toLowerCase());
         batch.answers.push(
           await assess(
             {
