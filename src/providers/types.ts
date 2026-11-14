@@ -54,6 +54,7 @@ export type Answer = {
   usage?: { inputTokens: number; outputTokens: number };
 };
 export type ModelInput = {
+  verification?: boolean;
   assessmentTopic?: "release";
   activeSourceIds?: string[];
   retrievalHint?: string;

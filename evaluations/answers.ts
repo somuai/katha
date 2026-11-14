@@ -127,12 +127,50 @@ const options = {
 };
 if (!options.groqKey || !options.tavilyKey)
   throw Error("Both server keys are required.");
+let activeWireRequests: Record<string, unknown>[] = [];
 const adapters = new Map<string, ReturnType<typeof createKathaAdapters>>();
 for (const model of models) {
   const status = await validateProviderSetup({ ...options, model }, false);
   if (status.groq.availability !== "available")
     throw Error(`Unavailable configured candidate ${model}`);
-  adapters.set(model, createKathaAdapters({ ...options, model }));
+  adapters.set(
+    model,
+    createKathaAdapters({
+      ...options,
+      model,
+      fetcher: async (url, init) => {
+        const request = JSON.parse(String(init?.body || "{}"));
+        const system = String(request.messages?.[0]?.content || "");
+        const record: Record<string, unknown> = {
+          phase: system.startsWith("Plan a temporal")
+            ? "planning"
+            : system.startsWith("Review source qualifications")
+              ? "qualification_review"
+              : "generation",
+          maxTokens: request.max_tokens,
+        };
+        activeWireRequests.push(record);
+        try {
+          const response = await fetch(url, init);
+          record.status = response.status;
+          const body = await response
+            .clone()
+            .json()
+            .catch(() => ({}));
+          record.usage = body.usage;
+          record.finishReason = body.choices?.[0]?.finish_reason;
+          if (record.phase === "qualification_review")
+            record.visibleReview = String(
+              body.choices?.[0]?.message?.content || "",
+            ).replaceAll(options.groqKey!, "[REDACTED]");
+          return response;
+        } catch (error) {
+          record.transportFailure = true;
+          throw error;
+        }
+      },
+    }),
+  );
 }
 // Capture actual search observations once, independently of candidate planning.
 let captured: Record<string, SearchResult[]> = {};
@@ -207,6 +245,7 @@ results.push(...previous.results);
 for (const c of fixture.cases)
   for (const model of models) {
     if (results.some((r) => r.id === c.id && r.model === model)) continue;
+    activeWireRequests = [];
     const directory = await mkdtemp(join(tmpdir(), "katha-answer-"));
     let clock = "2026-11-03T12:00:00Z";
     const adapter = adapters.get(model)!;
@@ -324,6 +363,7 @@ for (const c of fixture.cases)
         kind: c.kind,
         model,
         runAt: new Date().toISOString(),
+        wireRequests: structuredClone(activeWireRequests),
         baselineId,
         completionMs,
         firstUsefulMs:
@@ -354,6 +394,7 @@ for (const c of fixture.cases)
         kind: c.kind,
         model,
         error: error instanceof Error ? error.message : String(error),
+        wireRequests: structuredClone(activeWireRequests),
         review: { reviewed: false, claims: [] },
       });
       console.log("ERROR", model, c.id, String(error));

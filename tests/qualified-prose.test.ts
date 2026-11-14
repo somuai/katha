@@ -112,6 +112,7 @@ test("a qualification review cannot spend a second repair after citation repair"
       ];
       return Response.json({
         choices: [{ message: { content: JSON.stringify(outputs[step++]) } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
       });
     }) as typeof fetch,
   });
@@ -311,6 +312,147 @@ test("Stop cancels source review without publishing the draft", async () => {
       ),
       false,
     );
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("an ordinary web explanation cannot silently turn into a historical comparison", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "katha-answer-path-"));
+  let clock = 1000,
+    step = 0;
+  const adapter = createKathaAdapters({
+    groqKey: "fixture",
+    clock: () => clock,
+    fetcher: (async (_url, init) => {
+      clock += 2000;
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      const id = context.evidence[0].id;
+      const data =
+        step++ === 0
+          ? {
+              text: "Basic costs one credit; advanced costs two.",
+              citations: [id],
+              comparisons: [
+                {
+                  claim: "Credit cost",
+                  status: "CURRENTLY_MATCHES",
+                  baselineSourceIds: [],
+                  evidenceIds: [id],
+                  explanation: "The credit amounts match.",
+                },
+              ],
+            }
+          : {
+              text: "Basic costs one credit per request; advanced costs two.",
+              citations: [id],
+              comparisons: [],
+            };
+      return Response.json({
+        choices: [{ message: { content: JSON.stringify(data) } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
+      });
+    }) as typeof fetch,
+  });
+  const app = createKatha({
+    directory,
+    model: { generate: adapter.model.generate },
+    search: {
+      async search() {
+        return [
+          {
+            title: "Credit policy",
+            url: "https://example.com/credits",
+            content:
+              "Basic costs one credit per request. Advanced costs two credits per request.",
+          },
+        ];
+      },
+    },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "ordinary-explanation",
+      expectedTailId: null,
+      text: "Using the web, explain the credit costs of basic and advanced search.",
+    });
+    for await (const event of app.turns.events(receipt.turnId))
+      if (event.type === "complete") break;
+    const snapshot = await app.turns.get(receipt.turnId);
+    assert.equal(snapshot.status, "COMPLETED");
+    assert.match(snapshot.answer, /Basic costs one credit/);
+    assert.doesNotMatch(snapshot.answer, /cannot establish a change/);
+    assert.deepEqual(snapshot.comparisons, []);
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("a current-price explanation does not take the historical offer-comparison shortcut", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "katha-current-price-"));
+  const terms = (amount: number) =>
+    `Alder Team: USD ${amount} per seat per month, billed monthly; region US; 5 seats; unlimited contacts; tax excluded.`;
+  const adapter = createKathaAdapters({
+    groqKey: "fixture",
+    fetcher: (async (_url, init) => {
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      return Response.json({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                text: "The current quote is USD 25 per seat per month for five seats, monthly billing, US region, unlimited contacts and tax excluded.",
+                citations: [context.evidence[0].id],
+                comparisons: [],
+              }),
+            },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const app = createKatha({
+    directory,
+    model: { generate: adapter.model.generate },
+    search: {
+      async search() {
+        return [
+          {
+            title: "Alder pricing",
+            url: "https://example.com/pricing",
+            content: terms(25),
+          },
+        ];
+      },
+    },
+  });
+  try {
+    await app.evidence.import({
+      name: "Alder retained offer",
+      content: terms(20),
+    });
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "current-price",
+      expectedTailId: null,
+      text: "Using the web, explain current pricing for Alder Team.",
+    });
+    for await (const event of app.turns.events(receipt.turnId))
+      if (event.type === "complete") break;
+    const snapshot = await app.turns.get(receipt.turnId);
+    assert.equal(snapshot.status, "COMPLETED");
+    assert.match(snapshot.answer, /current quote is USD 25/);
+    assert.doesNotMatch(snapshot.answer, /changed|differs|20 to 25/);
+    assert.deepEqual(snapshot.comparisons, []);
   } finally {
     app.close();
     rmSync(directory, { recursive: true, force: true });
