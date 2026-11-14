@@ -192,6 +192,31 @@ try {
   assert.equal(linked.retryOf, parent.id);
   assert.deepEqual(linked.attachmentIds, parent.attachmentIds);
   await page.getByText("Retried question", { exact: true }).waitFor();
+  await page
+    .getByRole("textbox", { name: "Message Katha" })
+    .fill("What did we retain on 3 November?");
+  await page.getByRole("button", { name: "Send message" }).click();
+  const sourceButton = page
+    .locator(".message--assistant")
+    .last()
+    .getByRole("button", { name: "View source 1", exact: true });
+  await sourceButton.waitFor();
+  assert.doesNotMatch(
+    await page.locator(".message--assistant").last().innerText(),
+    /[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}/i,
+  );
+  await sourceButton.click();
+  await page.getByRole("button", { name: "Close source inspector" }).waitFor();
+  await page.getByRole("button", { name: "Close source inspector" }).click();
+  await page
+    .locator(".message--assistant")
+    .last()
+    .getByRole("button", { name: "Answer details & sources", exact: true })
+    .click();
+  await page
+    .getByRole("heading", { name: "Why this answer?", exact: true })
+    .waitFor();
+  await page.keyboard.press("Escape");
   await page.screenshot({ path: "qa/conversation-reference.png" });
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 812 });
@@ -222,6 +247,7 @@ try {
       "original preservation",
       "typed turn",
       "persisted linked retry with attachments",
+      "compact retained citations and historical answer inspection",
       "keyboard Escape",
       "responsive overflow",
       "reduced motion",

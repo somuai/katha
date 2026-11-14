@@ -2180,3 +2180,24 @@ body {
   place-items: center;
   object-fit: contain;
 }
+
+.inline-citation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4em;
+  padding: 0 0.25em;
+  margin-inline: 0.12em;
+  border: 1px solid #c8d1bf;
+  border-radius: 0.35em;
+  color: #425d44;
+  background: #f3f5ee;
+  font-size: 0.75em;
+  line-height: 1.5;
+  vertical-align: 0.12em;
+  cursor: pointer;
+}
+.inline-citation:focus-visible {
+  outline: 2px solid #425d44;
+  outline-offset: 2px;
+}

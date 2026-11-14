@@ -1,3 +1,4 @@
+import { AnswerText } from "./AnswerText.js";
 import { Thinking } from "./Thinking.js";
 import { Connections } from "./Connections.js";
 import { AnimatedTitleWord } from "./AnimatedTitle.js";
@@ -270,6 +271,31 @@ export default function App() {
       setInspection(await api("/api/sources/" + id));
     } catch (e: any) {
       setError(e.message);
+    }
+  }
+  async function inspectTurnSource(turnId: string | null, sourceId: string) {
+    if (!turnId) return;
+    try {
+      const snapshot = await api("/api/turns/" + turnId);
+      if (
+        !snapshot.sources?.some((source: Item) => source.id === sourceId) &&
+        !snapshot.citations?.some(
+          (citation: { sourceId: string }) => citation.sourceId === sourceId,
+        )
+      )
+        throw Error("This source is not a retained reference for that answer.");
+      await inspect(sourceId);
+    } catch (error: any) {
+      setError(error.message);
+    }
+  }
+  async function inspectAnswer(turnId: string) {
+    try {
+      const snapshot = await api("/api/turns/" + turnId);
+      setAudit({ ...snapshot.trace, ...snapshot });
+      setShowAudit(true);
+    } catch (error: any) {
+      setError(error.message);
     }
   }
   async function sourceAction(id: string, action: string) {
@@ -869,10 +895,28 @@ export default function App() {
                       )}
                     </div>
                     <div className="message-content">
-                      <Markdown>
-                        {m.content || m.text || m.answer || ""}
-                      </Markdown>
+                      {m.role === "assistant" ? (
+                        <AnswerText
+                          text={m.content || m.text || m.answer || ""}
+                          onSource={(sourceId) =>
+                            inspectTurnSource(m.turnId, sourceId)
+                          }
+                        />
+                      ) : (
+                        <Markdown>
+                          {m.content || m.text || m.answer || ""}
+                        </Markdown>
+                      )}
                     </div>
+                    {m.role === "assistant" && m.turnId && (
+                      <button
+                        type="button"
+                        className="record-inspect"
+                        onClick={() => inspectAnswer(m.turnId)}
+                      >
+                        Answer details & sources
+                      </button>
+                    )}
                     {m.role === "user" && (
                       <button
                         className="record-inspect"
@@ -934,7 +978,12 @@ export default function App() {
                     </div>
                     {stream ? (
                       <div className="message-content">
-                        <Markdown>{stream}</Markdown>
+                        <AnswerText
+                          text={stream}
+                          onSource={(sourceId) =>
+                            inspectTurnSource(turn, sourceId)
+                          }
+                        />
                       </div>
                     ) : (
                       <Thinking sources={evidence} status={statusText} />
