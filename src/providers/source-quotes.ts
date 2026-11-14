@@ -1,3 +1,7 @@
+import {
+  sourceMarkerPattern,
+  sourceLinkPattern,
+} from "../core/citation-markers.js";
 import type { ModelInput } from "./types.js";
 const normalize = (text: string) =>
   text.replace(/[‘’]/g, "'").replace(/\s+/g, " ").trim();
@@ -35,14 +39,19 @@ export function unsupportedSourceQuotes(
       /\b(?:it|he|she|they)\s+(?:says?|said|wrote|states?|reads?)\s*[:,—-]?\s*$/i.test(
         prefix,
       ));
+  const citedImmediately = (suffix: string) => {
+    const following = suffix.trimStart();
+    return (
+      sourceMarkerPattern().exec(following)?.index === 0 ||
+      sourceLinkPattern().exec(following)?.index === 0
+    );
+  };
   const quotes: string[] = [];
   for (const match of prose.matchAll(/“([^”]+)”|"([^"\n]+)"/g)) {
     const quote = match[1] || match[2];
     if (
       explicit ||
-      /^\s*(?:\[[0-9a-f-]{36}\]|【[0-9a-f-]{36}】)/i.test(
-        prose.slice(match.index! + match[0].length),
-      ) ||
+      citedImmediately(prose.slice(match.index! + match[0].length)) ||
       attributed(prose.slice(Math.max(0, match.index! - 160), match.index))
     )
       quotes.push(quote);
@@ -50,9 +59,7 @@ export function unsupportedSourceQuotes(
   for (const match of prose.matchAll(/(?:^|\n)((?:>[^\n]*(?:\n|$))+)/g))
     if (
       explicit ||
-      /^\s*(?:\[[0-9a-f-]{36}\]|【[0-9a-f-]{36}】)/i.test(
-        prose.slice(match.index! + match[0].length),
-      ) ||
+      citedImmediately(prose.slice(match.index! + match[0].length)) ||
       attributed(prose.slice(Math.max(0, match.index! - 160), match.index))
     )
       quotes.push(match[1].replace(/^>\s?/gm, ""));

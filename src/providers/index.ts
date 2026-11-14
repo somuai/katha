@@ -1,3 +1,4 @@
+import { inlineSourceIds } from "../core/citation-markers.js";
 import { shortlistedVendors, verificationTopics } from "../core/shortlist.js";
 import { unsupportedSourceQuotes } from "./source-quotes.js";
 import { prepareCsvEvidence } from "../core/csv-summary.js";
@@ -696,11 +697,7 @@ Do not create temporal comparisons or commercial-term objects for an ordinary ex
         ...(c?.evidenceIds || []),
       ]),
     ];
-    const inlineIds = [
-      ...data.text.matchAll(
-        /\[([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\]/gi,
-      ),
-    ].map((m) => m[1]);
+    const inlineIds = inlineSourceIds(data.text);
     if (
       [...ids, ...inlineIds].some(
         (id) => typeof id !== "string" || !allowed.has(id),
@@ -724,6 +721,8 @@ Do not create temporal comparisons or commercial-term objects for an ordinary ex
         "The answer included an unknown citation. Please retry.",
       );
     }
+    // A validated explicit inline citation is already a reference, not a guessed source.
+    data.citations = [...new Set([...data.citations, ...inlineIds])];
     const citationRequested =
       /\b(?:cite|citations?|(?:show|provide|include|link) (?:the |your |supporting )?(?:sources|references))\b/i.test(
         input.question,

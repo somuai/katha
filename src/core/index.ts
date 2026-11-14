@@ -1183,8 +1183,9 @@ export function createKatha(options: KathaOptions) {
         ) ||
           !!window) &&
         !(
-          /\b(observation|snapshot|search failure)\b/i.test(input.text) &&
-          /\b(establish|prove|mean)\b/i.test(input.text)
+          /\b(?:observation|snapshot|search failure|(?:current )?(?:price|quote) alone)\b/i.test(
+            input.text,
+          ) && /\b(establish|prove|mean)\b/i.test(input.text)
         );
       const explicitChatRecall =
         /\bwhat (?:did|have) (?:i|we) (?:ask|say|tell|decide|record|discuss|shortlist|upload|attach)\b|\bwhat (?:was|were) (?:my|our) (?:questions?|decisions?)\b/i.test(

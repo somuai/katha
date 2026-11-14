@@ -84,3 +84,81 @@ test("model-visible web excerpts retain the relevant exception branch from the s
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("web excerpts retain a parameter's meaning and limitation instead of a site configuration dump", async () => {
+  const capture = JSON.parse(
+    readFileSync(
+      new URL(
+        "../docs/evaluations/current-default-reviewed.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const record = capture.results.find((r: any) => r.id === "web-05");
+  const original = record.snapshot.sources.find(
+    (s: any) => s.title === "Changelog - Tavily Docs",
+  );
+  const directory = mkdtempSync(join(tmpdir(), "katha-web-parameter-"));
+  let clock = 1000;
+  const visible: string[] = [];
+  const adapter = createKathaAdapters({
+    groqKey: "fixture",
+    clock: () => clock,
+    fetcher: (async (_url, init) => {
+      clock += 2000;
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      visible.push(context.evidence[0].text);
+      const data = context.draft
+        ? { supported: true, issues: [] }
+        : {
+            text: "Zero requests a live fetch. On non-paying plans this is best-effort and may be refused under load.",
+            citations: [context.evidence[0].id],
+            comparisons: [],
+          };
+      return Response.json({
+        choices: [{ message: { content: JSON.stringify(data) } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
+      });
+    }) as typeof fetch,
+  });
+  const app = createKatha({
+    directory,
+    model: { generate: adapter.model.generate },
+    search: {
+      async search() {
+        return [
+          {
+            title: original.title,
+            url: original.metadata.url,
+            content: original.content,
+          },
+        ];
+      },
+    },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "preserve-parameter",
+      expectedTailId: null,
+      text: "Using the web, explain what Tavily max_age_hours zero means and its limitation on non-paying plans. Cite evidence.",
+    });
+    for await (const event of app.turns.events(receipt.turnId))
+      if (event.type === "complete") break;
+    for (const excerpt of visible) {
+      assert.match(excerpt, /max_age_hours/);
+      assert.match(excerpt, /`0` to always fetch the page live/);
+      assert.match(excerpt, /best-effort/);
+      assert.doesNotMatch(excerpt, /"docsConfig"/);
+      assert.ok(excerpt.length <= 900);
+    }
+    assert.equal((await app.turns.get(receipt.turnId)).status, "COMPLETED");
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});

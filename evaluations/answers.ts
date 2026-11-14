@@ -1,3 +1,7 @@
+import {
+  inlineSourceIds,
+  sourceIdPattern,
+} from "../src/core/citation-markers.js";
 import { createHash, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import "dotenv/config";
@@ -165,6 +169,30 @@ for (const model of models) {
               }
             : undefined;
           record.finishReason = body.choices?.[0]?.finish_reason;
+          if (record.phase === "generation" && response.ok) {
+            try {
+              const visible = String(body.choices?.[0]?.message?.content || "")
+                .replace(/^\`\`\`(?:json)?\s*/, "")
+                .replace(/\s*\`\`\`$/, "");
+              const answer = JSON.parse(visible);
+              record.generatedCitationCount = Array.isArray(answer.citations)
+                ? answer.citations.length
+                : null;
+              record.explicitCitationIds = Array.isArray(answer.citations)
+                ? answer.citations.filter(
+                    (id: unknown) =>
+                      typeof id === "string" &&
+                      new RegExp("^" + sourceIdPattern + "$", "i").test(id),
+                  )
+                : [];
+              record.inlineCitationIds =
+                typeof answer.text === "string"
+                  ? inlineSourceIds(answer.text)
+                  : [];
+            } catch {
+              record.citationDiagnosticDecoded = false;
+            }
+          }
           if (record.phase === "qualification_review")
             record.visibleReview = String(
               body.choices?.[0]?.message?.content || "",

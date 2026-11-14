@@ -8,14 +8,14 @@ const id = "12345678-1234-4234-8234-123456789012";
 test("answer references are compact controls without raw identifiers or arbitrary source URLs", () => {
   const html = renderToStaticMarkup(
     React.createElement(AnswerText, {
-      text: `A fact [${id}]. Another [source: ${id}]. [Source 12345678](katha-source:${id}).`,
+      text: `A fact [${id}]. Another [source: ${id}]. A model variant 【${id}】. [Source 12345678](katha-source:${id}).`,
       onSource() {},
     }),
   );
   assert.doesNotMatch(html, new RegExp(id));
   assert.doesNotMatch(html, /href="katha-source/);
   assert.match(html, /View source 1/);
-  assert.equal((html.match(/>1<\/button>/g) || []).length, 3);
+  assert.equal((html.match(/>1<\/button>/g) || []).length, 4);
 });
 test("ordinary prose, code examples and safe web links remain readable", () => {
   const html = renderToStaticMarkup(

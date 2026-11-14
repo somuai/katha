@@ -1,7 +1,10 @@
 import React from "react";
 import Markdown, { defaultUrlTransform } from "react-markdown";
 
-const uuid = "[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}";
+import {
+  sourceIdPattern as uuid,
+  sourceMarkerPattern,
+} from "../../src/core/citation-markers.js";
 const identifier = new RegExp("^" + uuid + "$", "i");
 type Node = { type: string; value?: string; url?: string; children?: Node[] };
 
@@ -23,9 +26,11 @@ export function AnswerText({
       if (!node.children) return;
       node.children = node.children.flatMap((child): Node[] => {
         if (child.type === "link" && child.url?.startsWith("katha-source:")) {
-          const id = child.url.slice("katha-source:".length);
-          if (identifier.test(id))
+          const id = child.url.slice("katha-source:".length).toLowerCase();
+          if (identifier.test(id)) {
+            child.url = "katha-source:" + id;
             child.children = [{ type: "text", value: String(position(id)) }];
+          }
           return [child];
         }
         if (child.type !== "text") {
@@ -33,16 +38,15 @@ export function AnswerText({
           return [child];
         }
         const value = child.value || "";
-        const markers = new RegExp(
-          "\\[(?:source[: ]*\\s*)?" + uuid + "(?:\\s*,\\s*" + uuid + ")*\\]",
-          "gi",
-        );
+        const markers = sourceMarkerPattern();
         const parts: Node[] = [];
         let end = 0;
         for (const match of value.matchAll(markers)) {
           if (match.index! > end)
             parts.push({ type: "text", value: value.slice(end, match.index) });
-          for (const id of match[0].match(new RegExp(uuid, "gi")) || [])
+          for (const id of (match[0].match(new RegExp(uuid, "gi")) || []).map(
+            (id) => id.toLowerCase(),
+          ))
             parts.push({
               type: "link",
               url: "katha-source:" + id,

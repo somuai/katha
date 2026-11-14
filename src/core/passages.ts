@@ -172,6 +172,9 @@ export function selectWebPassages(
   const excerptable = text
     .split(/\n\s*\n/)
     .flatMap((paragraph) => {
+      // Remove known documentation-shell configuration from model excerpts only.
+      // The retained observation remains unchanged for inspection and validation.
+      if (/^\s*\{"docsConfig"\s*:/.test(paragraph)) return [];
       if (paragraph.length <= 300 || /^\s*```/.test(paragraph))
         return [paragraph];
       const definition = paragraph.match(/^([^\n]{1,180}\n)\s*:\s*/);
@@ -185,9 +188,13 @@ export function selectWebPassages(
         );
       const body = prefix ? paragraph.slice(prefix.length) : paragraph;
       const sentences = body.split(/(?<=[.!?])\s+|\n/).filter((s) => s.trim());
-      return sentences.map((sentence, i) =>
-        prefix ? prefix + (i ? "[…] " : "") + sentence : sentence,
-      );
+      const lead = sentences[0] || "";
+      return sentences.map((sentence, i) => {
+        if (prefix) return prefix + (i ? "[…] " : "") + sentence;
+        // Keep a short parameter description attached to its value/limit sentences.
+        // Explicit gaps distinguish context carry-forward from contiguous quotation.
+        return i && lead.length <= 240 ? lead + " […] " + sentence : sentence;
+      });
     })
     .join("\n\n");
   return selectPassages(
