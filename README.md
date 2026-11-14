@@ -2,6 +2,8 @@
 
 A local-first chat agent that remembers dated conversations and checks what changed through one web-search tool.
 
+Current release proof: [full default evaluation at `dea37e2`](docs/evaluations/default-dea37e2-review.md) records 38/39 supported delivered factual claims and 27/40 successful tasks; twelve quota errors keep the gate EXECUTION_LIMITED. All six platform/browser CI jobs pass. A targeted success is not substituted for missing full-run answers.
+
 ## Run
 
 Use Node 24 LTS (`nvm use`). Run `npm install`, copy `.env.example` to `.env`, set `GROQ_API_KEY` and `TAVILY_API_KEY`, then `npm run dev`. Open http://localhost:3000. Without keys, the app still retains sources and supports deterministic historical recall; live answers/search/transcription require provider access. Never put keys in client code.

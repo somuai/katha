@@ -1,3 +1,9 @@
+## Completed current-default capture: `dea37e2`
+
+All forty cases are recorded and reviewed: **38/39 supported factual claims (97.4%), 27/40 tasks, twelve quota execution failures, eleven source-only recoveries**. Gate: **EXECUTION_LIMITED**. [Complete review, sources and metrics](evaluations/default-dea37e2-review.md). The run is terminal; it is not still waiting. A new unconstrained run requires provider capacity. No successful targeted cases are spliced into it.
+
+267 local tests, type/lint/build and all six runtime platform/browser CI jobs pass. The current-default full answer gate remains unproved because of missing generations. Deferred integrations and physical-mobile testing remain deferred.
+
 ## Timestamp-contract follow-up: `dea37e2`
 
 Local 267 tests, type/lint/build pass. The targeted default-model explanation passes review; the text candidate still makes an unsupported date inference. Capacity is available again and a new forty-case Qwen default evaluation is underway. See [separate captured outcomes](evaluations/coherent-excerpts-review.md). No full-run success is inferred from the targeted check.

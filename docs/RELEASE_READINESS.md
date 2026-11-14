@@ -36,3 +36,5 @@ The [current source-qualification follow-up](evaluations/qualified-prose-review.
 ## Latest evidence-context follow-up
 
 The [coherent-excerpt review](evaluations/coherent-excerpts-review.md) supersedes the current-status summary of the earlier follow-up while preserving its historical failures. Runtime `a251224` passed all six CI jobs (Windows/Linux/macOS and Chromium/Firefox/WebKit). Runtime `dea37e2` additionally makes the distinction between publication, retrieval and effective dates explicit in generation and review prompts. Its targeted text-candidate replay still makes an unsupported timing inference; [the retained answer](evaluations/date-contract-reviewed.json) is a failure, not proof of a fix. Local 267 tests, type/lint/build pass. The clean current-default full answer gate remains open.
+
+The new [full current-default review](evaluations/default-dea37e2-review.md) is now terminal: 38/39 supported claims, 27/40 tasks and twelve quota errors. All six `dea37e2` platform/browser CI jobs pass. This supersedes the earlier “underway” status; the answer gate is EXECUTION_LIMITED.
