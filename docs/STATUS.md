@@ -1,3 +1,7 @@
+## Timestamp-contract follow-up: `dea37e2`
+
+Local 267 tests, type/lint/build pass. The targeted default-model explanation passes review; the text candidate still makes an unsupported date inference. Capacity is available again and a new forty-case Qwen default evaluation is underway. See [separate captured outcomes](evaluations/coherent-excerpts-review.md). No full-run success is inferred from the targeted check.
+
 ## Latest follow-up: `a251224`
 
 267 local tests, check/lint/build and Chromium browser regression pass. Web excerpts preserve parameter meaning and exception qualifications; explicit citation syntax is consistent across provider guards and UI. [Evidence and unresolved limits](evaluations/coherent-excerpts-review.md).

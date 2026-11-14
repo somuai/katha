@@ -25,3 +25,9 @@ The current default Qwen forty-case run is still pending provider capacity. It r
 ## Verification
 
 267 deterministic tests, type checking, lint and production build pass locally. Chromium upload/correction/conversation/responsive/accessibility regression passes. Cross-platform/browser workflow for `a251224`: [CI run](https://github.com/somuai/katha/actions/runs/43553087796). See its individual job outcomes rather than assuming an unfinished workflow passed.
+
+## Explicit timestamp-contract follow-up (`dea37e2`)
+
+Generation and review now explicitly separate publication/update, retrieval and effective-change timestamps; date filtering is not a price-history API. Both targeted executions completed with reused evidence. The [text candidate](date-contract-reviewed.json) still incorrectly says a live fetch or explicit date metadata establishes when a price was set (2/3 supported facts, task failed). The [unchanged Qwen default](date-contract-default-reviewed.json) correctly limits its explanation to the supplied freshness/date-filter documentation and labels the observation-versus-change inference (3/3 supported facts, task passed). Neither one-case result is a full gate, and no candidate/default answer is substituted into an earlier run.
+
+The default's capacity returned during this check. A new complete forty-case default run is underway at `dea37e2`, with its own output directory and manifest. Its outcome and review must be inspected before the release gate can be assessed.

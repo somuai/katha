@@ -1,6 +1,6 @@
 # Katha release evidence — 14 November 2026
 
-This is the MiniMi chat-agent project, separate from the Wispr portfolio. Runtime under review: `caa68c2`; older full answer captures are revision-pinned separately; platform/browser CI is revision-pinned in STATUS. The application is a single local workspace; public multi-user hosting is not part of this release.
+This is the MiniMi chat-agent project, separate from the Wispr portfolio. Runtime under review: `dea37e2`; older full answer captures are revision-pinned separately; platform/browser CI is revision-pinned in STATUS. The application is a single local workspace; public multi-user hosting is not part of this release.
 
 ## Requirements to evidence
 
@@ -22,7 +22,7 @@ This is the MiniMi chat-agent project, separate from the Wispr portfolio. Runtim
 
 ## Validation discipline
 
-The runtime passes 256 public-interface/provider/HTTP tests, TypeScript, lint and production build locally. Current CI results and newly captured answer outcomes are recorded in STATUS and the release evaluation report. Older captures remain preserved and retain their own revision, observation times and review scope. A provider failure or evidence-only PARTIAL response does not count as completing a generated answer task.
+The runtime passes 267 public-interface/provider/HTTP tests, TypeScript, lint and production build locally. Current CI results and newly captured answer outcomes are recorded in STATUS and the release evaluation report. Older captures remain preserved and retain their own revision, observation times and review scope. A provider failure or evidence-only PARTIAL response does not count as completing a generated answer task.
 
 Do not describe this as better than every open-source assistant. Its defensible distinction is the explicit, tested temporal-original/correction/deletion contract; [the comparison](research/open-source-comparison.md) records overlapping features and lacks a competitor head-to-head benchmark.
 
@@ -32,3 +32,7 @@ Do not describe this as better than every open-source assistant. Its defensible 
 The [versioned answer review](evaluations/release-review.md) reports 96.2% supported delivered claims in the older `936da48` full-default run, but eight quota failures keep that run EXECUTION_LIMITED. Its 30/40 full tasks are distinct from claim precision. Two substantive qualified-prose failures remain visible. A quota-unlimited current-default forty-case run and review remains pending capacity; the focused ten-outcome mixed fixture cannot substitute for it. The goal stays open rather than relabelling this partial proof as complete.
 
 The [current source-qualification follow-up](evaluations/qualified-prose-review.md) records the new path/review regressions, extra-request trade-offs and a BELOW_TARGET two-case candidate replay. The default quota block is preserved; no current full-run success is claimed.
+
+## Latest evidence-context follow-up
+
+The [coherent-excerpt review](evaluations/coherent-excerpts-review.md) supersedes the current-status summary of the earlier follow-up while preserving its historical failures. Runtime `a251224` passed all six CI jobs (Windows/Linux/macOS and Chromium/Firefox/WebKit). Runtime `dea37e2` additionally makes the distinction between publication, retrieval and effective dates explicit in generation and review prompts. Its targeted text-candidate replay still makes an unsupported timing inference; [the retained answer](evaluations/date-contract-reviewed.json) is a failure, not proof of a fix. Local 267 tests, type/lint/build pass. The clean current-default full answer gate remains open.
