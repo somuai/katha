@@ -2,7 +2,7 @@
 
 A local-first chat agent that remembers dated conversations and checks what changed through one web-search tool.
 
-Current release proof: [full default evaluation at `dea37e2`](docs/evaluations/default-dea37e2-review.md) records 38/39 supported delivered factual claims and 27/40 successful tasks; twelve quota errors keep the gate EXECUTION_LIMITED. All six platform/browser CI jobs pass. A targeted success is not substituted for missing full-run answers.
+Current release proof: [complete default-model evaluation](docs/evaluations/default-fd37213-evening-review.md) records **59/63 supported factual claims (93.7%), 37/40 successful tasks and no execution errors**. This passes the agreed 90% fixed-evidence gate under coding-agent review; it is not production accuracy. Three failed web explanations and all earlier quota failures remain visible.
 
 ## Run
 
@@ -42,4 +42,22 @@ Katha chooses retained evidence versus web search automatically. Explicit source
 
 The [release evidence matrix](docs/RELEASE_READINESS.md) maps the agreed requirements to implementation, tests and explicit deferrals. Quota-limited runs, source-only recovery and model-generated task completion are reported separately.
 
-The [source-qualification follow-up](docs/evaluations/qualified-prose-review.md) records the latest answer-path fixes and the failed two-case candidate replay. Current tests/CI are green; the current grounding release gate remains open.
+The [historical source-qualification follow-up](docs/evaluations/qualified-prose-review.md) retains earlier failed candidate replays. The complete current-default result linked above supersedes its old release status without changing those captured failures.
+
+## Reproduce the complete answer evaluation
+
+With your own configured keys, `EVAL_MODELS=qwen/qwen3.8-27b npx tsx evaluations/answers.ts --run-live` captures fresh web observations and runs all forty cases. It consumes quota; new observations and model sampling can change the result.
+
+To replay the exact published observations instead, export them from the public reviewed ledger (no keys or network needed):
+
+```sh
+npx tsx evaluations/export-evidence.ts docs/evaluations/default-fd37213-evening-reviewed.json data/evaluations/published-evidence
+```
+
+The command verifies the original capture hash and requires a new output directory. Then, with keys and sufficient quota:
+
+```sh
+EVAL_MODELS=qwen/qwen3.8-27b EVAL_CAPTURE_DIR=data/evaluations/published-evidence EVAL_OUTPUT=data/evaluations/my-replay npx tsx evaluations/answers.ts --run-live
+```
+
+Use fresh experiment directories. Review every answer before computing claim support; fixtures and status/keyword checks do not establish factual truth. The public ledger contains synthetic records and public documentation, not the owner's private PDFs or history.

@@ -1,6 +1,10 @@
 # Current evaluation entry point
 
-See [the versioned release review](release-review.md) and [current status](../STATUS.md) first. They supersede the historical snapshots below. Retrieval, grounded factual precision, full task success and provider failures are separate measurements.
+## Complete current-default release gate — 14 November 2026
+
+The [latest complete forty-case run](default-fd37213-evening-review.md) has no execution failures: **59/63 supported factual claims (93.7%) and 37/40 successful tasks**. It passes the agreed numerical gate for this fixed-evidence set under coding-agent review. Its source ledger retains three failed web explanations, and the report separates inference, model-only timings, quota waits and synthetic search dispatches. It does not establish production accuracy, independent certification or fresh web-discovery quality. All earlier captures below retain their historical outcomes.
+
+See [the complete current-default review](default-fd37213-evening-review.md) and [current status](../STATUS.md) first. The [older versioned release review](release-review.md) retains historical outcomes. Retrieval, grounded factual precision, full task success and provider failures are separate measurements.
 
 ## Historical evaluation evidence
 
@@ -45,3 +49,7 @@ The captured two-model answer comparison supplies the same stored evidence per c
 Review annotations now require claim text and, for supported claims, evidence IDs resolving to nonempty retained sources. An empty claim list counts as a complete review only for an explicitly labelled nonfactual abstention. This prevents sparse reviews from inflating coverage; semantic entailment still requires a reviewer to read the evidence.
 
 Run `npx tsx evaluations/metrics.ts data/evaluations/answers-reviewed/results.json data/evaluations/answers-reviewed/metrics.json evaluations/answer-cases.json` to summarize the captured run without consuming provider quotas. It separates execution completion, reviewed task success, factual support, review coverage, and useful-answer latency; failures and empty outputs never count as useful answers. Inferences and abstentions do not inflate factual precision. Missing case declarations or incomplete claim reviews prevent a passed 90% gate. The original unannotated capture reports NOT_REVIEWED and null precision. Separate retrospective annotations and the latest committed, fully annotated run are linked above; raw captures are not silently overwritten.
+
+## Reproduce the frozen evidence
+
+Follow the [README replay commands](../../README.md#reproduce-the-complete-answer-evaluation). `evaluations/export-evidence.ts` reconstructs the eight public source sets from the committed full ledger and verifies the original SHA-256 before writing a fresh directory. No private runtime files, network or credentials are needed for export. Model replay still requires configured keys and quota, with a new experiment directory. Re-review new outputs; a matching input hash is not a promise of identical model output.

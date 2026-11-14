@@ -1,56 +1,22 @@
-## Resumed complete default run: `fd37213`
+# Katha implementation and release status — 14 November 2026
 
-The fresh forty-case run is terminal: **21/40 tasks, nineteen daily-token execution failures, eleven source-only recoveries**. All 24 delivered factual claims are supported retained-memory/original-record claims; there is no new web-answer support evidence. Gate: EXECUTION_LIMITED. [Separate ledger, metrics and capacity findings](evaluations/default-fd37213-review.md).
+Katha is the MiniMi chat agent, separate from the Wispr portfolio. Runtime `fd37213`; tested checkout `3960ef9`. The repository and source remain public at https://github.com/somuai/katha.
 
-268 local tests, type/lint/build and all six runtime/checkout CI jobs pass. Stop short-interval full-run retries: successful small probes do not establish daily headroom. The remaining full gate requires substantial provider-capacity recovery. No paid tier or default switch is enabled.
+## Current release evidence
 
-## Quota-wait follow-up: `fd37213`
+- **268 deterministic tests**, TypeScript, lint and production build pass.
+- All six Windows/Linux/macOS and Chromium/Firefox/WebKit CI jobs pass for the runtime and tested checkout.
+- The [complete current-default evaluation](evaluations/default-fd37213-evening-review.md) records **59/63 supported factual claims (93.7%), 37/40 tasks and zero execution errors**. All forty cases are recorded and coding-agent reviewed; the agreed 90% fixed-evidence gate passes.
+- Three ordinary web tasks fail strict review. Their unsupported/unverifiable details remain in the score. No perfect, production or independently certified accuracy is claimed.
 
-268 tests, type/lint/build pass. Compound day/hour/minute/second provider waits are preserved and long delays fail promptly at the existing two-minute limit. [The diagnostic capture](evaluations/quota-diagnostics.md) confirms daily-token rejection of full-size generations despite a successful three-token probe. A new full gate awaits enough provider capacity; no default switch or paid tier is enabled.
+[Requirements-to-evidence matrix](RELEASE_READINESS.md) · [Attachment audit](ATTACHMENT_AUDIT.md) · [Operating limits](OPERATING_LIMITS.md) · [One-page design](../DESIGN.md).
 
-## Completed current-default capture: `dea37e2`
+## Retained limitations and deferrals
 
-All forty cases are recorded and reviewed: **38/39 supported factual claims (97.4%), 27/40 tasks, twelve quota execution failures, eleven source-only recoveries**. Gate: **EXECUTION_LIMITED**. [Complete review, sources and metrics](evaluations/default-dea37e2-review.md). The run is terminal; it is not still waiting. A new unconstrained run requires provider capacity. No successful targeted cases are spliced into it.
+The full evaluation uses actual model calls with frozen public documentation and labelled synthetic records; it is not fresh market discovery or a head-to-head competitor benchmark. Same-model qualification review can miss semantic errors. Independent review of the new capture and broader multilingual memory remain future work. File interpretation and source excerpts have the documented bounds; CSV is not arbitrary database analysis.
 
-267 local tests, type/lint/build and all six runtime platform/browser CI jobs pass. The current-default full answer gate remains unproved because of missing generations. Deferred integrations and physical-mobile testing remain deferred.
+Owner-confirmed VoiceOver/privacy and physical microphone checks retain their prior scope. Physical-mobile testing and HubSpot/Salesforce/Shopify activation remain explicitly user-deferred. Optional connections import user-selected records; the model-controlled tool remains web search. No public multi-user deployment or hiring-form submission was performed.
 
-## Timestamp-contract follow-up: `dea37e2`
+## Historical failures remain visible
 
-Local 267 tests, type/lint/build pass. The targeted default-model explanation passes review; the text candidate still makes an unsupported date inference. Capacity is available again and a new forty-case Qwen default evaluation is underway. See [separate captured outcomes](evaluations/coherent-excerpts-review.md). No full-run success is inferred from the targeted check.
-
-## Latest follow-up: `a251224`
-
-267 local tests, check/lint/build and Chromium browser regression pass. Web excerpts preserve parameter meaning and exception qualifications; explicit citation syntax is consistent across provider guards and UI. [Evidence and unresolved limits](evaluations/coherent-excerpts-review.md).
-
-The complete text-candidate capture records 50/51 supported factual claims and 34/40 tasks, with one execution failure. It is not a clean default-model release gate. The new targeted replay passes the freshness task but still fails the conceptual-date task. Default Qwen evaluation remains capacity-limited. No new independent review is implied.
-
-# Katha status — 14 November 2026
-
-MiniMi chat-agent project. Local preview: http://localhost:3000/ . Public source: https://github.com/somuai/katha . This is separate from the Wispr portfolio; no Katha public multi-user deployment is claimed.
-
-## Latest implementation
-
-Runtime `caa68c2` passes **256 automated tests**, TypeScript, formatting lint and production build locally. The Chromium regression passes upload, original/correction inspection, a saved-chat linked retry with original attachments, keyboard dismissal, responsive viewports and automated accessibility checks. Compact inline source controls hide technical IDs; historical answers can open their own evidence/audit view. The preview responds successfully.
-
-The latest changes prevent a second workspace process from interrupting the owner's active work; recover committed turns after process termination; make deliberate retries fresh, linked and deletion-safe; restore observation of active chats; prevent the user question appearing as an assistant snapshot; label missing-model responses partial; and allow one search-plan shape repair. Prior selected-document, quote, mixed-topic comparison, date-validation and usage-accounting fixes remain in place.
-
-Current runtime [passes all six CI jobs](https://github.com/somuai/katha/actions/runs/43548250381): Windows/Linux/macOS install/tests/build and Chromium/Firefox/WebKit journeys. Earlier answer-capture hashes remain pinned to their own code versions; no old full-run result is relabelled as a current pass.
-
-New public-turn regressions cover source-qualified draft repair, shared repair limits, quota resumption, cancellation, and the host's ordinary-versus-historical answer path. The shorter ordinary prompt avoids unnecessary historical commercial-term instructions. [Scope, added calls and remaining live failures](evaluations/qualified-prose-review.md).
-
-## What the evidence establishes
-
-- The three hiring phrasings use persisted conversation fixtures, calendar/timezone resolution, immutable original answers and explicit missing-evidence outcomes. See `tests/judge-conversations.test.ts`.
-- Earlier default-model live attachment checks passed 13 targeted PDF/CSV/image journeys, including the owner's report and cross-chat identity. [Scope and limitations](ATTACHMENT_AUDIT.md). This does not mean every arbitrary data type or unlimited attachment is supported.
-- The current focused mixed-topic fixture passed **five price outcomes plus five dated releases** with real GPT-OSS model calls and invented vendor evidence. Its prior failures remain visible.
-- The last full default capture at `936da48` delivered **50/52 supported factual propositions (96.2%)**, but only **30/40 complete tasks**, with **eight quota-limited cases**. The computed gate is **EXECUTION_LIMITED**. The two-model comparison, source passages, claims and failures are in the [release review](evaluations/release-review.md).
-- The 40-case retrieval ablation (0/40 recent, 32/40 lexical/calendar, 40/40 hybrid) measures retrieval, not answer accuracy or superiority over competitors.
-- Owner-confirmed physical microphone and VoiceOver/privacy checks are retained. Automated mobile viewports are not physical-device sign-off.
-
-## Still open / explicitly deferred
-
-A quota-unlimited forty-case run of the **current default runtime** remains pending provider capacity. The last full run exposed two qualified-prose failures. The new two-case candidate replay also leaves an unsupported billing gloss and an unnecessary scope clarification; citation/date/model review is not a semantic truth guarantee. No clean current-default release gate, production accuracy or model superiority is claimed.
-
-Physical-mobile testing is deferred by the owner. HubSpot/Salesforce account activation and Shopify remain deferred; Notion is owner-confirmed, with earlier owner-authorized Canva/Gmail checks. Wider OAuth distribution, multi-tenant authentication and public hosting are outside this local workspace release.
-
-[Requirements/evidence matrix](RELEASE_READINESS.md) · [Operating limits and metrics](OPERATING_LIMITS.md) · [Architecture comparison](research/open-source-comparison.md) · [Earlier chronological snapshots](STATUS_HISTORY.md)
+The [preceding full default run](evaluations/default-fd37213-review.md), [earlier default run](evaluations/default-dea37e2-review.md), [quota diagnosis](evaluations/quota-diagnostics.md), [text-candidate and targeted checks](evaluations/coherent-excerpts-review.md), and [older release ledger](evaluations/release-review.md) retain their original failures and revision/source identities. They are not rescored or combined with successful cases from this run.

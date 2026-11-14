@@ -14,3 +14,8 @@
 - **Document reference**: a contributor name resolved from a literal user mention and a retained document, linked to that message and document version; not an inferred identity or an assistant assertion.
 
 - **Qualification review**: a bounded same-model check of provisional web prose for factual support and source version/environment caveats. It is distinct from a temporal verification and is not independent proof of semantic correctness.
+
+- **Segment:** a located excerpt extracted from a retained source, with its source locator and preparation state.
+- **Assertion:** a source-linked subject/predicate/value statement used for recall, correction and comparison.
+- **Correction operation:** `CORRECT_PAST_RECORD` clarifies a past assertion; `CHANGE_FROM_NOW` appends a change with its effective date. Neither overwrites the original.
+- **Recorded time:** when Katha learned material; distinct from its event time, web observation time, publication time and effective-change time.

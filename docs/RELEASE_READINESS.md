@@ -1,6 +1,6 @@
 # Katha release evidence — 14 November 2026
 
-This is the MiniMi chat-agent project, separate from the Wispr portfolio. Runtime under review: `dea37e2`; older full answer captures are revision-pinned separately; platform/browser CI is revision-pinned in STATUS. The application is a single local workspace; public multi-user hosting is not part of this release.
+This is the MiniMi chat-agent project, separate from the Wispr portfolio. Runtime under review: `fd37213`; older full answer captures are revision-pinned separately; platform/browser CI is revision-pinned in STATUS. The application is a single local workspace; public multi-user hosting is not part of this release.
 
 ## Requirements to evidence
 
@@ -22,21 +22,13 @@ This is the MiniMi chat-agent project, separate from the Wispr portfolio. Runtim
 
 ## Validation discipline
 
-The runtime passes 267 public-interface/provider/HTTP tests, TypeScript, lint and production build locally. Current CI results and newly captured answer outcomes are recorded in STATUS and the release evaluation report. Older captures remain preserved and retain their own revision, observation times and review scope. A provider failure or evidence-only PARTIAL response does not count as completing a generated answer task.
+The runtime passes 268 public-interface/provider/HTTP tests, TypeScript, lint and production build locally. Current CI results and newly captured answer outcomes are recorded in STATUS and the release evaluation report. Older captures remain preserved and retain their own revision, observation times and review scope. A provider failure or evidence-only PARTIAL response does not count as completing a generated answer task.
 
 Do not describe this as better than every open-source assistant. Its defensible distinction is the explicit, tested temporal-original/correction/deletion contract; [the comparison](research/open-source-comparison.md) records overlapping features and lacks a competitor head-to-head benchmark.
 
 
 ## Release decision
 
-The [versioned answer review](evaluations/release-review.md) reports 96.2% supported delivered claims in the older `936da48` full-default run, but eight quota failures keep that run EXECUTION_LIMITED. Its 30/40 full tasks are distinct from claim precision. Two substantive qualified-prose failures remain visible. A quota-unlimited current-default forty-case run and review remains pending capacity; the focused ten-outcome mixed fixture cannot substitute for it. The goal stays open rather than relabelling this partial proof as complete.
+The [complete current-default evaluation](evaluations/default-fd37213-evening-review.md) records **59/63 supported factual claims (93.7%), 37/40 successful tasks and no execution errors**. All forty cases are reviewed; the agreed 90% fixed-evidence gate passes. The report retains three failed web tasks, coding-agent review scope, normal quota delays, original source dates and the distinction between synthetic search fixtures and fresh discovery. This is not production accuracy or a competitor ranking.
 
-The [current source-qualification follow-up](evaluations/qualified-prose-review.md) records the new path/review regressions, extra-request trade-offs and a BELOW_TARGET two-case candidate replay. The default quota block is preserved; no current full-run success is claimed.
-
-## Latest evidence-context follow-up
-
-The [coherent-excerpt review](evaluations/coherent-excerpts-review.md) supersedes the current-status summary of the earlier follow-up while preserving its historical failures. Runtime `a251224` passed all six CI jobs (Windows/Linux/macOS and Chromium/Firefox/WebKit). Runtime `dea37e2` additionally makes the distinction between publication, retrieval and effective dates explicit in generation and review prompts. Its targeted text-candidate replay still makes an unsupported timing inference; [the retained answer](evaluations/date-contract-reviewed.json) is a failure, not proof of a fix. Local 267 tests, type/lint/build pass. The clean current-default full answer gate remains open.
-
-The new [full current-default review](evaluations/default-dea37e2-review.md) is now terminal: 38/39 supported claims, 27/40 tasks and twelve quota errors. All six `dea37e2` platform/browser CI jobs pass. This supersedes the earlier “underway” status; the answer gate is EXECUTION_LIMITED.
-
-The [resumed full run at `fd37213`](evaluations/default-fd37213-review.md) is also terminal and EXECUTION_LIMITED: 21/40 tasks, nineteen daily-token errors. Its 24 supported claims all concern retained memory, not web verification. Runtime tests now total 268; all six runtime and latest checkout CI jobs pass. Daily capacity remains the release blocker.
+Earlier incomplete runs remain preserved in their own reports, including [the preceding full attempt](evaluations/default-fd37213-review.md). No targeted successes are substituted into them. Runtime tests total 268 and all six runtime/checkout platform/browser CI jobs pass. The matrix above maps the rest of the implementation and validation requirements to their evidence. User-deferred integrations and physical-mobile testing remain deferred, and no application submission or new deployment is included.
