@@ -1,3 +1,7 @@
+## Quota-wait follow-up: `fd37213`
+
+268 tests, type/lint/build pass. Compound day/hour/minute/second provider waits are preserved and long delays fail promptly at the existing two-minute limit. [The diagnostic capture](evaluations/quota-diagnostics.md) confirms daily-token rejection of full-size generations despite a successful three-token probe. A new full gate awaits enough provider capacity; no default switch or paid tier is enabled.
+
 ## Completed current-default capture: `dea37e2`
 
 All forty cases are recorded and reviewed: **38/39 supported factual claims (97.4%), 27/40 tasks, twelve quota execution failures, eleven source-only recoveries**. Gate: **EXECUTION_LIMITED**. [Complete review, sources and metrics](evaluations/default-dea37e2-review.md). The run is terminal; it is not still waiting. A new unconstrained run requires provider capacity. No successful targeted cases are spliced into it.

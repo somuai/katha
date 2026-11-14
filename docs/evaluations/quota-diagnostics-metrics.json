@@ -1,0 +1,102 @@
+{
+  "target": 0.9,
+  "expectedCaseSetDeclared": true,
+  "scope": "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
+  "definitions": {
+    "resources": "Reported response tokens only, not a billing total; absent usage is unknown, not zero. Search attempts include cache/budget checks; adapter dispatches are separate and are not invoice credits. Attachment preparation and unreported failed responses are outside turn usage.",
+    "claimPrecision": "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
+    "taskSuccess": "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
+    "latency": "Useful-answer medians exclude failed, cancelled, empty and evidence-only fallback responses; quota waits are reported separately"
+  },
+  "models": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "expectedCases": 40,
+      "recordedCases": 2,
+      "missingCaseIds": [
+        "recall-01",
+        "recall-02",
+        "recall-03",
+        "recall-04",
+        "recall-05",
+        "recall-06",
+        "recall-07",
+        "recall-08",
+        "memory-01",
+        "memory-02",
+        "memory-03",
+        "memory-04",
+        "memory-05",
+        "memory-06",
+        "memory-07",
+        "memory-08",
+        "web-01",
+        "web-02",
+        "web-03",
+        "web-04",
+        "web-05",
+        "web-06",
+        "web-07",
+        "verify-02",
+        "verify-03",
+        "verify-04",
+        "verify-05",
+        "verify-06",
+        "verify-07",
+        "verify-08",
+        "gap-01",
+        "gap-02",
+        "gap-03",
+        "gap-04",
+        "safety-01",
+        "safety-02",
+        "safety-03",
+        "safety-04"
+      ],
+      "duplicateCaseIds": [],
+      "executionCompleted": 1,
+      "executionErrorCases": 2,
+      "evidenceOnlyCases": 1,
+      "answered": 1,
+      "answerCoverage": 0.025,
+      "reviewedCases": 2,
+      "reviewCoverage": 0.05,
+      "taskSuccesses": 0,
+      "taskSuccessRate": null,
+      "abstentions": 2,
+      "factualAnswerCases": 0,
+      "claims": {
+        "supported": 0,
+        "unsupported": 0,
+        "unverifiable": 0,
+        "inference": 0,
+        "factual": 0,
+        "precision": null
+      },
+      "claimSupportGate": "INCOMPLETE_RUN",
+      "resources": {
+        "reportedInputTokens": 799,
+        "reportedOutputTokens": 131,
+        "casesWithReportedModelUsage": 2,
+        "casesWithoutReportedModelUsage": 38,
+        "searchAttemptsIncludingCache": 4,
+        "searchAdapterDispatches": 4,
+        "casesWithReportedDispatchCount": 2,
+        "cachedSearchQueries": 0,
+        "reportedSearchQueries": 4,
+        "usageScopes": [
+          "reported completed planning and generation responses; excludes unreported failed attempts"
+        ]
+      },
+      "latency": {
+        "medianAnswerCompletionMs": null,
+        "medianActiveCompletionMs": null,
+        "medianFirstUsefulMs": null,
+        "medianQuotaMs": null,
+        "medianTerminalMs": 1784.9984785000001,
+        "answerSamples": 0,
+        "firstUsefulSamples": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,426 @@
+{
+  "identity": {
+    "fixtureHash": "c02c44bc5712bbb0da86cdfe6c1fcba78b74e7f85f004929943515c9f2911dd4",
+    "implementationHash": "8f1f89faf72059682eb883ae8dd1880d6164951145b7a8b15c662c8c03d221f8",
+    "models": [
+      "qwen/qwen3.8-27b"
+    ],
+    "temperature": 0,
+    "maxOutputTokens": 1000,
+    "node": "24.22.2",
+    "sharedCaptureHash": "a7c9af21b310ce414fd9c69c02787d07cd2e3e8d25ce6bdca9beecbd404cf95c"
+  },
+  "label": "Targeted subset (2/40), not a full release gate. Synthetic personal histories and vendor fixtures are labelled. Live documentation evidence is captured once and shared by all candidates.",
+  "expectedCaseIds": [
+    "web-08",
+    "verify-01"
+  ],
+  "reusedEvidence": "Shared captured observations retain their original dates; this is not fresh live web discovery.",
+  "models": [
+    "qwen/qwen3.8-27b"
+  ],
+  "captureOutcomes": {
+    "web-01": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:24.459Z"
+    },
+    "web-02": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:26.451Z"
+    },
+    "web-03": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:27.741Z"
+    },
+    "web-04": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:32.079Z"
+    },
+    "web-05": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:36.421Z"
+    },
+    "web-06": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:39.033Z"
+    },
+    "web-07": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:41.214Z"
+    },
+    "web-08": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:44.081Z"
+    }
+  },
+  "gate": "Unreviewed: no supported-claim accuracy is inferred from keyword checks.",
+  "results": [
+    {
+      "id": "web-08",
+      "kind": "web",
+      "model": "qwen/qwen3.8-27b",
+      "runAt": "2026-11-14T07:56:20.059Z",
+      "wireRequests": [
+        {
+          "phase": "planning",
+          "maxTokens": 500,
+          "status": 200,
+          "usage": {
+            "inputTokens": 331,
+            "outputTokens": 82,
+            "totalTokens": 413
+          },
+          "finishReason": "stop"
+        },
+        {
+          "phase": "generation",
+          "maxTokens": 1000,
+          "status": 429,
+          "quotaScope": "daily_tokens",
+          "providerWaitDuration": "2m35.952s",
+          "retryAfterSeconds": 156
+        }
+      ],
+      "completionMs": 1519.5085410000002,
+      "firstUsefulMs": null,
+      "quotaMs": 0,
+      "assertions": {
+        "includes": [],
+        "excludes": [],
+        "expectedStatus": null,
+        "statusMatches": true
+      },
+      "snapshot": {
+        "id": "4dd19576-7dde-4c73-81b2-a07c49972836",
+        "conversationId": "35423924-7cee-4898-b3cf-b87601da6dd0",
+        "status": "FAILED",
+        "text": "Using the web, explain why a current price alone cannot establish its change date. Cite any relevant evidence and clearly separate your inference.",
+        "originalInputAvailable": true,
+        "attachmentIds": [],
+        "memoryScope": "workspace",
+        "timezone": "UTC",
+        "answer": "",
+        "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+        "createdAt": "2026-11-12T12:00:00.000Z",
+        "updatedAt": "2026-11-12T12:00:00.000Z",
+        "citations": [],
+        "comparisons": [],
+        "sources": [
+          {
+            "id": "824acf08-718a-45a7-87a6-4319b25737e3",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Changelog - Tavily Docs",
+            "content": "* **`max_age_hours`** sets the maximum age in hours of Tavily\u2019s cached copy of each result. Accepts `1` to `720`, `0` to always fetch the page live, or `-1` to never fetch live. Use it when you need the current version of pages that change often, such as prices, live scores, and status pages.\n* Lower values do not cost more credits, but fetching live adds latency. On non-paying plans, live fetching is best-effort and requests may return `434` while Tavily is under heavy load. See [Flex Tier Capacity](/documentation/rate-limits#flex-tier-capacity).\n\nUse it when you need the current version of pages that change often, such as prices, live scores, and status pages.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[`Lower values do not cost more credits, but fetching live adds latency.\n\n{\"docsConfig\":{\"theme\":\"aspen\",\"$schema\":\"https://mintlify.com/docs.json\",\"name\":\"Tavily Docs\",\"colors\":{\"primary\":\"#80AF9B\",\"light\":\"#80AF9B\",\"dark\":\"#817FFF\"},\"logo\":{\"light\":\"https://mintcdn.com/tavilyai/4\\_uvKy\\_66YQwB55y/logo/light.svg?fit=max\\u0026auto=format\\u0026n=4\\_uvKy\\_66YQwB55y\\u0026q=85\\u0026s=dc43e5efe7e46e07f0eb136402479de8\",\"dark\":\"https://mintcdn.com/tavilyai/4\\_uvKy\\_66YQwB55y/logo/dark.svg?fit=max\\u0026auto=format\\u0026n=4\\_uvKy\\_66YQwB55y\\u0026q=85\\u0026s=683273a1e0164bedd5796c0292b7486e\",\"href\":\"https://tavily.com/\"},\"favicon\":\"https://mintcdn.com/tavilyai/8Hb954Quc\\_LiMlq3/favicon.ico?fit=max\\u0026auto=format\\u0026n=8Hb954Quc\\_LiMlq3\\u0026q=85\\u0026s=585516a7dd162d47508ea9da086baec2\",\"api\":{\"openapi\":[\"documentation/api-reference/openapi.json\",\"documentation/enterprise/openapi.json\"],\"playground\":{\"display\":\"simple\"}},\"background\":{\"color\":{\"light\":\"#FFFCF6\",\"dark\":\"#1F1E1E\"}},\"navbar\":{\"links\":[{\"href\":\"mailto:support@tavily.com\",\"label\":\"Support\"}],\"primary\":{\"type\":\"button\",\"label\":\"Get an API key\",\"href\":\"https://app.tavily.com\"}},\"footer\":{\"socials\":{\"linkedin\":\"https://linkedin.com/company/tavily\",\"x\":\"https://x.com/tavilyai\",\"github\":\"https://github.com/tavily-ai\",\"youtube\":\"https://www.youtube.com/@TavilyAI\"},\"links\":[{\"header\":\"Resources\",\"items\":[{\"label\":\"Get started\",\"href\":\"/\"},{\"label\":\"Tavily Search Crawler\",\"href\":\"/documentation/search-crawler\"},{\"label\":\"Tavily Status\",\"href\":\"https://status.tavily.com/\"}]},{\"header\":\"Legal\",\"items\":[{\"label\":\"Security \\u0026 Compliance\",\"href\":\"https://trust.tavily.com/\"},{\"label\":\"Privacy Policy\",\"href\":\"https://www.tavily.com/privacy\"},{\"label\":\"Website Terms of Use\",\"href\":\"https://www.tavily.com/website-terms\"},{\"label\":\"Platform Terms of Use\",\"href\":\"https://www.tavily.com/terms\"},{\"label\":\"Cookie Notice\",\"href\":\"https://www.tavily.com/cookie-policy\"}]}]},\"seo\":{\"metatags\":{\"canonical\":\"https://docs.tavily.com\"}},\"fonts\":{\"heading\":{\"family\":\"SuisseIntl\",\"weight\":700,\"source\":\"fonts/SuisseIntl-Medium.woff2\",\"format\":\"woff2\"},\"body\":{\"family\":\"SuisseIntl\",\"weight\":400,\"source\":\"fonts/SuisseIntl-Regular.woff2\",\"format\":\"woff2\"}},\"contextual\":{\"options\":[\"copy\",\"view\",\"chatgpt\",\"claude\"],\"display\":\"header\"},\"thumbnails\":{\"appearance\":\"dark\",\"background\":\"https://mintcdn.com/tavilyai/xMLYLDqESGBETUw7/images/og-background.png?fit=max\\u0026auto=format\\u0026n=xMLYLDqESGBETUw7\\u0026q=85\\u0026s=b8592c875dc9b99e8536ae24dc6a742f\"},\"styling\":{\"latex\":false},\"navigation\":{\"global\":{\"anchors\":[{\"anchor\":\"API Playground\",\"icon\":\"play\",\"href\":\"https://app.tavily.com/playground\"}]},\"pages\":[]}},\"deployment\":{\"deploymentMetadataValue\":{\"subdomain\":\"tavilyai\",\"hasAudioNarration\":false,\"actualSubdomain\":\"tavilyai\",\"customDomains\":[\"docs.tavily.com\"],\"gitSource\":{\"type\":\"github\",\"owner\":\"tavily-ai\",\"repo\":\"new-docs\",\"deployBranch\":\"main\",\"contentDirectory\":\"\",\"isPrivate\":true,\"mountPath\":\"\",\"label\":\"\"},\"chroma\":{\"liveDeploymentHistoryId\":\"6ae4da74257df2aabdae3d7e\",\"collectionId\":\"ed075f08-a549-4e9b-bf63-6ca25032a963\",\"schemaVersion\":\"v3\",\"latestBuiltDeploymentHistoryId\":\"6ae4da74257df2aabdae3d7e\"},\"entitlements\":{\"AI\\_CHAT\":{\"status\":\"ENABLED\"},\"REMOVE\\_BRANDING\":{\"status\":\"ENABLED\"},\"CONTEXTUAL\\_FEEDBACK\":{\"status\":\"ENABLED\"},\"CODE\\_SNIPPET\\_FEEDBACK\":{\"status\":\"ENABLED\"},\"WEB\\_MCP\":{\"status\":\"ENABLED\"},\"NARRATION\":{\"status\":\"ENABLED\"}},\"buildId\":\"6ae4da74257df2aabdae3d7e\",\"clientVersion\":\"0.0.4044\",\"searchFilterCounts\":[{\"language\":\"default\",\"tag\":\"Integrations\",\"count\":81},{\"language\":\"default\",\"tag\":\"Documentation\",\"count\":28},{\"language\":\"default\",\"tag\":\"Examples\",\"count\":24},{\"language\":\"default\",\"tag\":\"More\",\"count\":23},{\"language\":\"default\",\"tag\":\"API Reference\",\"count\":16},{\"language\":\"default\",\"tag\":\"Coding agents\",\"count\":10},{\"language\":\"default\",\"tag\":\"Apps\",\"count\":8},{\"language\":\"default\",\"tag\":\"Get started\",\"count\":7},{\"language\":\"default\",\"tag\":\"Agent Toolkit\",\"count\":7},{\"language\":\"default\",\"tag\":\"Cookbook\",\"count\":7}]},\"assistantConfig\":{},\"basePath\":\"\",\"hasChatPermissions\":true,\"hasWebMcpPermissions\":true,\"toggles\":[{\"name\":\"kill-isr\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"agent-mintlify-slack\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"agent-integrations-settings\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"automations-pr-grouping\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"custom-prefix\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"analytics-v7\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"user-flows-analytics\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"no-publish-flow\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-onboarding\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"llms-txt-v2\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"snapshot-serving-live\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"stripTemperatureMiddleware\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"support-platform-pylon-zendesk\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"snapshot-serving\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"instant-rollback\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"granular-notifications-server\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"granular-notifications\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"automations-fable\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"fixed-ai-action-pricing\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"automation-resolve-merge-conflict\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"scoped-publishing\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"mintql\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"page-level-analytics\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"editor-version-history-v2\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"billing-page-v2\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"full-page-search\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workspace-projects\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"assistant-v5\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"byok-sep-25\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"fork-pr-previews\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"revalidation-jwt\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"vite-origin\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"billing-updated-9-15\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-sso-scim\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"hobby-abuse-scan\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"dashboard-inbox\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-signup\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"turbopuffer-dual-write\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-enabled\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"approve-review-flow\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"sso-setup-deadline-banner\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false}],\"googleFontsInlined\":false},\"customCss\":[{\"filePath\":\"style.css\",\"content\":\":root{--tavily-off-white:#fffcf6;--tavily-black:#1f1e1e;--tavily-green:#80af9b;--tavily-light-blue:#79deeb;--tavily-lavender:#817fff;--tavily-pink:#f49eff}[data-component-part=tab-content] .code-group{margin-top:.5rem;margin-bottom:.5rem}.footer-social-icons>a>svg.icon{background-color:rgb(var(--gray-400));transition:background-color .15s ease}.footer-social-icons>a:hover>svg.icon{background-color:rgb(var(--gray-200))}.hidden.lg\\\\:flex>.nav-tabs{width:100%}.hidden.lg\\\\:flex>.nav-tabs>a.nav-tabs-item[href=\\\"/changelog\\\"]{margin-left:auto}.qs-widget{--qs-ink:var(--tavily-black);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:\\\"title actions\\\";align-items:center;gap:1.25rem 1.5rem;margin:.5rem 0 2rem;padding:1.5rem 1.75rem;border-radius:16px;background:var(--tavily-green);color:var(--qs-ink)}.qs-widget-copy{grid-area:title;display:flex;flex-direction:column;gap:.25rem;min-width:0}.qs-widget-title{font-size:1.375rem;font-weight:600;line-height:1.25}.qs-widget-subtitle{font-size:.9375rem;line-height:1.4;opacity:.75}.qs-widget-actions{grid-area:actions;display:flex;gap:.5rem}.qs-widget-button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border:0;border-radius:.75rem;background:var(--tavily-black);color:var(--tavily-off-white)!important;font-size:1rem;font-weight:500;line-height:1;white-space:nowrap;text-decoration:",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://docs.tavily.com/changelog",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:44.074Z",
+              "method": "search observation",
+              "query": "why current price does not indicate change date",
+              "cached": false
+            }
+          },
+          {
+            "id": "91f14533-92d0-40e0-8bb4-0439c0c874f8",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "SDK Reference - Tavily Docs",
+            "content": "| `max_age_hours` | `int` | The maximum age in hours of Tavily\u2019s cached copy of each result.\n\n{\"docsConfig\":{\"theme\":\"aspen\",\"$schema\":\"https://mintlify.com/docs.json\",\"name\":\"Tavily Docs\",\"colors\":{\"primary\":\"#80AF9B\",\"light\":\"#80AF9B\",\"dark\":\"#817FFF\"},\"logo\":{\"light\":\"https://mintcdn.com/tavilyai/4\\_uvKy\\_66YQwB55y/logo/light.svg?fit=max\\u0026auto=format\\u0026n=4\\_uvKy\\_66YQwB55y\\u0026q=85\\u0026s=dc43e5efe7e46e07f0eb136402479de8\",\"dark\":\"https://mintcdn.com/tavilyai/4\\_uvKy\\_66YQwB55y/logo/dark.svg?fit=max\\u0026auto=format\\u0026n=4\\_uvKy\\_66YQwB55y\\u0026q=85\\u0026s=683273a1e0164bedd5796c0292b7486e\",\"href\":\"https://tavily.com/\"},\"favicon\":\"https://mintcdn.com/tavilyai/8Hb954Quc\\_LiMlq3/favicon.ico?fit=max\\u0026auto=format\\u0026n=8Hb954Quc\\_LiMlq3\\u0026q=85\\u0026s=585516a7dd162d47508ea9da086baec2\",\"api\":{\"openapi\":[\"documentation/api-reference/openapi.json\",\"documentation/enterprise/openapi.json\"],\"playground\":{\"display\":\"simple\"}},\"background\":{\"color\":{\"light\":\"#FFFCF6\",\"dark\":\"#1F1E1E\"}},\"navbar\":{\"links\":[{\"href\":\"mailto:support@tavily.com\",\"label\":\"Support\"}],\"primary\":{\"type\":\"button\",\"label\":\"Get an API key\",\"href\":\"https://app.tavily.com\"}},\"footer\":{\"socials\":{\"linkedin\":\"https://linkedin.com/company/tavily\",\"x\":\"https://x.com/tavilyai\",\"github\":\"https://github.com/tavily-ai\",\"youtube\":\"https://www.youtube.com/@TavilyAI\"},\"links\":[{\"header\":\"Resources\",\"items\":[{\"label\":\"Get started\",\"href\":\"/\"},{\"label\":\"Tavily Search Crawler\",\"href\":\"/documentation/search-crawler\"},{\"label\":\"Tavily Status\",\"href\":\"https://status.tavily.com/\"}]},{\"header\":\"Legal\",\"items\":[{\"label\":\"Security \\u0026 Compliance\",\"href\":\"https://trust.tavily.com/\"},{\"label\":\"Privacy Policy\",\"href\":\"https://www.tavily.com/privacy\"},{\"label\":\"Website Terms of Use\",\"href\":\"https://www.tavily.com/website-terms\"},{\"label\":\"Platform Terms of Use\",\"href\":\"https://www.tavily.com/terms\"},{\"label\":\"Cookie Notice\",\"href\":\"https://www.tavily.com/cookie-policy\"}]}]},\"seo\":{\"metatags\":{\"canonical\":\"https://docs.tavily.com\"}},\"fonts\":{\"heading\":{\"family\":\"SuisseIntl\",\"weight\":700,\"source\":\"fonts/SuisseIntl-Medium.woff2\",\"format\":\"woff2\"},\"body\":{\"family\":\"SuisseIntl\",\"weight\":400,\"source\":\"fonts/SuisseIntl-Regular.woff2\",\"format\":\"woff2\"}},\"contextual\":{\"options\":[\"copy\",\"view\",\"chatgpt\",\"claude\"],\"display\":\"header\"},\"thumbnails\":{\"appearance\":\"dark\",\"background\":\"https://mintcdn.com/tavilyai/xMLYLDqESGBETUw7/images/og-background.png?fit=max\\u0026auto=format\\u0026n=xMLYLDqESGBETUw7\\u0026q=85\\u0026s=b8592c875dc9b99e8536ae24dc6a742f\"},\"styling\":{\"latex\":false},\"navigation\":{\"global\":{\"anchors\":[{\"anchor\":\"API Playground\",\"icon\":\"play\",\"href\":\"https://app.tavily.com/playground\"}]},\"pages\":[]}},\"deployment\":{\"deploymentMetadataValue\":{\"subdomain\":\"tavilyai\",\"hasAudioNarration\":false,\"actualSubdomain\":\"tavilyai\",\"customDomains\":[\"docs.tavily.com\"],\"gitSource\":{\"type\":\"github\",\"owner\":\"tavily-ai\",\"repo\":\"new-docs\",\"deployBranch\":\"main\",\"contentDirectory\":\"\",\"isPrivate\":true,\"mountPath\":\"\",\"label\":\"\"},\"chroma\":{\"liveDeploymentHistoryId\":\"6ae4da74257df2aabdae3d7e\",\"collectionId\":\"ed075f08-a549-4e9b-bf63-6ca25032a963\",\"schemaVersion\":\"v3\",\"latestBuiltDeploymentHistoryId\":\"6ae4da74257df2aabdae3d7e\"},\"entitlements\":{\"AI\\_CHAT\":{\"status\":\"ENABLED\"},\"REMOVE\\_BRANDING\":{\"status\":\"ENABLED\"},\"CONTEXTUAL\\_FEEDBACK\":{\"status\":\"ENABLED\"},\"CODE\\_SNIPPET\\_FEEDBACK\":{\"status\":\"ENABLED\"},\"WEB\\_MCP\":{\"status\":\"ENABLED\"},\"NARRATION\":{\"status\":\"ENABLED\"}},\"buildId\":\"6ae4da74257df2aabdae3d7e\",\"clientVersion\":\"0.0.4044\",\"searchFilterCounts\":[{\"language\":\"default\",\"tag\":\"Integrations\",\"count\":81},{\"language\":\"default\",\"tag\":\"Documentation\",\"count\":28},{\"language\":\"default\",\"tag\":\"Examples\",\"count\":24},{\"language\":\"default\",\"tag\":\"More\",\"count\":23},{\"language\":\"default\",\"tag\":\"API Reference\",\"count\":16},{\"language\":\"default\",\"tag\":\"Coding agents\",\"count\":10},{\"language\":\"default\",\"tag\":\"Apps\",\"count\":8},{\"language\":\"default\",\"tag\":\"Get started\",\"count\":7},{\"language\":\"default\",\"tag\":\"Agent Toolkit\",\"count\":7},{\"language\":\"default\",\"tag\":\"Cookbook\",\"count\":7}]},\"assistantConfig\":{},\"basePath\":\"\",\"hasChatPermissions\":true,\"hasWebMcpPermissions\":true,\"toggles\":[{\"name\":\"kill-isr\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"agent-mintlify-slack\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"agent-integrations-settings\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"automations-pr-grouping\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"custom-prefix\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"analytics-v7\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"user-flows-analytics\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"no-publish-flow\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-onboarding\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"llms-txt-v2\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"snapshot-serving-live\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"stripTemperatureMiddleware\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"support-platform-pylon-zendesk\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"snapshot-serving\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"instant-rollback\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"granular-notifications-server\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"granular-notifications\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"automations-fable\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"fixed-ai-action-pricing\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"automation-resolve-merge-conflict\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"scoped-publishing\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"mintql\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"page-level-analytics\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"editor-version-history-v2\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"billing-page-v2\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"full-page-search\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workspace-projects\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"assistant-v5\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"byok-sep-25\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"fork-pr-previews\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"revalidation-jwt\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"vite-origin\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"billing-updated-9-15\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-sso-scim\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"hobby-abuse-scan\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"dashboard-inbox\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-signup\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"turbopuffer-dual-write\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"workos-enabled\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"approve-review-flow\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false},{\"name\":\"sso-setup-deadline-banner\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature\\_enabled\":true},\"impressionData\":false}],\"googleFontsInlined\":false},\"customCss\":[{\"filePath\":\"style.css\",\"content\":\":root{--tavily-off-white:#fffcf6;--tavily-black:#1f1e1e;--tavily-green:#80af9b;--tavily-light-blue:#79deeb;--tavily-lavender:#817fff;--tavily-pink:#f49eff}[data-component-part=tab-content] .code-group{margin-top:.5rem;margin-bottom:.5rem}.footer-social-icons>a>svg.icon{background-color:rgb(var(--gray-400));transition:background-color .15s ease}.footer-social-icons>a:hover>svg.icon{background-color:rgb(var(--gray-200))}.hidden.lg\\\\:flex>.nav-tabs{width:100%}.hidden.lg\\\\:flex>.nav-tabs>a.nav-tabs-item[href=\\\"/changelog\\\"]{margin-left:auto}.qs-widget{--qs-ink:var(--tavily-black);display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:\\\"title actions\\\";align-items:center;gap:1.25rem 1.5rem;margin:.5rem 0 2rem;padding:1.5rem 1.75rem;border-radius:16px;background:var(--tavily-green);color:var(--qs-ink)}.qs-widget-copy{grid-area:title;display:flex;flex-direction:column;gap:.25rem;min-width:0}.qs-widget-title{font-size:1.375rem;font-weight:600;line-height:1.25}.qs-widget-subtitle{font-size:.9375rem;line-height:1.4;opacity:.75}.qs-widget-actions{grid-area:actions;display:flex;gap:.5rem}.qs-widget-button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border:0;border-radius:.75rem;background:var(--tavily-black);color:var(--tavily-off-white)!important;font-size:1rem;font-weight:500;line-height:1;white-space:nowrap;text-decoration:none!important;transition:background-color .15s ease}.qs-widget-button:hover{background:rgb(31 30 30/.85)}.qs-widget-button:focus-visible{outline:2px solid var(--qs-ink);outline-offset:3px}.agent-field{--af-ink:var(--tavily-black);--af-ink-60:rgb(31 30 30 / 0.6);--af-ink-10:rgb(31 30 30 / 0.1);--af-ink-5:rgb(31 30 30 / 0.05);--af-surface:var(--tavily-off-white);position:relative;display:inline-flex;align-items:stretch;min-height:36px;border-radius:.75rem;background:var(--af-surface)}.agent-field-copy,.agent-field-trigger{position:relative;display:inline-flex;align-items:center;justify-content:center;border:0;background:0 0;color:var(--af-ink-60);font-family:inherit;font-size:1rem;curs",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://docs.tavily.com/sdk/python/reference",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:44.074Z",
+              "method": "search observation",
+              "query": "why current price does not indicate change date",
+              "cached": false
+            }
+          },
+          {
+            "id": "6f4102c3-372c-4819-9321-9f2663e35d9f",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Tavily Search - Tavily Docs",
+            "content": "Setting this to `true` also enables `include_published_date`.\\n\\nIf you want date-window filtering but don't want to lose sources without a detectable date, leave this `false` and set `include_published_date: true` together with a date range instead.\",\"default\":false,\"uniqueKey\":\"filter_by_published_date\",\"typeLabel\":\"boolean\"},\"max_age_hours\":{\"type\":\"integer\",\"description\":\"The maximum age in hours of Tavily's cached copy of each result.\\n\\nAccepted values:\\n\\n- unset (default): Tavily serves cached copies and fetches pages live as needed.\\n- `1` to `720` (30 days): only return a cached copy fetched within that many hours.\\n- `0`: always fetch the page live.\\n- `-1`: never fetch live.\\n\\nUse this for continuously updated pages, such as weather forecasts and prices, where `time_range` drops results.\n\nThe time range back from the current date to filter results by publish date. Continuously updated pages, such as weather forecasts and prices, keep old publish dates and get filtered out. For those, leave `time_range` unset and use `max_age_hours`. By default, results with no detectable published date are not removed; set `filter_by_published_date` to `true` to remove them.\n\n*   unset (default): Tavily serves cached copies and fetches pages live as needed.\n*   `1` to `720` (30 days): only return a cached copy fetched within that many hours.\n*   `0`: always fetch the page live.\n*   `-1`: never fetch live.\n\nRetry shortly, or omit max_age_hours/fetch_timeout to be served from cache.\"}},\"examples\":{\"Example\":{\"title\":\"Example\",\"value\":{\"detail\":{\"error\":\"Live content fetching is temporarily unavailable on your plan due to high demand.\n\nLower values do not cost more credits, but fetching live adds latency. Results whose cached copy is too old and can't be fetched live are left out, so you may get fewer than `max_results`.\n\nOn non-paying plans, live fetching is best-effort. While Tavily is under heavy load, requests that set `max_age_hours` may be refused with `434 Flex tier capacity exceeded`.\n\nResults whose cached copy is too old and can't be fetched live are left out, so you may get fewer than `max_results`.\\n\\nOn non-paying plans, live fetching is best-effort.\n\ncurl_setopt_array($curl, [\n  CURLOPT_URL => \"https://api.tavily.com/search\",\n  CURLOPT_RETURNTRANSFER => true,\n  CURLOPT_ENCODING => \"\",\n  CURLOPT_MAXREDIRS => 10,\n  CURLOPT_TIMEOUT => 30,\n  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,\n  CURLOPT_CUSTOMREQUEST => \"POST\",\n  CURLOPT_POSTFIELDS => json_encode([\n    'query' => 'who is Leo Messi?',\n    'search_depth' => 'basic',\n    'chunks_per_source' => 3,\n    'max_results' => 10,\n    'topic' => 'general',\n    'time_range' => null,\n    'start_date' => null,\n    'end_date' => null,\n    'include_published_date' => false,\n    'filter_by_published_date' => false,\n    'max_age_hours' => null,\n    'include_answer' => false,\n    'include_raw_content' => false,\n    'include_images' => false,\n    'include_image_descriptions' => false,\n    'include_favicon' => false,\n    'include_domains' => [\n\n\tpayload := strings.NewReader(\"{\\n  \\\"query\\\": \\\"who is Leo Messi?\\\",\\n  \\\"search_depth\\\": \\\"basic\\\",\\n  \\\"chunks_per_source\\\": 3,\\n  \\\"max_results\\\": 10,\\n  \\\"topic\\\": \\\"general\\\",\\n  \\\"time_range\\\": null,\\n  \\\"start_date\\\": null,\\n  \\\"end_date\\\": null,\\n  \\\"include_published_date\\\": false,\\n  \\\"filter_by_published_date\\\": false,\\n  \\\"max_age_hours\\\": null,\\n  \\\"include_answer\\\": false,\\n  \\\"include_raw_content\\\": false,\\n  \\\"include_images\\\": false,\\n  \\\"include_image_descriptions\\\": false,\\n  \\\"include_favicon\\\": false,\\n  \\\"include_domains\\\": [],\\n  \\\"exclude_domains\\\": [],\\n  \\\"include_domains_mode\\\": \\\"restrict\\\",\\n  \\\"country\\\": null,\\n  \\\"language\\\": null,\\n  \\\"filter_by_language\\\": false,\\n  \\\"auto_parameters\\\": false,\\n  \\\"exact_match\\\": false,\\n  \\\"include_usage\\\": false,\\n  \\\"safe_search\\\": false\\n}\")\n\nrequest = Net::HTTP::Post.new(url)\nrequest[\"Authorization\"] = 'Bearer <token>'\nrequest[\"Content-Type\"] = 'application/json'\nrequest.body = \"{\\n  \\\"query\\\": \\\"who is Leo Messi?\\\",\\n  \\\"search_depth\\\": \\\"basic\\\",\\n  \\\"chunks_per_source\\\": 3,\\n  \\\"max_results\\\": 10,\\n  \\\"topic\\\": \\\"general\\\",\\n  \\\"time_range\\\": null,\\n  \\\"start_date\\\": null,\\n  \\\"end_date\\\": null,\\n  \\\"include_published_date\\\": false,\\n  \\\"filter_by_published_date\\\": false,\\n  \\\"max_age_hours\\\": null,\\n  \\\"include_answer\\\": false,\\n  \\\"include_raw_content\\\": false,\\n  \\\"include_images\\\": false,\\n  \\\"include_image_descriptions\\\": false,\\n  \\\"include_favicon\\\": false,\\n  \\\"include_domains\\\": [],\\n  \\\"exclude_domains\\\": [],\\n  \\\"include_domains_mode\\\": \\\"restrict\\\",\\n  \\\"country\\\": null,\\n  \\\"language\\\": null,\\n  \\\"filter_by_language\\\": false,\\n  \\\"auto_parameters\\\": false,\\n  \\\"exact_match\\\": false,\\n  \\\"include_usage\\\": false,\\n  \\\"safe_search\\\": false\\n}\"\n\ncurl_setopt_array($curl, [\n  CURLOPT_URL => \"https://api.tavily.com/search\",\n  CURLOPT_RETURNTRANSFER => true,\n  CURLOPT_ENCODING => \"\",\n  CURLOPT_MAXREDIRS => 10,\n  CURLOPT_TIMEOUT => 30,\n  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,\n  CURLOPT_CUSTOMREQUEST => \"POST\",\n  CURLOPT_POSTFIELDS => json_encode([\n    'query' => 'who is Leo Messi?',\n    'search_depth' => 'basic',\n    'chunks_per_source' => 3,\n    'max_results' => 10,\n    'topic' => 'general',\n    'time_range' => null,\n    'start_date' => null,\n    'end_date' => null,\n    'include_published_date' => false,\n    'filter_by_published_date' => false,\n    'max_age_hours' => null,\n    'include_answer' => false,\n    'include_raw_content' => false,\n    'include_images' => false,\n    'include_image_descriptions' => false,\n    'include_favicon' => false,\n    'include_domains' => [\n\n\tpayload := strings.NewReader(\"{\\n  \\\"query\\\": \\\"who is Leo Messi?\\\",\\n  \\\"search_depth\\\": \\\"basic\\\",\\n  \\\"chunks_per_source\\\": 3,\\n  \\\"max_results\\\": 10,\\n  \\\"topic\\\": \\\"general\\\",\\n  \\\"time_range\\\": null,\\n  \\\"start_date\\\": null,\\n  \\\"end_date\\\": null,\\n  \\\"include_published_date\\\": false,\\n  \\\"filter_by_published_date\\\": false,\\n  \\\"max_age_hours\\\": null,\\n  \\\"include_answer\\\": false,\\n  \\\"include_raw_content\\\": false,\\n  \\\"include_images\\\": false,\\n  \\\"include_image_descriptions\\\": false,\\n  \\\"include_favicon\\\": false,\\n  \\\"include_domains\\\": [],\\n  \\\"exclude_domains\\\": [],\\n  \\\"include_domains_mode\\\": \\\"restrict\\\",\\n  \\\"country\\\": null,\\n  \\\"language\\\": null,\\n  \\\"filter_by_language\\\": false,\\n  \\\"auto_parameters\\\": false,\\n  \\\"exact_match\\\": false,\\n  \\\"include_usage\\\": false,\\n  \\\"safe_search\\\": false\\n}\")\n\nrequest = Net::HTTP::Post.new(url)\nrequest[\"Authorization\"] = 'Bearer <token>'\nrequest[\"Content-Type\"] = 'application/json'\nrequest.body = \"{\\n  \\\"query\\\": \\\"who is Leo Messi?\\\",\\n  \\\"search_depth\\\": \\\"basic\\\",\\n  \\\"chunks_per_source\\\": 3,\\n  \\\"max_results\\\": 10,\\n  \\\"topic\\\": \\\"general\\\",\\n  \\\"time_range\\\": null,\\n  \\\"start_date\\\": null,\\n  \\\"end_date\\\": null,\\n  \\\"include_published_date\\\": false,\\n  \\\"filter_by_published_date\\\": false,\\n  \\\"max_age_hours\\\": null,\\n  \\\"include_answer\\\": false,\\n  \\\"include_raw_content\\\": false,\\n  \\\"include_images\\\": false,\\n  \\\"include_image_descriptions\\\": false,\\n  \\\"include_favicon\\\": false,\\n  \\\"include_domains\\\": [],\\n  \\\"exclude_domains\\\": [],\\n  \\\"include_domains_mode\\\": \\\"restrict\\\",\\n  \\\"country\\\": null,\\n  \\\"language\\\": null,\\n  \\\"filter_by_language\\\": false,\\n  \\\"auto_parameters\\\": false,\\n  \\\"exact_match\\\": false,\\n  \\\"include_usage\\\": false,\\n  \\\"safe_search\\\": false\\n}\"\n\n{\"docsConfig\":{\"theme\":\"aspen\",\"$schema\":\"https://mintlify.com/docs.json\",\"name\":\"Tavily Docs\",\"colors\":{\"primary\":\"#80AF9B\",\"light\":\"#80AF9B\",\"dark\":\"#817FFF\"},\"logo\":{\"light\":\"https://mintcdn.com/tavilyai/4_uvKy_66YQwB55y/logo/light.svg?fit=max\\u0026auto=format\\u0026n=4_uvKy_66YQwB55y\\u0026q=85\\u0026s=dc43e5efe7e46e07f0eb136402479de8\",\"dark\":\"https://mintcdn.com/tavilyai/4_uvKy_66YQwB55y/logo/dark.svg?fit=max\\u0026auto=format\\u0026n=4_uvKy_66YQwB55y\\u0026q=85\\u0026s=683273a1e0164bedd5796c0292b7486e\",\"href\":\"https://tavily.com/\"},\"favicon\":\"https://mintcdn.com/tavilyai/8Hb954Quc_LiMlq3/favicon.ico?fit=max\\u0026auto=format\\u0026n=8Hb954Quc_LiMlq3\\u0026q=85\\u0026s=585516a7dd162d47508ea9da086baec2\",\"api\":{\"openapi\":[\"documentation/api-reference/openapi.json\",\"documentation/enterprise/openapi.json\"],\"playground\":{\"display\":\"simple\"}},\"background\":{\"color\":{\"light\":\"#FFFCF6\",\"dark\":\"#1F1E1E\"}},\"navbar\":{\"links\":[{\"href\":\"mailto:support@tavily.com\",\"label\":\"Support\"}],\"primary\":{\"type\":\"button\",\"label\":\"Get an API key\",\"href\":\"https://app.tavily.com\"}},\"footer\":{\"socials\":{\"linkedin\":\"https://linkedin.com/company/tavily\",\"x\":\"https://x.com/tavilyai\",\"github\":\"https://github.com/tavily-ai\",\"youtube\":\"https://www.youtube.com/@TavilyAI\"},\"links\":[{\"header\":\"Resources\",\"items\":[{\"label\":\"Get started\",\"href\":\"/\"},{\"label\":\"Tavily Search Crawler\",\"href\":\"/documentation/search-crawler\"},{\"label\":\"Tavily Status\",\"href\":\"https://status.tavily.com/\"}]},{\"header\":\"Legal\",\"items\":[{\"label\":\"Security \\u0026 Compliance\",\"href\":\"https://trust.tavily.com/\"},{\"label\":\"Privacy Policy\",\"href\":\"https://www.tavily.com/privacy\"},{\"label\":\"Website Terms of Use\",\"href\":\"https://www.tavily.com/website-terms\"},{\"label\":\"Platform Terms of Use\",\"href\":\"https://www.tavily.com/terms\"},{\"label\":\"Cookie Notice\",\"href\":\"https://www.tavily.com/cookie-policy\"}]}]},\"seo\":{\"metatags\":{\"canonical\":\"https://docs.tavily.com\"}},\"fonts\":{\"heading\":{\"family\":\"SuisseIntl\",\"weight\":700,\"source\":\"fonts/SuisseIntl-Medium.woff2\",\"format\":\"woff2\"},\"body\":{\"family\":\"SuisseIntl\",\"weight\":400,\"source\":\"fonts/SuisseIntl-Regular.woff2\",\"format\":\"woff2\"}},\"integrations\":{\"cookies\":{\"key\":\"tavily_mintlify_telemetry_consent\",\"value\":\"granted\"}},\"contextual\":{\"options\":[\"copy\",\"view\",\"chatgpt\",\"claude\"],\"display\":\"header\"},\"thumbnails\":{\"appearance\":\"dark\",\"background\":\"https://mintcdn.com/tavilyai/xMLYLDqESGBETUw7/images/og-background.png?fit=max\\u0026auto=format\\u0026n=xMLYLDqESGBETUw7\\u0026q=85\\u0026s=b8592c875dc9b99e8536ae24dc6a742f\"},\"styling\":{\"latex\":false},\"navigation\":{\"global\":{\"anchors\":[{\"anchor\":\"API Playground\",\"icon\":\"play\",\"href\":\"https://app.tavily.com/playground\"}]},\"pages\":[]}},\"deployment\":{\"deploymentMetadataValue\":{\"subdomain\":\"tavilyai\",\"hasAudioNarration\":false,\"actualSubdomain\":\"tavilyai\",\"customDomains\":[\"docs.tavily.com\"],\"gitSource\":{\"type\":\"github\",\"owner\":\"tavily-ai\",\"repo\":\"new-docs\",\"deployBranch\":\"main\",\"contentDirectory\":\"\",\"isPrivate\":true,\"mountPath\":\"\",\"label\":\"\"},\"entitlements\":{\"AI_CHAT\":{\"status\":\"ENABLED\"},\"REMOVE_BRANDING\":{\"status\":\"ENABLED\"},\"CONTEXTUAL_FEEDBACK\":{\"status\":\"ENABLED\"},\"CODE_SNIPPET_FEEDBACK\":{\"status\":\"ENABLED\"},\"WEB_MCP\":{\"status\":\"ENABLED\"},\"NARRATION\":{\"status\":\"ENABLED\"}},\"buildId\":\"6af64b3fb7f5fc4a3755e4a5\",\"clientVersion\":\"0.0.4124\",\"searchFilterCounts\":[{\"language\":\"default\",\"tag\":\"Integrations\",\"count\":83},{\"language\":\"default\",\"tag\":\"Documentation\",\"count\":32},{\"language\":\"default\",\"tag\":\"More\",\"count\":24},{\"language\":\"default\",\"tag\":\"API Reference\",\"count\":16},{\"language\":\"default\",\"tag\":\"Coding agents\",\"count\":12},{\"language\":\"default\",\"tag\":\"Examples\",\"count\":10},{\"language\":\"default\",\"tag\":\"Apps\",\"count\":8},{\"language\":\"default\",\"tag\":\"Get started\",\"count\":7},{\"language\":\"default\",\"tag\":\"API keys \\u0026 credits\",\"count\":6},{\"language\":\"default\",\"tag\":\"Gateways and routers\",\"count\":6}]},\"assistantConfig\":{},\"basePath\":\"\",\"hasChatPermissions\":true,\"hasWebMcpPermissions\":true,\"toggles\":[{\"name\":\"kill-isr\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature_enabled\":true},\"impressionData\":false},{\"name\":\"custom-rbac-roles\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature_enabled\":true},\"impressionData\":false},{\"name\":\"agent-mintlify-slack\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature_enabled\":true},\"impressionData\":false},{\"name\":\"agent-integrations-settings\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":false,\"feature_enabled\":true},\"impressionData\":false},{\"name\":\"rbac-expansion\",\"enabled\":true,\"variant\":{\"name\":\"disabled\",\"enabled\":f",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://docs.tavily.com/documentation/api-reference/endpoint/search",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:44.074Z",
+              "method": "search observation",
+              "query": "why current price does not indicate change date",
+              "cached": false
+            }
+          }
+        ],
+        "trace": {
+          "activeSourceIds": [],
+          "recordView": "effective",
+          "resolvedDate": null,
+          "referenceClock": "2026-11-12T12:00:00.000Z",
+          "timezone": "UTC",
+          "retrievalMethods": [
+            "lexical"
+          ],
+          "baselineSourceIds": [],
+          "previousObservationIds": [],
+          "searches": [
+            {
+              "query": "why current price does not indicate change date",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "price history vs current price data limitations",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "financial data timestamping price change events",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            }
+          ],
+          "searchAttempts": 3,
+          "searchAdapterDispatches": 3,
+          "coverage": {
+            "queries": 3,
+            "succeeded": 3,
+            "failed": 0
+          },
+          "documentReferences": [],
+          "usageBreakdown": {
+            "planning": {
+              "inputTokens": 331,
+              "outputTokens": 82
+            }
+          },
+          "usage": {
+            "inputTokens": 331,
+            "outputTokens": 82
+          },
+          "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+          "routing": {
+            "sourcesOnly": false,
+            "privateFileTask": false,
+            "explicitWebRequest": true,
+            "usesWeb": true
+          }
+        }
+      },
+      "review": {
+        "reviewed": true,
+        "taskSuccess": false,
+        "abstained": true,
+        "factualAnswer": false,
+        "claims": [],
+        "notes": "Daily-token quota rejected generation; no generated-answer task or new factual-support credit. Source-only partial response is retained separately."
+      }
+    },
+    {
+      "id": "verify-01",
+      "kind": "verify",
+      "model": "qwen/qwen3.8-27b",
+      "runAt": "2026-11-14T07:56:22.124Z",
+      "wireRequests": [
+        {
+          "phase": "planning",
+          "maxTokens": 500,
+          "status": 200,
+          "usage": {
+            "inputTokens": 468,
+            "outputTokens": 49,
+            "totalTokens": 517
+          },
+          "finishReason": "stop"
+        },
+        {
+          "phase": "generation",
+          "maxTokens": 1000,
+          "status": 429,
+          "quotaScope": "daily_tokens",
+          "providerWaitDuration": "7m19.776s",
+          "retryAfterSeconds": 440
+        }
+      ],
+      "baselineId": "93d30fa1-20d1-46bc-b46e-e56b70ddbb0c",
+      "completionMs": 2050.488416,
+      "firstUsefulMs": 2050.488416,
+      "quotaMs": 0,
+      "assertions": {
+        "includes": [
+          {
+            "text": "CSV",
+            "pass": false
+          }
+        ],
+        "excludes": [],
+        "expectedStatus": "CHANGED_WITH_DATED_EVIDENCE",
+        "statusMatches": false
+      },
+      "snapshot": {
+        "id": "37f728eb-1ad2-47a8-96f1-c5924a2a042c",
+        "conversationId": "08c5d07e-225e-4cfb-8133-ec8e8213b51a",
+        "status": "PARTIAL",
+        "text": "Has the export capability changed since 3 November?",
+        "originalInputAvailable": true,
+        "attachmentIds": [],
+        "memoryScope": "workspace",
+        "timezone": "UTC",
+        "answer": "Evidence only \u2014 not a generated answer. Automatic answering is unavailable for this request. No current comparison was established; verification remains unresolved.\n\n**Retained source excerpt: Synthetic original record**\n\n> The export capability supports JSON only.\n\n[Inspect source](katha-source:93d30fa1-20d1-46bc-b46e-e56b70ddbb0c)",
+        "error": "The free-tier quota wait would exceed two minutes. Please retry later.",
+        "createdAt": "2026-11-12T12:00:00.000Z",
+        "updatedAt": "2026-11-12T12:00:00.000Z",
+        "citations": [
+          {
+            "sourceId": "93d30fa1-20d1-46bc-b46e-e56b70ddbb0c"
+          }
+        ],
+        "comparisons": [
+          {
+            "claim": "Has the export capability changed since 3 November?",
+            "status": "UNVERIFIED",
+            "baselineSourceIds": [
+              "93d30fa1-20d1-46bc-b46e-e56b70ddbb0c"
+            ],
+            "evidenceSourceIds": [],
+            "explanation": "The model was unavailable; no comparison was established."
+          }
+        ],
+        "sources": [
+          {
+            "id": "93d30fa1-20d1-46bc-b46e-e56b70ddbb0c",
+            "kind": "attachment",
+            "role": "document",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Synthetic original record",
+            "content": "The export capability supports JSON only.",
+            "recordedAt": "2026-11-03T12:00:00.000Z",
+            "occurredAt": "2026-11-03T00:00:00.000Z",
+            "occurredEnd": "2026-11-04T00:00:00.000Z",
+            "dateProvenance": "user-confirmed",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "mimeType": "text/plain"
+            }
+          }
+        ],
+        "trace": {
+          "activeSourceIds": [],
+          "recordView": "original",
+          "resolvedDate": {
+            "from": "2026-11-03T00:00:00Z",
+            "to": "2026-11-04T00:00:00Z",
+            "date": "2026-11-03",
+            "timezone": "UTC",
+            "label": "2026-11-03 (UTC)"
+          },
+          "referenceClock": "2026-11-12T12:00:00.000Z",
+          "timezone": "UTC",
+          "retrievalMethods": [
+            "calendar"
+          ],
+          "baselineSourceIds": [
+            "93d30fa1-20d1-46bc-b46e-e56b70ddbb0c"
+          ],
+          "previousObservationIds": [],
+          "searches": [
+            {
+              "query": "export capability changes since 2026-11-03",
+              "error": null,
+              "cached": false,
+              "resultCount": 1
+            }
+          ],
+          "searchAttempts": 1,
+          "searchAdapterDispatches": 1,
+          "coverage": {
+            "queries": 1,
+            "succeeded": 1,
+            "failed": 0
+          },
+          "usageBreakdown": {
+            "planning": {
+              "inputTokens": 468,
+              "outputTokens": 49
+            }
+          },
+          "usage": {
+            "inputTokens": 468,
+            "outputTokens": 49
+          },
+          "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+          "routing": {
+            "sourcesOnly": false,
+            "privateFileTask": false,
+            "explicitWebRequest": false,
+            "usesWeb": true
+          },
+          "modelFallback": {
+            "reasonCode": "QUOTA_WAIT_EXCEEDED",
+            "mode": "retained-evidence-only",
+            "generatedAnswer": false
+          }
+        }
+      },
+      "review": {
+        "reviewed": true,
+        "taskSuccess": false,
+        "abstained": true,
+        "factualAnswer": false,
+        "claims": [],
+        "notes": "Daily-token quota rejected generation; no generated-answer task or new factual-support credit. Source-only partial response is retained separately."
+      }
+    }
+  ],
+  "reviewMetadata": {
+    "runtime": "fd37213",
+    "rawResultsSha256": "089d8149d9d4b39a811177f63702b099abdcd7976ec7083ed8f59b6aaa4ff0bf",
+    "scope": "Two-case diagnostic subset only. Sanitized provider 429 classifications and duration guidance; not a full release gate.",
+    "reviewer": "coding agent",
+    "independentReview": "pending"
+  }
+}

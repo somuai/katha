@@ -61,3 +61,7 @@ Model transport failures preserve a safe capability-unavailable message and orig
 ## Ordinary web-prose review
 
 Ordinary web prose receives a same-model factual-support and qualification review before publication. The initial risk-marker selector was widened after it missed an unsupported billing mechanic. The review uses the existing 20 RPM/7,000 estimated tokens-per-minute limiter and turn deadlines. It shares the single scoped quotation/citation repair budget, then fails visibly if still unsupported. Pending unpublished drafts are bounded to 32 entries/five minutes across quota retries; crashes do not resume them. Completed usage includes review/repair. This adds requests and latency, can miss risks, and is not independent certification. See docs/adr/0001-bounded-source-qualification-review.md.
+
+### Compound quota guidance
+
+Runtime `fd37213` respects compound provider waits such as `2m35.952s`, `1h2m3.5s` and `1d3h`, rather than defaulting to a minute. A numeric or HTTP-date Retry-After header takes precedence. A delay exceeding the turn's two-minute total quota-wait budget terminates promptly; accepted history remains retained. The [daily-token diagnostic](evaluations/quota-diagnostics.md) shows actual larger requests rejected while a tiny capacity probe succeeded. A small successful request is not evidence of enough quota for a full evaluation.
