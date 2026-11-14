@@ -1977,11 +1977,14 @@ export function createKatha(options: KathaOptions) {
           now: row.created_at,
           evidence: [...local, ...web].map((s) => ({
             ...s,
-            content: selectPassages(
-              s.content,
-              input.text + " " + retrievalHints.join(" "),
-              1800,
-            ),
+            content:
+              s.kind === "web"
+                ? s.content
+                : selectPassages(
+                    s.content,
+                    input.text + " " + retrievalHints.join(" "),
+                    1800,
+                  ),
           })),
           verification,
           signal: controller.signal,

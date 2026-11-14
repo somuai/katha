@@ -4,7 +4,7 @@ import { prepareCsvEvidence } from "../core/csv-summary.js";
 import { explicitOfferAnswer } from "./explicit-offers.js";
 import { completePriceTerms, currencyAmountPattern } from "../core/pricing.js";
 import { resolveDate } from "../core/temporal.js";
-import { selectPassages } from "../core/passages.js";
+import { selectPassages, selectWebPassages } from "../core/passages.js";
 import { createHash } from "node:crypto";
 import type {
   ProviderOptions,
@@ -326,7 +326,7 @@ export function createProviders(options: ProviderOptions = {}) {
       evidence: diverseEvidence(input).map((e) => ({
         ...e,
         sourceText: undefined,
-        text: selectPassages(
+        text: selectWebPassages(
           e.text,
           input.question +
             " " +

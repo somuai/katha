@@ -161,3 +161,38 @@ export function selectPassages(
   }
   return output;
 }
+
+/** Web definition lists carry their label into short, explicitly gapped sentence excerpts. */
+export function selectWebPassages(
+  text: string,
+  question: string,
+  limit = 900,
+): string {
+  const labels = new Set<string>();
+  const excerptable = text
+    .split(/\n\s*\n/)
+    .flatMap((paragraph) => {
+      if (paragraph.length <= 300 || /^\s*```/.test(paragraph))
+        return [paragraph];
+      const definition = paragraph.match(/^([^\n]{1,180}\n)\s*:\s*/);
+      const prefix = definition?.[0] || "";
+      if (definition && labels.size < 16)
+        labels.add(
+          definition[1]
+            .replace(/\]\([^)]*\)/g, "]")
+            .replace(/[^a-z0-9_]+/gi, " ")
+            .trim(),
+        );
+      const body = prefix ? paragraph.slice(prefix.length) : paragraph;
+      const sentences = body.split(/(?<=[.!?])\s+|\n/).filter((s) => s.trim());
+      return sentences.map((sentence, i) =>
+        prefix ? prefix + (i ? "[…] " : "") + sentence : sentence,
+      );
+    })
+    .join("\n\n");
+  return selectPassages(
+    excerptable,
+    question + " " + [...labels].join(" "),
+    limit,
+  );
+}
