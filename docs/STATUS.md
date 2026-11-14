@@ -1,3 +1,9 @@
+## Resumed complete default run: `fd37213`
+
+The fresh forty-case run is terminal: **21/40 tasks, nineteen daily-token execution failures, eleven source-only recoveries**. All 24 delivered factual claims are supported retained-memory/original-record claims; there is no new web-answer support evidence. Gate: EXECUTION_LIMITED. [Separate ledger, metrics and capacity findings](evaluations/default-fd37213-review.md).
+
+268 local tests, type/lint/build and all six runtime/checkout CI jobs pass. Stop short-interval full-run retries: successful small probes do not establish daily headroom. The remaining full gate requires substantial provider-capacity recovery. No paid tier or default switch is enabled.
+
 ## Quota-wait follow-up: `fd37213`
 
 268 tests, type/lint/build pass. Compound day/hour/minute/second provider waits are preserved and long delays fail promptly at the existing two-minute limit. [The diagnostic capture](evaluations/quota-diagnostics.md) confirms daily-token rejection of full-size generations despite a successful three-token probe. A new full gate awaits enough provider capacity; no default switch or paid tier is enabled.
