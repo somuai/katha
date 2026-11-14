@@ -1,3 +1,9 @@
+## Latest follow-up: `a251224`
+
+267 local tests, check/lint/build and Chromium browser regression pass. Web excerpts preserve parameter meaning and exception qualifications; explicit citation syntax is consistent across provider guards and UI. [Evidence and unresolved limits](evaluations/coherent-excerpts-review.md).
+
+The complete text-candidate capture records 50/51 supported factual claims and 34/40 tasks, with one execution failure. It is not a clean default-model release gate. The new targeted replay passes the freshness task but still fails the conceptual-date task. Default Qwen evaluation remains capacity-limited. No new independent review is implied.
+
 # Katha status — 14 November 2026
 
 MiniMi chat-agent project. Local preview: http://localhost:3000/ . Public source: https://github.com/somuai/katha . This is separate from the Wispr portfolio; no Katha public multi-user deployment is claimed.
