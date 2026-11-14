@@ -195,7 +195,15 @@ export function createProviders(options: ProviderOptions = {}) {
             AbortSignal.timeout(30000),
           ]),
         },
-      );
+      ).catch((cause: unknown) => {
+        signal?.throwIfAborted();
+        const unavailable = new ProviderError(
+          "MODEL_UNAVAILABLE",
+          "The model service could not be reached. Your message is saved; retry when the connection is available.",
+        );
+        unavailable.cause = cause;
+        throw unavailable;
+      });
       if (!response.ok) {
         if (response.status === 429) {
           // Rejected dispatches did not consume generation tokens. Keeping this

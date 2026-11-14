@@ -1663,3 +1663,31 @@ test("a second invalid search-plan shape fails closed instead of looping or sear
   });
   assert.equal(attempts, 2);
 });
+
+test("model transport failure is an unavailable capability with a safe message, while cancellation stays cancellation", async () => {
+  const cause = Object.assign(
+    new TypeError("socket reset with confidential diagnostics"),
+    { code: "ECONNRESET" },
+  );
+  const p = createProviders({
+    groqKey: "test",
+    fetcher: (async () => {
+      throw cause;
+    }) as typeof fetch,
+  });
+  await assert.rejects(
+    p.answer({ question: "Explain this evidence" }),
+    (error: any) => {
+      assert.equal(error.code, "MODEL_UNAVAILABLE");
+      assert.doesNotMatch(error.message, /confidential|socket/);
+      assert.equal(error.cause, cause);
+      return true;
+    },
+  );
+  const controller = new AbortController();
+  controller.abort(new DOMException("User cancelled", "AbortError"));
+  await assert.rejects(
+    p.answer({ question: "Stop", signal: controller.signal }),
+    (error: any) => error.name === "AbortError",
+  );
+});
