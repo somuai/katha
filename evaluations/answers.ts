@@ -26,9 +26,22 @@ const fixture = JSON.parse(
   await readFile(new URL("./answer-cases.json", import.meta.url), "utf8"),
 );
 if (fixture.cases.length !== 40) throw Error("Expected 40 distinct cases");
+const requestedCaseIds = process.env.EVAL_CASE_IDS?.split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
+if (requestedCaseIds) {
+  if (
+    !requestedCaseIds.length ||
+    requestedCaseIds.some((id) => !fixture.cases.some((c: any) => c.id === id))
+  )
+    throw Error("EVAL_CASE_IDS must name existing cases.");
+  fixture.cases = fixture.cases.filter((c: any) =>
+    requestedCaseIds.includes(c.id),
+  );
+}
 if (!process.argv.includes("--run-live")) {
   console.log(
-    "Forty full-turn cases; pass --run-live to consume Groq/Tavily quota.",
+    `${fixture.cases.length} selected full-turn cases; pass --run-live to consume Groq/Tavily quota. A subset is not the full release gate.`,
   );
   process.exit(0);
 }
@@ -38,6 +51,7 @@ const models = (
 ).split(",");
 const output =
   process.env.EVAL_OUTPUT || `data/evaluations/answers-${Date.now()}`;
+const sharedCaptureDirectory = process.env.EVAL_CAPTURE_DIR;
 async function loadJSON(path: string, fallback: any) {
   try {
     return JSON.parse(await readFile(path, "utf8"));
@@ -75,6 +89,20 @@ const identity = {
   temperature: 0,
   maxOutputTokens: 1000,
   node: process.versions.node,
+  ...(sharedCaptureDirectory
+    ? {
+        sharedCaptureHash: createHash("sha256")
+          .update(
+            JSON.stringify(
+              await loadJSON(
+                join(sharedCaptureDirectory, "captured.json"),
+                null,
+              ),
+            ),
+          )
+          .digest("hex"),
+      }
+    : {}),
 };
 await mkdir(output, { recursive: true });
 const existingManifest = await loadJSON(join(output, "manifest.json"), null);
@@ -109,10 +137,34 @@ for (const model of models) {
 // Capture actual search observations once, independently of candidate planning.
 let captured: Record<string, SearchResult[]> = {};
 captured = await loadJSON(join(output, "captured.json"), {});
+if (sharedCaptureDirectory) {
+  const shared = await loadJSON(
+    join(sharedCaptureDirectory, "captured.json"),
+    null,
+  );
+  if (
+    !shared ||
+    fixture.cases.some(
+      (c: any) => c.kind === "web" && !Array.isArray(shared[c.id]),
+    )
+  )
+    throw Error(
+      "Shared capture is missing selected web evidence; refusing to replace it with a new search.",
+    );
+  captured = shared;
+  await saveJSON(join(output, "captured.json"), captured);
+}
 const captureOutcomes: Record<string, any> = await loadJSON(
   join(output, "capture-outcomes.json"),
   {},
 );
+if (sharedCaptureDirectory) {
+  Object.assign(
+    captureOutcomes,
+    await loadJSON(join(sharedCaptureDirectory, "capture-outcomes.json"), {}),
+  );
+  await saveJSON(join(output, "capture-outcomes.json"), captureOutcomes);
+}
 const search = createProviders(options);
 for (const c of fixture.cases.filter((c: any) => c.kind === "web")) {
   if (captured[c.id]) {
@@ -311,7 +363,16 @@ for (const c of fixture.cases)
     }
     await saveJSON(join(output, "results.json"), {
       identity,
-      label: fixture.label,
+      label: requestedCaseIds
+        ? `Targeted subset (${fixture.cases.length}/40), not a full release gate. ${fixture.label}`
+        : fixture.label,
+      expectedCaseIds: fixture.cases.map((c: any) => c.id),
+      ...(sharedCaptureDirectory
+        ? {
+            reusedEvidence:
+              "Shared captured observations retain their original dates; this is not fresh live web discovery.",
+          }
+        : {}),
       models,
       captureOutcomes,
       gate: "Unreviewed: no supported-claim accuracy is inferred from keyword checks.",
