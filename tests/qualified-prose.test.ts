@@ -330,6 +330,11 @@ test("an ordinary web explanation cannot silently turn into a historical compari
       const context = JSON.parse(
         JSON.parse(String(init?.body)).messages[1].content,
       );
+      if (context.draft)
+        return Response.json({
+          choices: [{ message: { content: '{"supported":true,"issues":[]}' } }],
+          usage: { prompt_tokens: 10, completion_tokens: 5 },
+        });
       const id = context.evidence[0].id;
       const data =
         step++ === 0
@@ -404,6 +409,11 @@ test("a current-price explanation does not take the historical offer-comparison 
       const context = JSON.parse(
         JSON.parse(String(init?.body)).messages[1].content,
       );
+      if (context.draft)
+        return Response.json({
+          choices: [{ message: { content: '{"supported":true,"issues":[]}' } }],
+          usage: { prompt_tokens: 10, completion_tokens: 5 },
+        });
       return Response.json({
         choices: [
           {
@@ -453,6 +463,84 @@ test("a current-price explanation does not take the historical offer-comparison 
     assert.match(snapshot.answer, /current quote is USD 25/);
     assert.doesNotMatch(snapshot.answer, /changed|differs|20 to 25/);
     assert.deepEqual(snapshot.comparisons, []);
+  } finally {
+    app.close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("ordinary web prose is checked for unsupported mechanics even without version markers", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "katha-billing-support-"));
+  let clock = 1000,
+    step = 0;
+  const adapter = createKathaAdapters({
+    groqKey: "fixture",
+    clock: () => clock,
+    fetcher: (async (_url, init) => {
+      clock += 2000;
+      const context = JSON.parse(
+        JSON.parse(String(init?.body)).messages[1].content,
+      );
+      const id = context.evidence[0].id;
+      const outputs = [
+        {
+          text: "Basic costs one credit; advanced costs two. Charges are deducted from a prepaid cash balance.",
+          citations: [id],
+          comparisons: [],
+        },
+        {
+          supported: false,
+          issues: [
+            "The source establishes unit costs, not a prepaid cash-balance mechanism.",
+          ],
+        },
+        {
+          text: "Basic costs one credit per search; advanced costs two.",
+          citations: [id],
+          comparisons: [],
+        },
+        { supported: true, issues: [] },
+      ];
+      return Response.json({
+        choices: [{ message: { content: JSON.stringify(outputs[step++]) } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
+      });
+    }) as typeof fetch,
+  });
+  const app = createKatha({
+    directory,
+    model: { generate: adapter.model.generate },
+    search: {
+      async search() {
+        return [
+          {
+            title: "Search credits",
+            url: "https://example.com/credits",
+            content:
+              "Basic search costs one credit. Advanced search costs two credits.",
+          },
+        ];
+      },
+    },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "unsupported-mechanic",
+      expectedTailId: null,
+      text: "Using the web, explain the credit cost of basic and advanced search.",
+    });
+    for await (const event of app.turns.events(receipt.turnId))
+      if (event.type === "complete") break;
+    const snapshot = await app.turns.get(receipt.turnId);
+    assert.equal(snapshot.status, "COMPLETED");
+    assert.match(snapshot.answer, /Basic costs one credit per search/);
+    assert.doesNotMatch(snapshot.answer, /prepaid|cash balance/);
+    assert.deepEqual(snapshot.trace.usage, {
+      inputTokens: 40,
+      outputTokens: 20,
+    });
   } finally {
     app.close();
     rmSync(directory, { recursive: true, force: true });

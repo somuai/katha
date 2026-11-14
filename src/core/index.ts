@@ -1726,7 +1726,16 @@ export function createKatha(options: KathaOptions) {
           !/\n\s*\n/.test(clarification);
         if (clarification && !validClarification)
           trace.rejectedPlannerClarification = true;
-        if (clarification && validClarification) {
+        const optionalScopePreference =
+          currentQuestion &&
+          !verification &&
+          /^(?:would|do) you (?:like|want|prefer)\b/i.test(clarification) &&
+          /\b(?:general|overview|broad|summary|details?|detailed|in-depth)\b/i.test(
+            clarification,
+          );
+        if (optionalScopePreference)
+          trace.ignoredOptionalScopeClarification = true;
+        if (clarification && validClarification && !optionalScopePreference) {
           update(id, {
             answer: clarification,
             sourceIds: local.map((s) => s.id),
@@ -1742,7 +1751,11 @@ export function createKatha(options: KathaOptions) {
           return;
         }
         queries = plan.queries;
-        if (plan.mode === "current" || plan.mode === "verify")
+        if (
+          optionalScopePreference ||
+          plan.mode === "current" ||
+          plan.mode === "verify"
+        )
           currentQuestion = true;
         else if (plan.mode === "general" || plan.mode === "recall")
           currentQuestion = verification;
