@@ -22,7 +22,7 @@ This copy lives on an APFS image on the owner's SSD to avoid filling the laptop.
 
 ## Evidence and configuration
 
-`npm run eval` reruns the forty-case retrieval ablation. `npm run eval:live` explicitly consumes configured Groq/Tavily quotas; it is never run by `npm test`. See [evaluation notes](docs/evaluations/README.md), including failures and unpassed release gates. Live captures and raw history stay in ignored `data/`.
+`npm run eval` reruns the forty-case retrieval ablation. `npm run eval:live` explicitly consumes configured Groq/Tavily quotas; it is never run by `npm test`. See [evaluation notes](docs/evaluations/README.md), including failures and the exact scope of each release gate. Live captures and raw history stay in ignored `data/`.
 
 Set keys in the root `.env` file, using the names in `.env.example`. The desktop copy's convenient path is `/Users/soumyajitghosh/Downloads/files/katha/.env`; a judge uses their own clone's `.env`. Do not paste keys in chat or add them to Git. Restart `npm run dev` after changing keys.
 
@@ -36,4 +36,6 @@ Use **Connections** in the sidebar, or type **@** → **Connect a source**. Noti
 
 Katha chooses retained evidence versus web search automatically. Explicit sources-only requests stay local; current public information can search without a special keyword. The answer audit shows the routing decision. Private-source freshness questions are not a reason to export their content into web queries.
 
-`npx tsx evaluations/metrics.ts INPUT.json OUTPUT.json evaluations/answer-cases.json` reports completion, reviewed factual precision, task success, evidence-review coverage and latency separately. The 90% gate cannot pass with missing cases or unreviewed claims. The committed 13 November shared-evidence review reports 60/61 supported factual propositions and 34/40 full tasks under a coding-agent rubric. It is not independent or production certification; retrieval scores remain separate from answer support.
+`npx tsx evaluations/metrics.ts INPUT.json OUTPUT.json evaluations/answer-cases.json` reports factual support, complete tasks, review coverage, execution limitations, latency and reported usage separately. The [versioned release review](docs/evaluations/release-review.md) includes a two-model comparison and the current-default run (50/52 supported delivered claims, 30/40 complete tasks, eight quota failures). The latter gate is **EXECUTION_LIMITED**, not passed. The latest focused five-vendor mixed-price/release fixture passes all ten outcomes; that is not live market research or production accuracy.
+
+The [release evidence matrix](docs/RELEASE_READINESS.md) maps the agreed requirements to implementation, tests and explicit deferrals. Quota-limited runs, source-only recovery and model-generated task completion are reported separately.

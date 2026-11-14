@@ -1,0 +1,63 @@
+{
+  "target": 0.9,
+  "expectedCaseSetDeclared": true,
+  "scope": "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
+  "definitions": {
+    "resources": "Reported response tokens only, not a billing total; absent usage is unknown, not zero. Search attempts include cache/budget checks; adapter dispatches are separate and are not invoice credits. Attachment preparation and unreported failed responses are outside turn usage.",
+    "claimPrecision": "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
+    "taskSuccess": "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
+    "latency": "Useful-answer medians exclude failed, cancelled, empty and evidence-only fallback responses; quota waits are reported separately"
+  },
+  "models": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "expectedCases": 40,
+      "recordedCases": 40,
+      "missingCaseIds": [],
+      "duplicateCaseIds": [],
+      "executionCompleted": 40,
+      "executionErrorCases": 4,
+      "evidenceOnlyCases": 4,
+      "answered": 40,
+      "answerCoverage": 1,
+      "reviewedCases": 40,
+      "reviewCoverage": 1,
+      "taskSuccesses": 33,
+      "taskSuccessRate": 0.825,
+      "abstentions": 10,
+      "factualAnswerCases": 30,
+      "claims": {
+        "supported": 59,
+        "unsupported": 2,
+        "unverifiable": 1,
+        "inference": 2,
+        "factual": 62,
+        "precision": 0.9516129032258065
+      },
+      "claimSupportGate": "EXECUTION_LIMITED",
+      "resources": {
+        "reportedInputTokens": 27464,
+        "reportedOutputTokens": 4427,
+        "casesWithReportedModelUsage": 21,
+        "casesWithoutReportedModelUsage": 19,
+        "searchAttemptsIncludingCache": 32,
+        "searchAdapterDispatches": 0,
+        "casesWithReportedDispatchCount": 0,
+        "cachedSearchQueries": 0,
+        "reportedSearchQueries": 32,
+        "usageScopes": [
+          "legacy or unspecified response usage"
+        ]
+      },
+      "latency": {
+        "medianAnswerCompletionMs": 866.4523539999991,
+        "medianActiveCompletionMs": 828.8637914999999,
+        "medianFirstUsefulMs": 866.4523539999991,
+        "medianQuotaMs": 0,
+        "medianTerminalMs": 934.9692499999928,
+        "answerSamples": 36,
+        "firstUsefulSamples": 36
+      }
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "target": 0.9,
+  "expectedCaseSetDeclared": true,
+  "scope": "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
+  "definitions": {
+    "resources": "Reported response tokens only, not a billing total; absent usage is unknown, not zero. Search attempts include cache/budget checks; adapter dispatches are separate and are not invoice credits. Attachment preparation and unreported failed responses are outside turn usage.",
+    "claimPrecision": "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
+    "taskSuccess": "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
+    "latency": "Useful-answer medians exclude failed, cancelled, empty and evidence-only fallback responses; quota waits are reported separately"
+  },
+  "models": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "expectedCases": 3,
+      "recordedCases": 3,
+      "missingCaseIds": [],
+      "duplicateCaseIds": [],
+      "executionCompleted": 3,
+      "executionErrorCases": 0,
+      "evidenceOnlyCases": 0,
+      "answered": 3,
+      "answerCoverage": 1,
+      "reviewedCases": 3,
+      "reviewCoverage": 1,
+      "taskSuccesses": 1,
+      "taskSuccessRate": 0.3333333333333333,
+      "abstentions": 0,
+      "factualAnswerCases": 3,
+      "claims": {
+        "supported": 10,
+        "unsupported": 1,
+        "unverifiable": 1,
+        "inference": 0,
+        "factual": 12,
+        "precision": 0.8333333333333334
+      },
+      "claimSupportGate": "BELOW_TARGET",
+      "resources": {
+        "reportedInputTokens": 7419,
+        "reportedOutputTokens": 1023,
+        "casesWithReportedModelUsage": 3,
+        "casesWithoutReportedModelUsage": 0,
+        "searchAttemptsIncludingCache": 8,
+        "searchAdapterDispatches": 8,
+        "casesWithReportedDispatchCount": 3,
+        "cachedSearchQueries": 0,
+        "reportedSearchQueries": 8,
+        "usageScopes": [
+          "reported completed planning and generation responses; excludes unreported failed attempts"
+        ]
+      },
+      "latency": {
+        "medianAnswerCompletionMs": 2082.684334,
+        "medianActiveCompletionMs": 2036.6465839999946,
+        "medianFirstUsefulMs": 2082.684334,
+        "medianQuotaMs": 0,
+        "medianTerminalMs": 2082.684334,
+        "answerSamples": 3,
+        "firstUsefulSamples": 3
+      }
+    }
+  ]
+}

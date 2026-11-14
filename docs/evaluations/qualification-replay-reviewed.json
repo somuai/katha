@@ -1,0 +1,718 @@
+{
+  "identity": {
+    "fixtureHash": "3230ed93156bcbf0c9ba00df5a3ffbbd81bc4bf06af16f36771fa8b9b7309b83",
+    "implementationHash": "b35477d13f06629cba8e2eae37c1589a706e89986c22eae48b31839068949ed9",
+    "models": [
+      "qwen/qwen3.8-27b"
+    ],
+    "temperature": 0,
+    "maxOutputTokens": 1000,
+    "node": "24.22.2",
+    "sharedCaptureHash": "a7c9af21b310ce414fd9c69c02787d07cd2e3e8d25ce6bdca9beecbd404cf95c"
+  },
+  "label": "Targeted subset (3/40), not a full release gate. Synthetic personal histories and vendor fixtures are labelled. Live documentation evidence is captured once and shared by all candidates.",
+  "expectedCaseIds": [
+    "web-04",
+    "web-06",
+    "web-07"
+  ],
+  "reusedEvidence": "Shared captured observations retain their original dates; this is not fresh live web discovery.",
+  "models": [
+    "qwen/qwen3.8-27b"
+  ],
+  "captureOutcomes": {
+    "web-01": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:24.459Z"
+    },
+    "web-02": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:26.451Z"
+    },
+    "web-03": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:27.741Z"
+    },
+    "web-04": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:32.079Z"
+    },
+    "web-05": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:36.421Z"
+    },
+    "web-06": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:39.033Z"
+    },
+    "web-07": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:41.214Z"
+    },
+    "web-08": {
+      "status": "succeeded",
+      "errors": [],
+      "observedAt": "2026-11-13T20:17:44.081Z"
+    }
+  },
+  "gate": "Targeted coding-agent review, not the 40-case release gate.",
+  "results": [
+    {
+      "id": "web-04",
+      "kind": "web",
+      "model": "qwen/qwen3.8-27b",
+      "runAt": "2026-11-14T01:43:19.509Z",
+      "completionMs": 2082.684334,
+      "firstUsefulMs": 2082.684334,
+      "quotaMs": 0,
+      "assertions": {
+        "includes": [],
+        "excludes": [],
+        "expectedStatus": null,
+        "statusMatches": true
+      },
+      "snapshot": {
+        "id": "dcdf27fc-0b67-49cb-8655-586bc709a7b4",
+        "conversationId": "2be4465c-c653-48ae-afbb-dcab102327c3",
+        "status": "COMPLETED",
+        "text": "Using the web, explain Tavily basic versus advanced search credits. Cite evidence.",
+        "originalInputAvailable": true,
+        "attachmentIds": [],
+        "memoryScope": "workspace",
+        "timezone": "UTC",
+        "answer": "Tavily search requests consume credits based on the selected `search_depth` parameter. A **Basic** search (`basic`) costs **1 API credit** per request and returns generic snippets from each source. An **Advanced** search (`advanced`) costs **2 API credits** per request and retrieves the most relevant sources and content snippets, with an optional `chunks_per_source` parameter (1-3) to control content length [82c089ac-97b2-4239-b7a6-eba949cf3ee6][a9837842-4048-4a10-b412-ef9196b18323].",
+        "error": null,
+        "createdAt": "2026-11-12T12:00:00.000Z",
+        "updatedAt": "2026-11-12T12:00:00.000Z",
+        "citations": [
+          {
+            "sourceId": "82c089ac-97b2-4239-b7a6-eba949cf3ee6"
+          },
+          {
+            "sourceId": "a9837842-4048-4a10-b412-ef9196b18323"
+          }
+        ],
+        "comparisons": [],
+        "sources": [
+          {
+            "id": "8ec41d40-e672-4829-9e35-c97383551c2e",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Credits & Pricing - Tavily Docs",
+            "content": "`,\\_jsx(\\_components.strong,{children:`No credit card required.`})]})}),`\\n`,\\_jsx(Heading,{level:`2`,id:`pricing-overview`,children:`Pricing Overview`}),`\\n`,\\_jsx(\\_components.p,{children:`Tavily operates on a simple, credit-based model:`}),`\\n`,\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Free`}),`: 1,000 credits/month`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Pay-as-you-go`}),`: $0.008 per credit (allows you to be charged per credit once your plan\u2019s credit limit is reached).`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Monthly plans`}),`: $0.0075 - $0.005 per credit`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Enterprise`}),`: Custom pricing and volume`]}),`\\n`]}),`\\n`,\\_jsxs(Table,{children:[\\_jsx(\\_components.thead,{children:\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.th,{children:\\_jsx(\\_components.strong,{children:`Plan`})}),\\_jsx(\\_components.th,{children:\\_jsx(\\_components.strong,{children:`Credits per month`})}),\\_jsx(\\_components.th,{children:\\_jsx(\\_components.strong,{children:`Monthly price`})}),\\_jsx(\\_components.th,{children:\\_jsx(\\_components.strong,{children:`Price per credit`})})]})}),\\_jsxs(\\_components.tbody,{children:[\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Researcher`})}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`1,000`}),\\_jsx(\\_components.td,{children:`Free`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`-`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Project`})}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`4,000`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$30`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$0.0075`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Bootstrap`})}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`15,000`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$100`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$0.0067`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Startup`})}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`38,000`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$220`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$0.0058`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Growth`})}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`100,000`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$500`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$0.005`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Pay as you go`})}),\\_jsx(\\_components.td,{children:`Per usage`}),\\_jsx(\\_components.td,{children:`$0.008 / Credit`}),\\_jsx(\\_components.td,{\\\"data-numeric\\\":`true`,children:`$0.008`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Enterprise`})}),\\_jsx(\\_components.td,{children:`Custom`}),\\_jsx(\\_components.td,{children:`Custom`}),\\_jsx(\\_components.td,{children:`Custom`})]})]})]}),`\\n`,\\_jsxs(\\_components.p,{children:[`Head to `,\\_jsx(\\_components.a,{href:`https://app.tavily.com/billing`,children:`billing`}),` to explore our different options and manage your plan.`]}),`\\n`,\\_jsx(Heading,{level:`2`,id:`api-credits-costs`,children:`API Credits Costs`}),`\\n`,\\_jsx(Heading,{level:`3`,id:`tavily-search`,children:`Tavily Search`}),`\\n`,\\_jsxs(\\_components.p,{children:[`Your `,\\_jsx(\\_components.a,{href:`/api-reference/endpoint/search#body-search-depth`,children:`search depth`}),` determines the cost of your request.`]}),`\\n`,\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[`\\n`,\\_jsxs(\\_components.p,{children:[\\_jsxs(\\_components.strong,{children:[`Basic Search (`,\\_jsx(\\_components.code,{children:`basic`}),`):`]}),`\\nEach request costs `,\\_jsx(\\_components.strong,{children:`1 API credit`}),`.`]}),`\\n`]}),`\\n`,\\_jsxs(\\_components.li,{children:[`\\n`,\\_jsxs(\\_components.p,{children:[\\_jsxs(\\_components.strong,{children:[`Advanced Search (`,\\_jsx(\\_components.code,{children:`advanced`}),`):`]}),`\\nEach request costs `,\\_jsx(\\_components.strong,{children:`2 API credits`}),`.`]}),`\\n`]}),`\\n`]}),`\\n`,\\_jsx(Heading,{level:`3`,id:`tavily-extract`,children:`Tavily Extract`}),`\\n`,\\_jsxs(\\_components.p,{children:[`The number of successful URL extractions and your `,\\_jsx(\\_components.a,{href:`/api-reference/endpoint/extract#body-extract-depth`,children:`extraction depth`}),` determines the cost of your request.\n\nYou never get charged if a map request fails.`]}),`\\n`,\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[`\\n`,\\_jsxs(\\_components.p,{children:[\\_jsx(\\_components.strong,{children:`Regular Mapping:`}),`\\nEvery 10 successful pages returned cost `,\\_jsx(\\_components.strong,{children:`1 API credit`})]}),`\\n`]}),`\\n`,\\_jsxs(\\_components.li,{children:[`\\n`,\\_jsxs(\\_components.p,{children:[\\_jsxs(\\_components.strong,{children:[`Map with (`,\\_jsx(\\_components.code,{children:`instructions`}),`):`]}),`\\nEvery 10 successful pages returned cost `,\\_jsx(\\_components.strong,{children:`2 API credits`})]}),`\\n`]}),`\\n`]}),`\\n`,\\_jsx(Heading,{level:`3`,id:`tavily-crawl`,children:`Tavily Crawl`}),`\\n`,\\_jsx(\\_components.p,{children:`Tavily Crawl combines both mapping and extraction operations, so the cost is the sum of both:`}),`\\n`,\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsx(\\_components.li,{children:\\_jsx(\\_components.strong,{children:`Crawl Cost = Mapping Cost + Extraction Cost`})}),`\\n`]}),`\\n`,\\_jsx(\\_components.p,{children:`For example:`}),`\\n`,\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[`If you crawl 10 pages with basic extraction depth, you\u2019ll be charged `,\\_jsx(\\_components.strong,{children:`1 credit for mapping`}),` (10 pages) + `,\\_jsx(\\_components.strong,{children:`2 credits for extraction`}),` (10 successful extractions \u00f7 5) = `,\\_jsx(\\_components.strong,{children:`3 total credits`})]}),`\\n`,\\_jsxs(\\_components.li,{children:[`If you crawl 10 pages with advanced extraction depth, you\u2019ll be charged `,\\_jsx(\\_components.strong,{children:`1 credit for mapping`}),` + `,\\_jsx(\\_components.strong,{children:`4 credits for extraction`}),` = `,\\_jsx(\\_components.strong,{children:`5 total credits`})]}),`\\n`]}),`\\n`,\\_jsx(Heading,{level:`3`,id:`tavily-research`,children:`Tavily Research`}),`\\n`,\\_jsxs(\\_components.p,{children:[`Tavily Research follows a dynamic\\npricing model with minimum and maximum credit consumption boundaries associated\\nwith each request.\n\n* **Basic Search (`basic`):** Each request costs **1 API credit**.\n* **Advanced Search (`advanced`):** Each request costs **2 API credits**.\n\nYou never get charged if a URL extraction fails.`]}),`\\n`,\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[`\\n`,\\_jsxs(\\_components.p,{children:[\\_jsxs(\\_components.strong,{children:[`Basic Extract (`,\\_jsx(\\_components.code,{children:`basic`}),`):`]}),`\\nEvery 5 successful URL extractions cost `,\\_jsx(\\_components.strong,{children:`1 API credit`})]}),`\\n`]}),`\\n`,\\_jsxs(\\_components.li,{children:[`\\n`,\\_jsxs(\\_components.p,{children:[\\_jsxs(\\_components.strong,{children:[`Advanced Extract (`,\\_jsx(\\_components.code,{children:`advanced`}),`):`]}),`\\nEvery 5 successful URL extractions cost `,\\_jsx(\\_components.strong,{children:`2 API credits`})]}),`\\n`]}),`\\n`]}),`\\n`,\\_jsx(Heading,{level:`3`,id:`tavily-map`,children:`Tavily Map`}),`\\n`,\\_jsxs(\\_components.p,{children:[`The number of pages mapped and whether or not natural-language `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/map#instructions`,children:`instructions`}),` are specified determines the cost of your request.\n\n* If you crawl 10 pages with basic extraction depth, you\u2019ll be charged **1 credit for mapping** (10 pages) + **2 credits for extraction** (10 successful extractions \u00f7 5) = **3 total credits**\n* If you crawl 10 pages with advanced extraction depth, you\u2019ll be charged **1 credit for mapping** + **4 credits for extraction** = **5 total credits**\n\n* **Basic Extract (`basic`):** Every 5 successful URL extractions cost **1 API credit**\n* **Advanced Extract (`advanced`):** Every 5 successful URL extractions cost **2 API credits**\n\n| **Plan** | **Credits per month** | **Monthly price** | **Price per credit** |\n| --- | --- | --- | --- |\n| **Researcher** | 1,000 | Free | - |\n| **Project** | 4,000 | $30 | $0.0075 |\n| **Bootstrap** | 15,000 | $100 | $0.0067 |\n| **Startup** | 38,000 | $220 | $0.0058 |\n| **Growth** | 100,000 | $500 | $0.005 |\n| **Pay as you go** | Per usage | $0.008 / Credit | $0.008 |\n| **Enterprise** | Custom | Custom | Custom |\n\n{\"docsConfig\":{\"theme\":\"aspen\",\"$schema\":\"https://mintlify.com/docs.json\",\"name\":\"Tavily Docs\",\"colors\":{\"primary\":\"#80AF9B\",\"light\":\"#80AF9B\",\"dark\":\"#817FFF\"},\"logo\":{\"light\":\"https://mintcdn.com/tavilyai/4\\_uvKy\\_66YQwB55y/logo/light.svg?fit=max\\u0026auto=format\\u0026n=4\\_uvKy\\_66YQwB55y\\u0026q=85\\u0026s=dc43e5efe7e46e07f0eb136402479de8\",\"dark\":\"https://mintcdn.com/tavilyai/4\\_uvKy\\_66YQwB55y/logo/dark.svg?fit=max\\u0026auto=format\\u0026n=4\\_uvKy\\_66YQwB55y\\u0026q=85\\u0026s=683273a1e0164bedd5796c0292b7486e\",\"href\":\"https://tavily.com/\"},\"favicon\":\"https://mintcdn.com/tavilyai/8Hb954Quc\\_LiMlq3/favicon.ico?fit=max\\u0026auto=format\\u0026n=8Hb954Quc\\_LiMlq3\\u0026q=85\\u0026s=585516a7dd162d47508ea9da086baec2\",\"api\":{\"openapi\":[\"documentation/api-reference/openapi.json\",\"documentation/enterprise/openapi.json\"],\"playground\":{\"display\":\"simple\"}},\"background\":{\"color\":{\"light\":\"#FFFCF6\",\"dark\":\"#1F1E1E\"}},\"navbar\":{\"links\":[{\"href\":\"mailto:support@tavily.com\",\"label\":\"Support\"}],\"primary\":{\"type\":\"button\",\"label\":\"Get an API key\",\"href\":\"https://app.tavily.com\"}},\"footer\":{\"socials\":{\"linkedin\":\"https://linkedin.com/company/tavily\",\"x\":\"https://x.com/tavilyai\",\"github\":\"https://github.com/tavily-ai\",\"youtube\":\"https://www.youtube.com/@TavilyAI\"},\"links\":[{\"header\":\"Resources\",\"items\":[{\"label\":\"Get started\",\"href\":\"/\"},{\"label\":\"Tavily Search Crawler\",\"href\":\"/documentation/search-crawler\"},{\"label\":\"Tavily Status\",\"href\":\"https://status.tavily.com/\"}]},{\"header\":\"Legal\",\"items\":[{\"label\":\"Security \\u0026 Compliance\",\"href\":\"https://trust.tavily.com/\"},{\"label\":\"Privacy Policy\",\"href\":\"https://www.tavily.com/privacy\"},{\"label\":\"Website Terms of Use\",\"href\":\"https://www.tavily.com/website-terms\"},{\"label\":\"Platform Terms of Use\",\"href\":\"https://www.tavily.com/terms\"},{\"label\":\"Cookie Notice\",\"href\":\"https://www.tavily.com/cookie-policy\"}]}]},\"seo\":{\"metatags\":{\"canonical\":\"https://docs.tavily.com\"}},\"fonts\":{\"heading\":{\"family\":\"SuisseIntl\",\"weight\":700,\"source\":\"fonts/SuisseIntl-Medium.woff2\",\"format\":\"woff2\"},\"body\":{\"family\":\"SuisseIntl\",\"weight\":400,\"source\":\"fonts/SuisseIntl-Regular.woff2\",\"format\":\"woff2\"}},\"integrations\":{\"cookies\":{\"key\":\"tavily\\_mintlify\\_telemetry\\_consent\",\"value\":\"granted\"}},\"contextual\":{\"options\":[\"copy\",\"view\",\"chatgpt\",\"claude\"],\"display\":\"header\"},\"thumbnails\":{\"appearance\":\"dark\",\"background\":\"https://mintcdn.com/tavilyai/xMLYLDqESGBETUw7/images/og-background.png?fit=max\\u0026auto=format\\u0026n=xMLYLDqESGBETUw7\\u0026q=85\\u0026s=b8592c875dc9b99e8536ae24dc6a742f\"},\"styling\":{\"latex\":false},\"navigation\":{\"global\":{\"anchors\":[{\"anchor\":\"API Playground\",\"icon\":\"play\",\"href\":\"https://app.tavily.com/playground\"}]},\"pages\":[]}},\"deployment\":{\"deploymentMetadataValue\":{\"subdomain\":\"tavilyai\",\"hasAudioNarration\":false,\"actualSubdomain\":\"tavilyai\",\"customDomains\":[\"docs.tavily.com\"],\"gitSource\":{\"type\":\"github\",\"owner\":\"tavily-ai\",\"repo\":\"new-docs\",\"depl",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://docs.tavily.com/documentation/api-credits",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:32.075Z",
+              "method": "search observation",
+              "query": "Tavily API pricing basic vs advanced search credits",
+              "cached": false
+            }
+          },
+          {
+            "id": "82c089ac-97b2-4239-b7a6-eba949cf3ee6",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Tavily Crawl - Tavily Docs",
+            "content": "Advanced extraction retrieves more data, including tables and embedded content, with higher success but may increase latency. `basic` extraction costs 1 credit per 5 successful extractions, while `advanced` extraction costs 2 credits per 5 successful extractions.\n\n\\n - **Advanced Search (`advanced`):** \\n Each request costs **2 API credits**.\n\n\\n\\n - **Basic Search (`basic`):** \\n Each request costs **1 API credit**.\n\n\\n - **Monthly plans**: $0.0075 - $0.005 per credit \\n - **Enterprise**: Custom pricing and volume \\n\\n| **Plan** | **Credits per month** | **Monthly price** | **Price per credit** | \\n| --- | --- | --- | --- | \\n| **Researcher** | 1,000 | Free | - | \\n| **Project** | 4,000 | $30 | $0.0075 | \\n| **Bootstrap** | 15,000 | $100 | $0.0067 | \\n| **Startup** | 38,000 | $220 | $0.0058 | \\n| **Growth** | 100,000 | $500 | $0.005 | \\n| **Pay as you go** | Per usage | $0.008 / Credit | $0.008 | \\n| **Enterprise** | Custom | Custom | Custom | \\n\\nHead to [my plan](https://app.tavily.com/account/plan) to explore our different options and manage your plan.\n\n\\n\\n## [\u200b](#api-credits-costs) API Credits Costs \\n\\n### [\u200b](#tavily-search) Tavily Search \\n\\nYour [search depth](/api-reference/endpoint/search#body-search-depth) determines the cost of your request.\n\n[ { \"url\": \"https://docs.tavily.com/welcome\",  \"raw_content\": \"Welcome - Tavily Docs \\n\\n[Tavily Docs home page![light logo](https://mintlify.s3.us-west-1.amazonaws.com/tavilyai/logo/light.svg)![dark logo](https://mintlify.s3.us-west-1.amazonaws.com/tavilyai/logo/dark.svg)](https://tavily.com/) \\n\\nSearch or ask...\n\n\\n**No credit card required.**](https://app.tavily.com) \\n\\n## [\u200b](#pricing-overview) Pricing Overview \\n\\nTavily operates on a simple, credit-based model: \\n\\n - **Free**: 1,000 credits/month \\n - **Pay-as-you-go**: $0.008 per credit (allows you to be charged per credit once your plan's credit limit is reached).\n\nWhether to include credit usage information in the response. `NOTE:`The value may be 0 if the total use of /extract and /map have not yet reached minimum requirements. See our [Credits & Pricing documentation](https://docs.tavily.com/documentation/api-credits) for details.\n\nScraping doesn't scale and requires expertise to refine, current search engine APIs don't provide explicit information to queries but simply potential related articles (which are not always related), and are not very customziable for AI agent needs.\n\n\\n\\nThe Tavily Search API aggregates up to 20 sites per a single API call, and uses proprietary AI to score, filter and rank the top most relevant sources and content to your task, query or goal.\n\nNatural language instructions for the crawler. When specified, the mapping cost increases to 2 API credits per 10 successful pages instead of 1 API credit per 10 pages.\n\n\\n\\n Ctrl K \\n\\n - [Support](mailto:support@tavily.com) \\n - [Get an API key](https://app.tavily.com) \\n - [Get an API key](https://app.tavily.com) \\n\\nSearch...\n\n\\n\\n Ctrl K \\n\\n - [Support](mailto:support@tavily.com) \\n - [Get an API key](https://app.tavily.com) \\n - [Get an API key](https://app.tavily.com) \\n\\nSearch...\n\n**No credit card required.**](https://app.tavily.com/)Head to our [API Playground](https://app.tavily.com/playground) to familiarize yourself with our API.\n\nHowever, the results are sometimes irrelevant to the goal of the search, and return simple URLs and snippets of content which are not always relevant.\n\nIn addition, Tavily allows developers to add custom fields such as context and limit response tokens to enable the optimal search experience for LLMs.\n\n\\n ----------- \\n\\nWe're a team of AI researchers and developers passionate about helping you build the next generation of AI assistants.\n\n\\n ----------------------------- \\n\\nTraditional search APIs such as Google, Serp and Bing retrieve search results based on a user query.\n\nWe take care of all the burden of searching, scraping, filtering and extracting the most relevant information from online sources.\n\nUnlike other search APIs such as Serp or Google, Tavily focuses on optimizing search for AI developers and autonomous AI agents.\n\n\\n\\n## [\u200b](#free-api-credits) Free API Credits \\n\\n[## Get your free API key \\n\\nYou get 1,000 free API Credits every month.\n\nThis is why we're excited to introduce the first search engine for AI agents - [Tavily](https://app.tavily.com/).\n\n\\n\\nTavily is a search engine optimized for LLMs, aimed at efficient, quick and persistent search results.\n\n\\n ------------------ \\n\\nTavily shines where others fail, with a Search API optimized for LLMs.\n\n\\n\\n[Get your free API key --------------------- You get 1,000 free API Credits every month.\n\nThe Tavily Search API takes care of all of this for you in a single API call.\n\nYou get **1,000 free API Credits every month**.\n\n\\n\\n What is the Tavily Search Engine?\n\nCredit usage details for the request.\n\n\\n\\n How does the Search API work?\n\nNo credit card required.\n\n{ \"credits\": 1 }\n\ndefault:basic\n\n`advanced`\n\n`basic`,\n\n```\ncurl --request POST \\ --url https://api.tavily.com/crawl \\ --header 'Authorization: Bearer ' \\ --header 'Content-Type: application/json' \\ --data ' { \"url\": \"docs.tavily.com\", \"instructions\": \"Find all pages about the Python SDK\", \"chunks_per_source\": 3, \"max_depth\": 1, \"max_breadth\": 20, \"limit\": 50, \"select_paths\": null, \"select_domains\": null, \"exclude_paths\": null, \"exclude_domains\": null, \"allow_external\": true, \"include_images\": false, \"extract_depth\": \"basic\", \"format\": \"markdown\", \"include_favicon\": false, \"timeout\": 150, \"include_usage\": false } '\n```\n\n```\n \"https://api.tavily.com/crawl\", CURLOPT_RETURNTRANSFER => true, CURLOPT_ENCODING => \"\", CURLOPT_MAXREDIRS => 10, CURLOPT_TIMEOUT => 30, CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1, CURLOPT_CUSTOMREQUEST => \"POST\", CURLOPT_POSTFIELDS => json_encode([ 'url' => 'docs.tavily.com', 'instructions' => 'Find all pages about the Python SDK', 'chunks_per_source' => 3, 'max_depth' => 1, 'max_breadth' => 20, 'limit' => 50, 'select_paths' => null, 'select_domains' => null, 'exclude_paths' => null, 'exclude_domains' => null, 'allow_external' => true, 'include_images' => false, 'extract_depth' => 'basic', 'format' => 'markdown', 'include_favicon' => false, 'timeout' => 150, 'include_usage' => false ]), CURLOPT_HTTPHEADER => [ \"Authorization: Bearer \", \"Content-Type: application/json\" ], ]); $response = curl_exec($curl); $err = curl_error($curl); curl_close($curl); if ($err) { echo \"cURL Error #:\" . $err; } else { echo $response; }\n```\n\n```\npackage main import ( \"fmt\" \"strings\" \"net/http\" \"io\" ) func main() { url := \"https://api.tavily.com/crawl\" payload := strings.NewReader(\"{\\n \\\"url\\\": \\\"docs.tavily.com\\\",\\n \\\"instructions\\\": \\\"Find all pages about the Python SDK\\\",\\n \\\"chunks_per_source\\\": 3,\\n \\\"max_depth\\\": 1,\\n \\\"max_breadth\\\": 20,\\n \\\"limit\\\": 50,\\n \\\"select_paths\\\": null,\\n \\\"select_domains\\\": null,\\n \\\"exclude_paths\\\": null,\\n \\\"exclude_domains\\\": null,\\n \\\"allow_external\\\": true,\\n \\\"include_images\\\": false,\\n \\\"extract_depth\\\": \\\"basic\\\",\\n \\\"format\\\": \\\"markdown\\\",\\n \\\"include_favicon\\\": false,\\n \\\"timeout\\\": 150,\\n \\\"include_usage\\\": false\\n}\") req, _ := http.NewRequest(\"POST\", url, payload) req.Header.Add(\"Authorization\", \"Bearer \") req.Header.Add(\"Content-Type\", \"application/json\") res, _ := http.DefaultClient.Do(req) defer res.Body.Close() body, _ := io.ReadAll(res.Body) fmt.Println(string(body)) }\n```\n\n```\nHttpResponse response = Unirest.post(\"https://api.tavily.com/crawl\") .header(\"Authorization\", \"Bearer \") .header(\"Content-Type\", \"application/json\") .body(\"{\\n \\\"url\\\": \\\"docs.tavily.com\\\",\\n \\\"instructions\\\": \\\"Find all pages about the Python SDK\\\",\\n \\\"chunks_per_source\\\": 3,\\n \\\"max_depth\\\": 1,\\n \\\"max_breadth\\\": 20,\\n \\\"limit\\\": 50,\\n \\\"select_paths\\\": null,\\n \\\"select_domains\\\": null,\\n \\\"exclude_paths\\\": null,\\n \\\"exclude_domains\\\": null,\\n \\\"allow_external\\\": true,\\n \\\"include_images\\\": false,\\n \\\"extract_depth\\\": \\\"basic\\\",\\n \\\"format\\\": \\\"markdown\\\",\\n \\\"include_favicon\\\": false,\\n \\\"timeout\\\": 150,\\n \\\"include_usage\\\": false\\n}\") .asString();\n```\n\n```\nrequire 'uri' require 'net/http' url = URI(\"https://api.tavily.com/crawl\") http = Net::HTTP.new(url.host, url.port) http.use_ssl = true request = Net::HTTP::Post.new(url) request[\"Authorization\"] = 'Bearer ' request[\"Content-Type\"] = 'application/json' request.body = \"{\\n \\\"url\\\": \\\"docs.tavily.com\\\",\\n \\\"instructions\\\": \\\"Find all pages about the Python SDK\\\",\\n \\\"chunks_per_source\\\": 3,\\n \\\"max_depth\\\": 1,\\n \\\"max_breadth\\\": 20,\\n \\\"limit\\\": 50,\\n \\\"select_paths\\\": null,\\n \\\"select_domains\\\": null,\\n \\\"exclude_paths\\\": null,\\n \\\"exclude_domains\\\": null,\\n \\\"allow_external\\\": true,\\n \\\"include_images\\\": false,\\n \\\"extract_depth\\\": \\\"basic\\\",\\n \\\"format\\\": \\\"markdown\\\",\\n \\\"include_favicon\\\": false,\\n \\\"timeout\\\": 150,\\n \\\"include_usage\\\": false\\n}\" response = http.request(request) puts response.read_body\n```\n\n```\ncurl --request POST \\ --url https://api.tavily.com/crawl \\ --header 'Authorization: Bearer ' \\ --header 'Content-Type: application/json' \\ --data ' { \"url\": \"docs.tavily.com\", \"instructions\": \"Find all pages about the Python SDK\", \"chunks_per_source\": 3, \"max_depth\": 1, \"max_breadth\": 20, \"limit\": 50, \"select_paths\": null, \"select_domains\": null, \"exclude_paths\": null, \"exclude_domains\": null, \"allow_external\": true, \"include_images\": false, \"extract_depth\": \"basic\", \"format\": \"markdown\", \"include_favicon\": false, \"timeout\": 150, \"include_usage\": false } '\n```\n\n```\n \"https://api.tavily.com/crawl\", CURLOPT_RETURNTRANSFER => true, CURLOPT_ENCODING => \"\", CURLOPT_MAXREDIRS => 10, CURLOPT_TIMEOUT => 30, CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1, CURLOPT_CUSTOMREQUEST => \"POST\", CURLOPT_POSTFIELDS => json_encode([ 'url' => 'docs.tavily.com', 'instructions' => 'Find all pages about the Python SDK', 'chunks_per_source' => 3, 'max_depth' => 1, 'max_breadth' => 20, 'limit' => 50, 'select_paths' => null, 'select_domains' => null, 'exclude_paths' => null, 'exclude_domains' => null, 'allow_external' => true, 'include_images' => false, 'extract_depth' => 'basic', 'format' => 'markdown', 'include_favicon' => false, 'timeout' => 150, 'include_usage' => false ]), CURLOPT_HTTPHEADER => [ \"Authorization: Bearer \", \"Content-Type: application/json\" ], ]); $response = curl_exec($curl); $err = curl_error($curl); curl_close($curl); if ($err) { echo \"cURL Error #:\" . $err; } else { echo $response; }\n```\n\n```\npackage main import ( \"fmt\" \"strings\" \"net/http\" \"io\" ) func main() { url := \"https://api.tavily.com/crawl\" payload := strings.NewReader(\"{\\n \\\"url\\\": \\\"docs.tavily.com\\\",\\n \\\"instructions\\\": \\\"Find all pages about the Python SDK\\\",\\n \\\"chunks_per_source\\\": 3,\\n \\\"max_depth\\\": 1,\\n \\\"max_breadth\\\": 20,\\n \\\"limit\\\": 50,\\n \\\"select_paths\\\": null,\\n \\\"select_domains\\\": null,\\n \\\"exclude_paths\\\": null,\\n \\\"exclude_domains\\\": null,\\n \\\"allow_external\\\": true,\\n \\\"include_images\\\": false,\\n \\\"extract_depth\\\": \\\"basic\\\",\\n \\\"format\\\": \\\"markdown\\\",\\n \\\"include_favicon\\\": false,\\n \\\"timeout\\\": 150,\\n \\\"include_usage\\\": false\\n}\") req, _ := http.NewRequest(\"POST\", url, payload) req.Header.Add(\"Authorization\", \"Bearer \") req.Header.Add(\"Content-Type\", \"application/json\") res, _ := http.DefaultClient.Do(req) defer res.Body.Close() body, _ := io.ReadAll(res.Body) fmt.Println(string(body)) }\n```\n\n```\nHttpResponse response = Unirest.post(\"https://api.tavily.com/crawl\") .header(\"Authorization\", \"Bearer \") .header(\"Content-Type\", \"application/json\") .body(\"{\\n \\\"url\\\": \\\"docs.tavily.com\\\",\\n \\\"instructions\\\": \\\"Find all pages about the Python SDK\\\",\\n \\\"chunks_per_source\\\": 3,\\n \\\"max_depth\\\": 1,\\n \\\"max_breadth\\\": 20,\\n \\\"limit\\\": 50,\\n \\\"select_paths\\\": null,\\n \\\"select_domains\\\": null,\\n \\\"exclude_paths\\\": null,\\n \\\"exclude_domains\\\": null,\\n \\\"allow_external\\\": true,\\n \\\"include_images\\\": false,\\n \\\"extract_depth\\\": \\\"basic\\\",\\n \\\"format\\\": \\\"markdown\\\",\\n \\\"include_favicon\\\": false,\\n \\\"timeout\\\": 150,\\n \\\"include_usage\\\": false\\n}\") .asString();\n```\n\n```\nrequ",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://docs.tavily.com/documentation/api-reference/endpoint/crawl",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:32.075Z",
+              "method": "search observation",
+              "query": "Tavily API pricing basic vs advanced search credits",
+              "cached": false
+            }
+          },
+          {
+            "id": "a9837842-4048-4a10-b412-ef9196b18323",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Changelog - Tavily Docs",
+            "content": "* **`search_depth`** (`basic` or `advanced`, default `basic`): `advanced` retrieves the most relevant sources and content snippets for your query, while `basic` returns generic snippets from each source. `basic` costs 1 API credit; `advanced` costs 2.\n* **`chunks_per_source`**: the maximum number of relevant chunks (short snippets up to 500 characters each) returned per source, which controls content length. Chunks appear in the `content` field as  `[...]  [...]` . Available only when `search_depth` is `advanced`. Range: 1 to 3.\n\n* `include_answer`, `include_raw_content`, and `max_results` must always be set manually, since they affect response size.\n* `search_depth` may be set to `advanced` automatically when that\u2019s likely to improve results, which costs **2 API credits per request**. Set `search_depth` to `basic` explicitly to avoid the extra cost.\n\n* **Basic search now returns chunks.** `basic` previously returned a single page summary per source. It now returns multiple semantically relevant snippets per URL, so `results[].content` may contain several chunks joined by `[...]`.\n* **`chunks_per_source` now applies to `basic`.** It previously affected `advanced` and `fast`, and now controls the number of chunks per source at those depths plus `basic`.\n* **Choosing between depths.** `advanced` still offers broader coverage and the highest relevance at higher latency. See [basic vs advanced](/documentation/best-practices/best-practices-search#basic-vs-advanced).\n\nSee `,\\_jsx(\\_components.a,{href:`/documentation/best-practices/best-practices-search#basic-vs-advanced`,children:`basic vs advanced`}),`.`]}),`\\n`]})]}),`\\n`,\\_jsxs(Update,{label:`May 2026`,id:`may-2026`,children:[\\_jsx(Heading,{level:`2`,id:`session-tracking-headers`,children:`Session tracking headers`}),\\_jsxs(\\_components.p,{children:[`Attach session and end-user identifiers to any API request so it can be attributed to a session or end-user.\n\nRoles differ in their Billing and Settings permissions:`}),\\_jsxs(Table,{children:[\\_jsx(\\_components.thead,{children:\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.th,{children:`Role`}),\\_jsx(\\_components.th,{children:`Settings`}),\\_jsx(\\_components.th,{children:`Billing`})]})}),\\_jsxs(\\_components.tbody,{children:[\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Owner`})}),\\_jsx(\\_components.td,{children:`Full access`}),\\_jsx(\\_components.td,{children:`Owns the billing account`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Admin`})}),\\_jsx(\\_components.td,{children:`Full access except ownership transfer`}),\\_jsx(\\_components.td,{children:`No access`})]}),\\_jsxs(\\_components.tr,{children:[\\_jsx(\\_components.td,{children:\\_jsx(\\_components.strong,{children:`Member`})}),\\_jsx(\\_components.td,{children:`View members only`}),\\_jsx(\\_components.td,{children:`No access`})]})]})]}),\\_jsx(Heading,{level:`2`,id:`extract-timeout-parameter`,children:`Extract timeout parameter`}),\\_jsxs(\\_components.p,{children:[`New `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/extract#body-timeout`,children:\\_jsx(\\_components.code,{children:`timeout`})}),` parameter for `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/extract`,children:`Extract`}),` to control how long to wait for URL extraction before timing out.`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Type:`}),` `,\\_jsx(\\_components.code,{children:`number`}),` (float)`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Range:`}),` 1.0 to 60.0 seconds`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Default:`}),` if not set, the timeout depends on `,\\_jsx(\\_components.code,{children:`extract\\_depth`}),`: 10 seconds for `,\\_jsx(\\_components.code,{children:`basic`}),` and 30 seconds for `,\\_jsx(\\_components.code,{children:`advanced`}),`.`]}),`\\n`]})]}),`\\n`,\\_jsxs(Update,{label:`July 2025`,id:`july-2025`,children:[\\_jsx(Heading,{level:`2`,id:`start-date-and-end-date-parameters`,children:`Start date and end date parameters`}),\\_jsxs(\\_components.p,{children:[`New `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-start-date`,children:\\_jsx(\\_components.code,{children:`start\\_date`})}),` and `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-end-date`,children:\\_jsx(\\_components.code,{children:`end\\_date`})}),` parameters for `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search`,children:`Search`}),`, both in `,\\_jsx(\\_components.code,{children:`YYYY-MM-DD`}),` format.`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.code,{children:`start\\_date`}),` returns results after the given date.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.code,{children:`end\\_date`}),` returns results before the given date.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[`For example, set `,\\_jsx(\\_components.code,{children:`start\\_date`}),` to `,\\_jsx(\\_components.code,{children:`2025-01-01`}),` and `,\\_jsx(\\_components.code,{children:`end\\_date`}),` to `,\\_jsx(\\_components.code,{children:`2025-04-01`}),` to get results strictly from that range.`]}),`\\n`]}),\\_jsx(Heading,{level:`2`,id:`usage-dashboard`,children:`Usage dashboard`}),\\_jsxs(\\_components.p,{children:[`Paid users and teams can `,\\_jsx(\\_components.a,{href:`https://app.tavily.com`,children:`log in`}),` to view the usage dashboard:`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Usage graph:`}),` daily usage across all Tavily endpoints, with history for month-over-month usage and spend comparison.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Logs table:`}),` per-request detail for visibility and traceability of every Tavily call.`]}),`\\n`]})]}),`\\n`,\\_jsxs(Update,{label:`June 2025`,id:`june-2025`,children:[\\_jsx(Heading,{level:`2`,id:`include-favicon-parameter`,children:`Include favicon parameter`}),\\_jsxs(\\_components.p,{children:[`Set `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-include-favicon`,children:\\_jsx(\\_components.code,{children:`include\\_favicon`})}),` to `,\\_jsx(\\_components.code,{children:`true`}),` to get the favicon URL (if available) for each result in `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search`,children:`Search`}),`, `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/extract`,children:`Extract`}),`, and `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/crawl`,children:`Crawl`}),`.\n\nParameters you set explicitly override the automatic ones.`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.code,{children:`include\\_answer`}),`, `,\\_jsx(\\_components.code,{children:`include\\_raw\\_content`}),`, and `,\\_jsx(\\_components.code,{children:`max\\_results`}),` must always be set manually, since they affect response size.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.code,{children:`search\\_depth`}),` may be set to `,\\_jsx(\\_components.code,{children:`advanced`}),` automatically when that\u2019s likely to improve results, which costs `,\\_jsx(\\_components.strong,{children:`2 API credits per request`}),`.\n\n`,\\_jsx(\\_components.code,{children:`text`}),` returns plain text and may increase latency.`]})]}),`\\n`,\\_jsxs(Update,{label:`April 2025`,id:`april-2025`,children:[\\_jsx(Heading,{level:`2`,id:`advanced-search-and-chunks-per-source`,children:`Advanced search and chunks per source`}),\\_jsxs(\\_components.p,{children:[`New `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-search-depth`,children:\\_jsx(\\_components.code,{children:`search\\_depth`})}),` and `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-chunks-per-source`,children:\\_jsx(\\_components.code,{children:`chunks\\_per\\_source`})}),` parameters for Search.`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:\\_jsx(\\_components.code,{children:`search\\_depth`})}),` (`,\\_jsx(\\_components.code,{children:`basic`}),` or `,\\_jsx(\\_components.code,{children:`advanced`}),`, default `,\\_jsx(\\_components.code,{children:`basic`}),`): `,\\_jsx(\\_components.code,{children:`advanced`}),` retrieves the most relevant sources and content snippets for your query, while `,\\_jsx(\\_components.code,{children:`basic`}),` returns generic snippets from each source.\n\n`,\\_jsx(\\_components.code,{children:`basic`}),` costs 1 API credit; `,\\_jsx(\\_components.code,{children:`advanced`}),` costs 2.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:\\_jsx(\\_components.code,{children:`chunks\\_per\\_source`})}),`: the maximum number of relevant chunks (short snippets up to 500 characters each) returned per source, which controls content length.\n\na strict filter.`]}),\\_jsx(Heading,{level:`2`,id:`logs-api%3A-filter-by-api-key-and-research-endpoint`,children:`Logs API: filter by API key and Research endpoint`}),\\_jsxs(\\_components.p,{children:[`The `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/logs`,children:`Logs endpoint`}),` can now return logs for the calling API key only, and filter by the Research endpoint.`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:\\_jsx(\\_components.code,{children:`filter\\_by\\_api\\_key`})}),` (`,\\_jsx(\\_components.code,{children:`boolean`}),`, default `,\\_jsx(\\_components.code,{children:`false`}),`): when `,\\_jsx(\\_components.code,{children:`true`}),`, only logs for the API key in the `,\\_jsx(\\_components.code,{children:`Authorization`}),` header are returned, instead of logs for all API keys under your account or organization.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:\\_jsx(\\_components.code,{children:`research`})}),` is now a valid value in the `,\\_jsx(\\_components.code,{children:`endpoints`}),` filter, alongside `,\\_jsx(\\_components.code,{children:`search`}),`, `,\\_jsx(\\_components.code,{children:`extract`}),`, `,\\_jsx(\\_components.code,{children:`map`}),`, and `,\\_jsx(\\_components.code,{children:`crawl`}),`.`]}),`\\n`]}),\\_jsxs(\\_components.p,{children:[`The Logs API is available on paid plans and is now fully documented in the `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/logs`,children:`API reference`}),`.`]})]}),`\\n`,\\_jsxs(Update,{label:`July 2026`,id:`july-2026`,children:[\\_jsx(Heading,{level:`2`,id:`chunked-content-for-basic-search`,children:`Chunked content for basic search`}),\\_jsxs(\\_components.p,{children:[\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-search-depth`,children:\\_jsx(\\_components.code,{children:`search\\_depth=basic`})}),` now returns reranked chunks, and `,\\_jsx(\\_components.a,{href:`/documentation/api-reference/endpoint/search#body-chunks-per-source`,children:\\_jsx(\\_components.code,{children:`chunks\\_per\\_source`})}),` applies to it.`]}),\\_jsxs(\\_components.ul,{children:[`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsx(\\_components.strong,{children:`Basic search now returns chunks.`}),` `,\\_jsx(\\_components.code,{children:`basic`}),` previously returned a single page summary per source.\n\nIt now returns multiple semantically relevant snippets per URL, so `,\\_jsx(\\_components.code,{children:`results[].content`}),` may contain several chunks joined by `,\\_jsx(\\_components.code,{children:`[...]`}),`.`]}),`\\n`,\\_jsxs(\\_components.li,{children:[\\_jsxs(\\_components.strong,{children:[\\_jsx(\\_components.code,{children:`chunks\\_per\\_source`}),` now applies to `,\\_jsx(\\_components.code,{children:`basic`}),`.`]}),` It previously affected `,\\_jsx(\\_comp",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://docs.tavily.com/changelog",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:32.075Z",
+              "method": "search observation",
+              "query": "Tavily API pricing basic vs advanced search credits",
+              "cached": false
+            }
+          }
+        ],
+        "trace": {
+          "activeSourceIds": [],
+          "recordView": "effective",
+          "resolvedDate": null,
+          "referenceClock": "2026-11-12T12:00:00.000Z",
+          "timezone": "UTC",
+          "retrievalMethods": [
+            "lexical"
+          ],
+          "baselineSourceIds": [],
+          "previousObservationIds": [],
+          "searches": [
+            {
+              "query": "Tavily API pricing basic vs advanced search credits",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "Tavily documentation search credits cost",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            }
+          ],
+          "searchAttempts": 2,
+          "searchAdapterDispatches": 2,
+          "coverage": {
+            "queries": 2,
+            "succeeded": 2,
+            "failed": 0
+          },
+          "documentReferences": [],
+          "usageBreakdown": {
+            "planning": {
+              "inputTokens": 317,
+              "outputTokens": 64
+            },
+            "generation": {
+              "inputTokens": 2314,
+              "outputTokens": 253
+            }
+          },
+          "usage": {
+            "inputTokens": 2631,
+            "outputTokens": 317
+          },
+          "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+          "routing": {
+            "sourcesOnly": false,
+            "privateFileTask": false,
+            "explicitWebRequest": true,
+            "usesWeb": true
+          }
+        }
+      },
+      "review": {
+        "reviewed": true,
+        "taskSuccess": true,
+        "abstained": false,
+        "factualAnswer": true,
+        "claims": [
+          {
+            "text": "Search depth determines search credit cost.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "8ec41d40-e672-4829-9e35-c97383551c2e"
+            ]
+          },
+          {
+            "text": "Basic costs one API credit per search.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "a9837842-4048-4a10-b412-ef9196b18323"
+            ]
+          },
+          {
+            "text": "Advanced costs two API credits per search.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "82c089ac-97b2-4239-b7a6-eba949cf3ee6"
+            ]
+          },
+          {
+            "text": "The supplied parameter documentation describes basic generic snippets versus advanced relevant snippets.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "a9837842-4048-4a10-b412-ef9196b18323"
+            ]
+          },
+          {
+            "text": "The documented chunks-per-source range is one to three.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "a9837842-4048-4a10-b412-ef9196b18323"
+            ]
+          }
+        ],
+        "notes": "Answers the requested credit difference without introducing an unqualified cash-cost range. The cited changelog includes historical parameter descriptions and newer chunk behavior; this is not a current API capability audit."
+      }
+    },
+    {
+      "id": "web-06",
+      "kind": "web",
+      "model": "qwen/qwen3.8-27b",
+      "runAt": "2026-11-14T01:44:19.425Z",
+      "completionMs": 59905.738625,
+      "firstUsefulMs": 59905.738625,
+      "quotaMs": 57869.092041,
+      "assertions": {
+        "includes": [],
+        "excludes": [],
+        "expectedStatus": null,
+        "statusMatches": true
+      },
+      "snapshot": {
+        "id": "cdb1abe9-b231-49d3-986b-18395e8442f6",
+        "conversationId": "0c266cf3-1aba-4d41-ab05-555dd4e914f2",
+        "status": "COMPLETED",
+        "text": "Using the web, explain whether an HTTP EventSource automatically reconnects. Cite evidence.",
+        "originalInputAvailable": true,
+        "attachmentIds": [],
+        "memoryScope": "workspace",
+        "timezone": "UTC",
+        "answer": "Yes, an HTTP `EventSource` automatically reconnects if the connection is lost. The browser waits for a specified reconnection time before attempting to reconnect. This time can be set by the server using the `retry` field, which must be an integer specifying the delay in milliseconds. If the server does not specify a `retry` value, the browser uses a default reconnection time (typically 3 seconds, though the provided sources do not explicitly state the default value). The connection remains open until explicitly closed by calling `EventSource.close()`.",
+        "error": null,
+        "createdAt": "2026-11-12T12:00:00.000Z",
+        "updatedAt": "2026-11-12T12:00:00.000Z",
+        "citations": [
+          {
+            "sourceId": "13a670ed-72c7-42e3-81f2-6d1a390cdae5"
+          },
+          {
+            "sourceId": "eda1469e-2b4a-4ad3-82f4-204026d5fc11"
+          }
+        ],
+        "comparisons": [],
+        "sources": [
+          {
+            "id": "13a670ed-72c7-42e3-81f2-6d1a390cdae5",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Using server-sent events - Web APIs | MDN",
+            "content": "[`id`](#id)\n:   The event ID to set the [`EventSource`](/en-US/docs/Web/API/EventSource) object's last event ID value.\n\nIf the server responds with an `error` key (e.g., `JSON.parse(event.data.error)` or another problem occurs (such as a network timeout or issues pertaining to [access control](/en-US/docs/Web/HTTP/Guides/CORS)), an error event is generated. You can take action on this programmatically by implementing the `onerror` callback on the `EventSource` object:\n\n[`data`](#data)\n:   The data field for the message. When the `EventSource` receives multiple consecutive lines that begin with `data:`, [it concatenates them](https://html.spec.whatwg.org/multipage/#dispatchMessage \"External link (opens in new tab)\"), inserting a newline character between each one. Trailing newlines are removed.\n\nIf the event generator script is hosted on a different origin, a new `EventSource` object should be created with both the URL and an options dictionary. For example, assuming the client script is on `example.com`:\n\nTo open a connection to the server to begin receiving events from it, create a new `EventSource` object with the URL of a script that generates the events. For example:\n\nThe server-sent event API is contained in the [`EventSource`](/en-US/docs/Web/API/EventSource) interface.\n\n### [Creating an `EventSource` instance](#creating_an_eventsource_instance)\n\nDeveloping a web application that uses [server-sent events](/en-US/docs/Web/API/Server-sent_events) is straightforward. You'll need a bit of code on the server to stream events to the front-end, but the client-side code works almost identically to [websockets](/en-US/docs/Web/API/WebSockets_API) in part of handling incoming events. This is a one-way connection, so you can't send events from a client to a server.\n\nThe code above generates an event every second, with the event type \"ping\". Each event's data is a JSON object containing the ISO 8601 timestamp corresponding to the time at which the event was generated. At random intervals, a simple message (with no event type) is sent. The loop will keep running independent of the connection status, so a check is included to break the loop if the connection has been closed (e.g., client closes the page).\n\n[`event`](#event)\n:   A string identifying the type of event described. If this is specified, an event will be dispatched on the browser to the listener for the specified event name; the website source code should use `addEventListener()` to listen for named events. The `onmessage` handler is called if no event name is specified for a message.\n\n[`retry`](#retry)\n:   The reconnection time. If the connection to the server is lost, the browser will wait for the specified time before attempting to reconnect. This must be an integer, specifying the reconnection time in milliseconds. If a non-integer value is specified, the field is ignored.\n\nThis example sends named events. Each has an event name specified by the `event` field, and a `data` field whose value is an appropriate JSON string with the data needed for the client to act on the event. The `data` field could, of course, have any string data; it doesn't have to be JSON.\n\nThe server-side script that sends events needs to respond using the MIME type `text/event-stream`. Each notification is sent as a block of text terminated by a pair of newlines. For details on the format of the event stream, see [Event stream format](#event_stream_format).\n\nThe event stream is a simple stream of text data which must be encoded using [UTF-8](/en-US/docs/Glossary/UTF-8). Messages in the event stream are separated by a pair of newline characters. A colon as the first character of a line is in essence a comment, and is ignored.\n\nMessages sent from the server that don't have an [`event`](#event) field are received as `message` events. To receive message events, attach a handler for the [`message`](/en-US/docs/Web/API/EventSource/message_event \"message\") event:\n\nThis code will be called whenever the server sends a message with the `event` field set to `ping`; it then parses the JSON in the `data` field and outputs that information.\n\n**Note:** The comment line can be used to prevent connections from timing out; a server can send a comment periodically to keep the connection alive.\n\nThis page was last modified on by [MDN contributors](/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events/contributors.txt).\n\nMessages from the server that do have an `event` field defined are received as events with the name given in `event`. For example:\n\nYou don't have to use just unnamed messages or typed events; you can mix them together in a single event stream.\n\nThis code listens for incoming message events and appends the message text to a list in the document's HTML.\n\n## [Receiving events from the server](#receiving_events_from_the_server)\n\n## [Sending events from the server](#sending_events_from_the_server)\n\n### [Listening for `message` events](#listening_for_message_events)\n\n### [Listening for custom events](#listening_for_custom_events)\n\n## [Closing event streams](#closing_event_streams)\n\n## [Event stream format](#event_stream_format)\n\n# Using server-sent events\n\n#### Named events\n\n```\nconst evtSource = new EventSource(\"//api.example.com/sse-demo.php\", { withCredentials: true, }); \n```\n\n```\nevtSource.onerror = (err) => { console.error(\"EventSource failed:\", err); }; \n```\n\n```\nconst evtSource = new EventSource(\"sse-demo.php\"); \n```\n\n```\ndate_default_timezone_set(\"America/New_York\"); header(\"X-Accel-Buffering: no\"); header(\"Content-Type: text/event-stream\"); header(\"Cache-Control: no-cache\"); $counter = rand(1, 10); while (true) { // Every second, send a \"ping\" event. echo \"event: ping\\n\"; $curDate = date(DATE_ISO8601); echo 'data: {\"time\": \"' . $curDate . '\"}'; echo \"\\n\\n\"; // Send a simple message at random intervals. $counter--; if (!$counter) { echo 'data: This is a message at time ' . $curDate . \"\\n\\n\"; $counter = rand(1, 10); } if (ob_get_contents()) { ob_end_flush(); } flush(); // Break the loop if the client aborted the connection (closed the page) if (connection_aborted()) break; sleep(1); } \n```\n\n```\nevent: userconnect data: {\"username\": \"bobby\", \"time\": \"02:33:48\"} event: usermessage data: {\"username\": \"bobby\", \"time\": \"02:34:11\", \"text\": \"Hi everyone.\"} event: userdisconnect data: {\"username\": \"bobby\", \"time\": \"02:34:23\"} event: usermessage data: {\"username\": \"sean\", \"time\": \"02:34:36\", \"text\": \"Bye, bobby.\"} \n```\n\n```\nevtSource.addEventListener(\"ping\", (event) => { const newElement = document.createElement(\"li\"); const eventList = document.getElementById(\"list\"); const time = JSON.parse(event.data).time; newElement.textContent = `ping at ${time}`; eventList.appendChild(newElement); }); \n```\n\n```\nevent: userconnect data: {\"username\": \"bobby\", \"time\": \"02:33:48\"} data: Here's a system message of some kind that will get used data: to accomplish some task. event: usermessage data: {\"username\": \"bobby\", \"time\": \"02:34:11\", \"text\": \"Hi everyone.\"} \n```\n\n```\nevtSource.onmessage = (event) => { const newElement = document.createElement(\"li\"); const eventList = document.getElementById(\"list\"); newElement.textContent = `message: ${event.data}`; eventList.appendChild(newElement); }; \n```\n\n1. [Web](/en-US/docs/Web)\n2. [Web APIs](/en-US/docs/Web/API)\n3. [Server-sent events](/en-US/docs/Web/API/Server-sent_events)\n4. [Using server-sent events](/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:39.031Z",
+              "method": "search observation",
+              "query": "HTTP EventSource automatic reconnection behavior specification",
+              "cached": false
+            }
+          },
+          {
+            "id": "eda1469e-2b4a-4ad3-82f4-204026d5fc11",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "EventSource - Web APIs | MDN",
+            "content": "An `EventSource` instance opens a persistent connection to an [HTTP](/en-US/docs/Web/HTTP) server, which sends [events](/en-US/docs/Learn_web_development/Core/Scripting/Events) in `text/event-stream` format. The connection remains open until closed by calling [`EventSource.close()`](/en-US/docs/Web/API/EventSource/close).\n\n[`EventSource.withCredentials`](/en-US/docs/Web/API/EventSource/withCredentials) Read only\n:   A boolean value indicating whether the `EventSource` object was instantiated with cross-origin ([CORS](/en-US/docs/Web/HTTP/Guides/CORS)) credentials set (`true`), or not (`false`, the default).\n\nEach received event causes our `EventSource` object's `onmessage` event handler to be run. It, in turn, creates a new  element and writes the message's data into it, then appends the new element to the list element already in the document.\n\n[`EventSource.readyState`](/en-US/docs/Web/API/EventSource/readyState) Read only\n:   A number representing the state of the connection. Possible values are `CONNECTING` (`0`), `OPEN` (`1`), or `CLOSED` (`2`).\n\n[`EventSource.close()`](/en-US/docs/Web/API/EventSource/close)\n:   Closes the connection, if any, and sets the `readyState` attribute to `CLOSED`. If the connection is already closed, the method does nothing.\n\n[`EventSource()`](/en-US/docs/Web/API/EventSource/EventSource \"EventSource()\")\n:   Creates a new `EventSource` to handle receiving server-sent events from a specified URL, optionally in credentials mode.\n\nIn this basic example, an `EventSource` is created to receive unnamed events from the server; a page with the name `sse.php` is responsible for generating the events.\n\n| Specification |\n| --- |\n| [HTML # the-eventsource-interface](https://html.spec.whatwg.org/multipage/server-sent-events.html#the-eventsource-interface) |\n\nThe **`EventSource`** interface is web content's interface to [server-sent events](/en-US/docs/Web/API/Server-sent_events).\n\n[`EventSource.url`](/en-US/docs/Web/API/EventSource/url) Read only\n:   A string representing the URL of the source.\n\n1. [Web](/en-US/docs/Web)\n2. [Web APIs](/en-US/docs/Web/API)\n3. [EventSource](/en-US/docs/Web/API/EventSource)\n\n# EventSource\n\nOnce the connection is opened, incoming messages from the server are delivered to your code in the form of events. If there is an event field in the incoming message, the triggered event is the same as the event field value. If no event field is present, then a generic [`message`](/en-US/docs/Web/API/EventSource/message_event \"message\") event is fired.\n\n* [Server-sent events](/en-US/docs/Web/API/Server-sent_events)\n* [Using server-sent events](/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)\n\nAdditionally, the event source itself may send messages with an event field, which will create ad hoc events keyed to that value.\n\n[`error`](/en-US/docs/Web/API/EventSource/error_event \"error\")\n:   Fired when a connection to an event source failed to open.\n\n[`message`](/en-US/docs/Web/API/EventSource/message_event \"message\")\n:   Fired when data is received from an event source.\n\n[`open`](/en-US/docs/Web/API/EventSource/open_event \"open\")\n:   Fired when a connection to an event source has opened.\n\n*This interface also inherits properties from its parent, [`EventTarget`](/en-US/docs/Web/API/EventTarget).*\n\n*This interface also inherits methods from its parent, [`EventTarget`](/en-US/docs/Web/API/EventTarget).*\n\nThis page was last modified on by [MDN contributors](/en-US/docs/Web/API/EventSource/contributors.txt).\n\nTo listen to named events, you'll require a listener for each type of event sent.\n\n## [Events](#events)\n\nUnlike [WebSockets](/en-US/docs/Web/API/WebSockets_API), server-sent events are unidirectional; that is, data messages are delivered in one direction, from the server to the client (such as a user's web browser). That makes them an excellent choice when there's no need to send data from the client to the server in message form. For example, `EventSource` is a useful approach for handling things like social media status updates, news feeds, or delivering data into a [client-side storage](/en-US/docs/Learn_web_development/Extensions/Client-side_APIs/Client-side_storage) mechanism like [IndexedDB](/en-US/docs/Web/API/IndexedDB_API) or [web storage](/en-US/docs/Web/API/Web_Storage_API).\n\n```\nconst sse = new EventSource(\"/api/v1/sse\"); /* * This will listen only for events * similar to the following: * * event: notice * data: useful data * id: some-id */ sse.addEventListener(\"notice\", (e) => { console.log(e.data); }); /* * Similarly, this will listen for events * with the field `event: update` */ sse.addEventListener(\"update\", (e) => { console.log(e.data); }); /* * The event \"message\" is a special case, as it * will capture events without an event field * as well as events that have the specific type * `event: message` It will not trigger on any * other event type. */ sse.addEventListener(\"message\", (e) => { console.log(e.data); }); \n```\n\n```\nconst evtSource = new EventSource(\"sse.php\"); const eventList = document.querySelector(\"ul\"); evtSource.onmessage = (e) => { const newElement = document.createElement(\"li\"); newElement.textContent = `message: ${e.data}`; eventList.appendChild(newElement); }; \n```",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://developer.mozilla.org/en-US/docs/Web/API/EventSource",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:39.031Z",
+              "method": "search observation",
+              "query": "HTTP EventSource automatic reconnection behavior specification",
+              "cached": false
+            }
+          },
+          {
+            "id": "c3d1174c-69d1-47b0-a989-7074a1b6f506",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "EventSource: open event - Web APIs | MDN",
+            "content": "| Specification |\n| --- |\n| [HTML # event-open](https://html.spec.whatwg.org/multipage/indices.html#event-open) |\n| [HTML # handler-eventsource-onopen](https://html.spec.whatwg.org/multipage/server-sent-events.html#handler-eventsource-onopen) |\n\nThe **`open`** event of the [`EventSource`](/en-US/docs/Web/API/EventSource) interface is fired when a connection with an event source is opened.\n\n# EventSource: open event\n\n* [Using server-sent events](/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events)\n* [`error`](/en-US/docs/Web/API/EventSource/error_event \"error\")\n* [`message`](/en-US/docs/Web/API/EventSource/message_event \"message\")\n\nUse the event name in methods like [`addEventListener()`](/en-US/docs/Web/API/EventTarget/addEventListener \"addEventListener()\"), or set an event handler property.\n\nThis page was last modified on by [MDN contributors](/en-US/docs/Web/API/EventSource/open_event/contributors.txt).\n\nThis event is not cancelable and does not bubble.\n\nA generic [`Event`](/en-US/docs/Web/API/Event).\n\n## [Event type](#event_type)\n\n```\nconst evtSource = new EventSource(\"sse.php\"); // addEventListener version evtSource.addEventListener(\"open\", (e) => { console.log(\"The connection has been established.\"); }); // onopen version evtSource.onopen = (e) => { console.log(\"The connection has been established.\"); }; \n```\n\n1. [Web](/en-US/docs/Web)\n2. [Web APIs](/en-US/docs/Web/API)\n3. [EventSource](/en-US/docs/Web/API/EventSource)\n4. [open](/en-US/docs/Web/API/EventSource/open_event)\n\n```\naddEventListener(\"open\", (event) => { }) onopen = (event) => { } \n```",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://developer.mozilla.org/docs/Web/API/EventSource/open_event",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:39.031Z",
+              "method": "search observation",
+              "query": "HTTP EventSource automatic reconnection behavior specification",
+              "cached": false
+            }
+          }
+        ],
+        "trace": {
+          "activeSourceIds": [],
+          "recordView": "effective",
+          "resolvedDate": null,
+          "referenceClock": "2026-11-12T12:00:00.000Z",
+          "timezone": "UTC",
+          "retrievalMethods": [
+            "lexical"
+          ],
+          "baselineSourceIds": [],
+          "previousObservationIds": [],
+          "searches": [
+            {
+              "query": "HTTP EventSource automatic reconnection behavior specification",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "MDN Web Docs EventSource reconnection",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "W3C Server-Sent Events specification reconnection logic",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            }
+          ],
+          "searchAttempts": 3,
+          "searchAdapterDispatches": 3,
+          "coverage": {
+            "queries": 3,
+            "succeeded": 3,
+            "failed": 0
+          },
+          "documentReferences": [],
+          "usageBreakdown": {
+            "planning": {
+              "inputTokens": 318,
+              "outputTokens": 87
+            },
+            "generation": {
+              "inputTokens": 2095,
+              "outputTokens": 211
+            }
+          },
+          "usage": {
+            "inputTokens": 2413,
+            "outputTokens": 298
+          },
+          "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+          "routing": {
+            "sourcesOnly": false,
+            "privateFileTask": false,
+            "explicitWebRequest": true,
+            "usesWeb": true
+          }
+        }
+      },
+      "review": {
+        "reviewed": true,
+        "taskSuccess": false,
+        "abstained": false,
+        "factualAnswer": true,
+        "claims": [
+          {
+            "text": "EventSource reconnects after losing its connection.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "13a670ed-72c7-42e3-81f2-6d1a390cdae5"
+            ]
+          },
+          {
+            "text": "The retry field specifies an integer delay in milliseconds.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "13a670ed-72c7-42e3-81f2-6d1a390cdae5"
+            ]
+          },
+          {
+            "text": "Calling close ends the connection.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "eda1469e-2b4a-4ad3-82f4-204026d5fc11"
+            ]
+          },
+          {
+            "text": "The typical default is three seconds.",
+            "verdict": "unverifiable",
+            "evidenceIds": []
+          }
+        ],
+        "notes": "Still inserts an unsupported numerical default despite acknowledging that the retained pages do not establish it. Prompt changes alone did not repair this behavior."
+      }
+    },
+    {
+      "id": "web-07",
+      "kind": "web",
+      "model": "qwen/qwen3.8-27b",
+      "runAt": "2026-11-14T01:44:21.405Z",
+      "completionMs": 1968.1576249999998,
+      "firstUsefulMs": 1968.1576249999998,
+      "quotaMs": 0,
+      "assertions": {
+        "includes": [],
+        "excludes": [],
+        "expectedStatus": null,
+        "statusMatches": true
+      },
+      "snapshot": {
+        "id": "5a92d521-5c0d-4e57-b2a0-8e5833926577",
+        "conversationId": "a93fc6e4-9315-4a8d-9ed3-9a3f98c25fe8",
+        "status": "COMPLETED",
+        "text": "Using the web, explain whether browser microphone capture requires a secure context. Cite evidence.",
+        "originalInputAvailable": true,
+        "attachmentIds": [],
+        "memoryScope": "workspace",
+        "timezone": "UTC",
+        "answer": "Yes, browser microphone capture requires a secure context. The `getUserMedia()` method is only available in secure contexts, which are typically loaded over HTTPS/TLS. If a document is not loaded in a secure context, the `navigator.mediaDevices` property is `undefined`, making access to `getUserMedia()` impossible. Additionally, attempting to use `getUserMedia()` from an insecure context (such as HTTP) results in a `NotAllowedError` DOMException. [3a0989f0-684d-40f7-8e5d-b7b7d0d7d639] [2b3781bd-c167-4bcc-8929-d63afc707092] [241c7d0f-308a-490c-813b-faa63097cdc8]",
+        "error": null,
+        "createdAt": "2026-11-12T12:00:00.000Z",
+        "updatedAt": "2026-11-12T12:00:00.000Z",
+        "citations": [
+          {
+            "sourceId": "3a0989f0-684d-40f7-8e5d-b7b7d0d7d639"
+          },
+          {
+            "sourceId": "2b3781bd-c167-4bcc-8929-d63afc707092"
+          },
+          {
+            "sourceId": "241c7d0f-308a-490c-813b-faa63097cdc8"
+          }
+        ],
+        "comparisons": [],
+        "sources": [
+          {
+            "id": "3a0989f0-684d-40f7-8e5d-b7b7d0d7d639",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "MediaDevices: getUserMedia() Methode - Web-APIs | MDN",
+            "content": "`getUserMedia()` ist ein starkes Merkmal, das nur in [sicheren Kontexten](/de/docs/Web/Security/Defenses/Secure_Contexts) verwendet werden kann; in unsicheren Kontexten ist `navigator.mediaDevices` `undefined`, was den Zugriff auf `getUserMedia()` verhindert. Ein sicherer Kontext ist kurz gesagt, eine Seite, die mit HTTPS oder dem `file:///` URL-Schema geladen wird, oder eine Seite von `localhost`.\n\nDie `getUserMedia()`-Methode ist nur in [sicheren Kontexten](/de/docs/Web/Security/Defenses/Secure_Contexts) verf\u00fcgbar. Ein sicherer Kontext ist einer, in dem der Browser mit hinl\u00e4nglichem Vertrauen annimmt, dass das Dokument sicher geladen wurde, mit HTTPS/TLS, und beschr\u00e4nkten Kontakt zu unsicheren Kontexten hat. Wenn ein Dokument nicht in einem sicheren Kontext geladen wird, ist die [`navigator.mediaDevices`](/de/docs/Web/API/Navigator/mediaDevices) Eigenschaft `undefined`, was den Zugang zu `getUserMedia()` unm\u00f6glich macht.\n\n`NotAllowedError` [`DOMException`](/de/docs/Web/API/DOMException)\n:   Ausgel\u00f6st, wenn eines oder mehrere der angeforderten Quellger\u00e4te derzeit nicht verwendet werden k\u00f6nnen. Dies tritt auf, wenn der Browsing-Kontext unsicher ist (d.h. die Seite wurde mit HTTP anstelle von HTTPS geladen). Es tritt auch auf, wenn der Benutzer angegeben hat, dass die aktuelle Browsing-Instanz keinen Zugriff auf das Ger\u00e4t erh\u00e4lt, der Benutzer den Zugriff f\u00fcr die aktuelle Sitzung verweigert hat oder der Benutzer den Zugriff auf Benutzer-Medienger\u00e4te weltweit verweigert hat. In Browsern, die die Verwaltung von Medienberechtigungen mit [Permissions Policy](/de/docs/Web/HTTP/Guides/Permissions_Policy) unterst\u00fctzen, wird dieser Fehler zur\u00fcckgegeben, wenn die Permissions Policy nicht so konfiguriert ist, dass sie den Zugriff auf die Eingabequelle(n) erlaubt.\n\n[`TypeError`](/de/docs/Web/JavaScript/Reference/Global_Objects/TypeError)\n:   Ausgel\u00f6st, wenn die Liste der angegebenen Einschr\u00e4nkungen leer ist oder alle Einschr\u00e4nkungen auf `false` gesetzt sind. Dies kann auch passieren, wenn Sie versuchen, `getUserMedia()` in einem unsicheren Kontext aufzurufen, da [`navigator.mediaDevices`](/de/docs/Web/API/Navigator/mediaDevices) in einem unsicheren Kontext `undefined` ist.\n\nAufgrund des offensichtlichen Sicherheitsanliegens, das mit `getUserMedia()` in unerwarteten Situationen oder ohne sorgf\u00e4ltig gemanagte Sicherheit verbunden ist, kann es nur in sicheren Kontexten verwendet werden. Es gibt eine Anzahl unsicherer Wege, ein Dokument zu laden, das m\u00f6glicherweise versuchen k\u00f6nnte, `getUserMedia()` aufzurufen. Die folgenden Beispiele zeigen Situationen, in denen `getUserMedia()` nicht aufgerufen werden darf:\n\n`SecurityError` [`DOMException`](/de/docs/Web/API/DOMException)\n:   Ausgel\u00f6st, wenn die Unterst\u00fctzung von Benutzer-Medien im [`Document`](/de/docs/Web/API/Document) deaktiviert ist, auf dem `getUserMedia()` aufgerufen wurde. Der Mechanismus, durch den die Unterst\u00fctzung f\u00fcr Benutzer-Medien aktiviert und deaktiviert wird, bleibt dem einzelnen Benutzeragenten \u00fcberlassen.\n\nZus\u00e4tzlich ist immer die Erlaubnis des Benutzers erforderlich, um auf die Audio- und Videoeing\u00e4nge des Benutzers zuzugreifen. Nur das Top-Level-Dokumentfenster eines g\u00fcltigen Ursprungs kann die Erlaubnis zur Nutzung von `getUserMedia()` anfordern, es sei denn, der Top-Level-Kontext gew\u00e4hrt ausdr\u00fccklich einem bestimmten\n\nDie **`getUserMedia()`**-Methode der [`MediaDevices`](/de/docs/Web/API/MediaDevices)-Schnittstelle fordert den Benutzer um Erlaubnis zur Nutzung eines Medieneingangs auf, welcher einen [`MediaStream`](/de/docs/Web/API/MediaStream) mit Spuren der angeforderten Medientypen erzeugt.\n\n**Sicherer Kontext:** Diese Funktion ist nur in [sicheren Kontexten](/de/docs/Web/Security/Defenses/Secure_Contexts) (HTTPS) in einigen oder allen [unterst\u00fctzenden Browsern](#browser-kompatibilit\u00e4t) verf\u00fcgbar.\n\nAls eine API, die signifikante Datenschutzbedenken hervorrufen kann, legt die Spezifikation von `getUserMedia()` eine Vielzahl von Datenschutz- und Sicherheitsanforderungen fest, die Browser erf\u00fcllen m\u00fcssen.\n\nDer Versuch, in dieser Situation auf `getUserMedia()` zuzugreifen, f\u00fchrt zu einem [`TypeError`](/de/docs/Web/JavaScript/Reference/Global_Objects/TypeError).\n\n# MediaDevices: getUserMedia() Methode\n\n1. [Web](/de/docs/Web)\n2. [Web-APIs](/de/docs/Web/API)\n3. [MediaDevices](/de/docs/Web/API/MediaDevices)\n4. [getUserMedia()](/de/docs/Web/API/MediaDevices/getUserMedia)\n\n```\ngetUserMedia(constraints) \n```",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://developer.mozilla.org/de/docs/Web/API/MediaDevices/getUserMedia",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:41.212Z",
+              "method": "search observation",
+              "query": "browser microphone capture requires secure context",
+              "cached": false
+            }
+          },
+          {
+            "id": "241c7d0f-308a-490c-813b-faa63097cdc8",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "Firefox 68 release notes for developers - Mozilla | MDN",
+            "content": "Secure contexts are those loaded using HTTPS, those located using the `file:///` scheme, and those loaded from `localhost`.\n\n* [`getUserMedia()`](/en-US/docs/Web/API/MediaDevices/getUserMedia \"getUserMedia()\") may no longer be used from a non-secure context; attempting to do so now throws a `NotAllowedError` exception.\n\n* Disabled the feature to force unloading background tabs on low memory conditions, to prevent top-level browser contexts from magically disappearing ([Firefox bug 1553748](https://bugzil.la/1553748 \"External link (opens in new tab)\")).\n* Disabled privileged content processes that caused HTTP authentication dialogs not to appear when navigating to a website after opening a new tab ([Firefox bug 1558763](https://bugzil.la/1558763 \"External link (opens in new tab)\")).\n\n  **Note:** In the future, Firefox will also remove the [`navigator.mediaDevices`](/en-US/docs/Web/API/Navigator/mediaDevices) property on insecure contexts, preventing all access to the [`MediaDevices`](/en-US/docs/Web/API/MediaDevices) APIs. **This is already the case in Nightly builds.**\n\nFor now, if you must, you can re-enable the ability to perform insecure calls to `getUserMedia()` by setting the preference `media.getusermedia.insecure.enabled` to `true` ([Firefox bug 1335740](https://bugzil.la/1335740 \"External link (opens in new tab)\")).\n\n* The Web Audio API [`MediaStreamTrackAudioSourceNode`](/en-US/docs/Web/API/MediaStreamTrackAudioSourceNode) interface is now supported, as is the method [`AudioContext.createMediaStreamTrackSource()`](/en-US/docs/Web/API/AudioContext/createMediaStreamTrackSource) ([Firefox bug 1324548](https://bugzil.la/1324548 \"External link (opens in new tab)\")).\n\n* `proxyAuthorization` and `connectionIsolation` in [`proxy.onRequest`](/en-US/docs/Mozilla/Add-ons/WebExtensions/API/proxy/onRequest) now apply only to HTTPS proxies ([Firefox bug 1549368](https://bugzil.la/1549368 \"External link (opens in new tab)\").\n\n* [`XMLHttpRequest`](/en-US/docs/Web/API/XMLHttpRequest) has been updated to no longer accept the non-standard `moz-chunked-arraybuffer` value for [`responseType`](/en-US/docs/Web/API/XMLHttpRequest/responseType \"responseType\").\n\n* A `string` value, `cookieStoreId`, representing the cookie store ID of the current context, has been added to the [proxy.RequestDetails](/en-US/docs/Mozilla/Add-ons/WebExtensions/API/proxy/RequestDetails).\n\n### [HTTP](#http)\n\n* The [HTTP](/en-US/docs/Web/HTTP) [`Clear-Site-Data`](/en-US/docs/Web/HTTP/Reference/Headers/Clear-Site-Data) header no longer supports the `executionContexts` directive. This was removed due to problems with interactions between interconnections among different kinds of data at different points in the navigation process and the way the specification is designed. It [has been proposed](https://github.com/w3c/webappsec-clear-site-data/issues/59 \"External link (opens in new tab)\") that this directive be removed from the specification for this reason, among others ([Firefox bug 1548034](https://bugzil.la/1548034 \"External link (opens in new tab)\")).\n\n* `XMLHttpRequest` now outputs a warning to console if you perform a synchronous request while handling an [`unload`](/en-US/docs/Web/API/Window/unload_event \"unload\"), [`beforeunload`](/en-US/docs/Web/API/Window/beforeunload_event \"beforeunload\"), or [`pagehide`](/en-US/docs/Web/API/Window/pagehide_event \"pagehide\") event ([Firefox bug 980902](https://bugzil.la/980902 \"External link (opens in new tab)\")).\n\n* The Network monitor [request list](https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/request_list/index.html#filtering-requests \"External link (opens in new tab)\") now allows you to block a specific URL ([Firefox bug 1151368](https://bugzil.la/1151368 \"External link (opens in new tab)\")).\n* You can now resend a network request without editing the method, URL, parameters, and headers, using the [Resend](https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/request_list/index.html#context-menu \"External link (opens in new tab)\") command on the context menu ([Firefox bug 1422014](https://bugzil.la/1422014 \"External link (opens in new tab)\")).\n* The context menu of the Network monitor [Headers](https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/request_details/index.html#headers \"External link (opens in new tab)\") tab now allows you to copy all or some of the header information to the clipboard in JSON format ([Firefox bug 1442249](https://bugzil.la/1442249 \"External link (opens in new tab)\")).",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Releases/68",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:41.212Z",
+              "method": "search observation",
+              "query": "browser microphone capture requires secure context",
+              "cached": false
+            }
+          },
+          {
+            "id": "2b3781bd-c167-4bcc-8929-d63afc707092",
+            "kind": "web",
+            "role": "web",
+            "conversationId": null,
+            "turnId": null,
+            "title": "MediaDevices: getUserMedia() method - Web APIs | MDN",
+            "content": "`getUserMedia()` is a powerful feature that can only be used in [secure contexts](/en-US/docs/Web/Security/Defenses/Secure_Contexts); in insecure contexts, `navigator.mediaDevices` is `undefined`, preventing access to `getUserMedia()`. A secure context is, in short, a page loaded using HTTPS or the `file:///` URL scheme, or a page loaded from `localhost`.\n\nThe `getUserMedia()` method is only available in [secure contexts](/en-US/docs/Web/Security/Defenses/Secure_Contexts). A secure context is one the browser is reasonably confident contains a document which was loaded securely, using HTTPS/TLS, and has limited exposure to insecure contexts. If a document isn't loaded in a secure context, the [`navigator.mediaDevices`](/en-US/docs/Web/API/Navigator/mediaDevices) property is `undefined`, making access to `getUserMedia()` impossible.\n\n`NotAllowedError` [`DOMException`](/en-US/docs/Web/API/DOMException)\n:   Thrown if one or more of the requested source devices cannot be used at this time. This will happen if the browsing context is insecure (that is, the page was loaded using HTTP rather than HTTPS). It also happens if the user has specified that the current browsing instance is not permitted access to the device, the user has denied access for the current session, or the user has denied all access to user media devices globally. On browsers that support managing media permissions with [Permissions Policy](/en-US/docs/Web/HTTP/Guides/Permissions_Policy), this error is returned if Permissions Policy is not configured to allow access to the input source(s).\n\nBecause of the obvious security concern associated with `getUserMedia()` if used unexpectedly or without security being carefully managed, it can only be used in secure contexts. There are a number of insecure ways to load a document that might, in turn, attempt to call `getUserMedia()`. The following are examples of situations in which `getUserMedia()` is not permitted to be called:\n\n[`TypeError`](/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError)\n:   Thrown if the list of constraints specified is empty, or has all constraints set to `false`. This can also happen if you try to call `getUserMedia()` in an insecure context, since [`navigator.mediaDevices`](/en-US/docs/Web/API/Navigator/mediaDevices) is `undefined` in an insecure context.\n\n**Secure context:** This feature is available only in [secure contexts](/en-US/docs/Web/Security/Defenses/Secure_Contexts) (HTTPS), in some or all [supporting browsers](#browser_compatibility).\n\nIn addition, user permission is always required to access the user's audio and video inputs. Only a window's top-level document context for a valid origin can even request permission to use `getUserMedia()`, unless the top-level context expressly grants permission for a given\n\n`SecurityError` [`DOMException`](/en-US/docs/Web/API/DOMException)\n:   Thrown if user media support is disabled on the [`Document`](/en-US/docs/Web/API/Document) on which `getUserMedia()` was called. The mechanism by which user media support is enabled and disabled is left up to the individual user agent.\n\nThe **`getUserMedia()`** method of the [`MediaDevices`](/en-US/docs/Web/API/MediaDevices) interface prompts the user for permission to use a media input which produces a [`MediaStream`](/en-US/docs/Web/API/MediaStream) with tracks containing the requested types of media.\n\nAs an API that may involve significant privacy concerns, `getUserMedia()`'s specification lays out a wide array of privacy and security requirements that browsers are obligated to meet.\n\nAttempting to access `getUserMedia()` in this situation will result in a [`TypeError`](/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError).\n\n# MediaDevices: getUserMedia() method\n\n1. [Web](/en-US/docs/Web)\n2. [Web APIs](/en-US/docs/Web/API)\n3. [MediaDevices](/en-US/docs/Web/API/MediaDevices)\n4. [getUserMedia()](/en-US/docs/Web/API/MediaDevices/getUserMedia)\n\n```\ngetUserMedia(constraints) \n```",
+            "recordedAt": "2026-11-12T12:00:00.000Z",
+            "occurredAt": null,
+            "occurredEnd": null,
+            "dateProvenance": "unknown",
+            "version": 1,
+            "deletedAt": null,
+            "invalidated": false,
+            "metadata": {
+              "url": "https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia",
+              "publishedAt": null,
+              "effectiveAt": null,
+              "observedAt": "2026-11-13T20:17:41.212Z",
+              "method": "search observation",
+              "query": "browser microphone capture requires secure context",
+              "cached": false
+            }
+          }
+        ],
+        "trace": {
+          "activeSourceIds": [],
+          "recordView": "effective",
+          "resolvedDate": null,
+          "referenceClock": "2026-11-12T12:00:00.000Z",
+          "timezone": "UTC",
+          "retrievalMethods": [
+            "lexical"
+          ],
+          "baselineSourceIds": [],
+          "previousObservationIds": [],
+          "searches": [
+            {
+              "query": "browser microphone capture requires secure context",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "getUserMedia secure context requirement MDN",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            },
+            {
+              "query": "WebRTC microphone access HTTPS requirement",
+              "error": null,
+              "cached": false,
+              "resultCount": 3
+            }
+          ],
+          "searchAttempts": 3,
+          "searchAdapterDispatches": 3,
+          "coverage": {
+            "queries": 3,
+            "succeeded": 3,
+            "failed": 0
+          },
+          "documentReferences": [],
+          "usageBreakdown": {
+            "planning": {
+              "inputTokens": 318,
+              "outputTokens": 79
+            },
+            "generation": {
+              "inputTokens": 2057,
+              "outputTokens": 329
+            }
+          },
+          "usage": {
+            "inputTokens": 2375,
+            "outputTokens": 408
+          },
+          "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+          "routing": {
+            "sourcesOnly": false,
+            "privateFileTask": false,
+            "explicitWebRequest": true,
+            "usesWeb": true
+          }
+        }
+      },
+      "review": {
+        "reviewed": true,
+        "taskSuccess": false,
+        "abstained": false,
+        "factualAnswer": true,
+        "claims": [
+          {
+            "text": "Microphone capture requires a secure context.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "2b3781bd-c167-4bcc-8929-d63afc707092"
+            ]
+          },
+          {
+            "text": "mediaDevices is undefined in insecure contexts.",
+            "verdict": "supported",
+            "evidenceIds": [
+              "2b3781bd-c167-4bcc-8929-d63afc707092"
+            ]
+          },
+          {
+            "text": "An insecure call unconditionally produces NotAllowedError.",
+            "verdict": "unsupported",
+            "evidenceIds": []
+          }
+        ],
+        "notes": "Still combines version-specific exception behavior with an unavailable method. Source set also establishes TypeError and older Firefox-specific behavior; no task success credited."
+      }
+    }
+  ],
+  "sourceCapture": {
+    "sha256": "75b80c8a51d114ff088ba1533f5d6d7b03fa02903c79f3a1c3615a421ec2f546",
+    "manifest": {
+      "identity": {
+        "fixtureHash": "3230ed93156bcbf0c9ba00df5a3ffbbd81bc4bf06af16f36771fa8b9b7309b83",
+        "implementationHash": "b35477d13f06629cba8e2eae37c1589a706e89986c22eae48b31839068949ed9",
+        "models": [
+          "qwen/qwen3.8-27b"
+        ],
+        "temperature": 0,
+        "maxOutputTokens": 1000,
+        "node": "24.22.2",
+        "sharedCaptureHash": "a7c9af21b310ce414fd9c69c02787d07cd2e3e8d25ce6bdca9beecbd404cf95c"
+      },
+      "revision": "4b893a46dedae6a53477e76e0307f3f2fc9e94f8",
+      "startedAt": "2026-11-14T01:43:16.940Z"
+    }
+  }
+}

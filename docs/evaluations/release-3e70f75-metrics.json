@@ -1,0 +1,113 @@
+{
+  "target": 0.9,
+  "expectedCaseSetDeclared": true,
+  "scope": "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
+  "definitions": {
+    "resources": "Reported response tokens only, not a billing total; absent usage is unknown, not zero. Search attempts include cache/budget checks; adapter dispatches are separate and are not invoice credits. Attachment preparation and unreported failed responses are outside turn usage.",
+    "claimPrecision": "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
+    "taskSuccess": "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
+    "latency": "Useful-answer medians exclude failed, cancelled, empty and evidence-only fallback responses; quota waits are reported separately"
+  },
+  "models": [
+    {
+      "model": "qwen/qwen3.8-27b",
+      "expectedCases": 40,
+      "recordedCases": 40,
+      "missingCaseIds": [],
+      "duplicateCaseIds": [],
+      "executionCompleted": 33,
+      "executionErrorCases": 18,
+      "evidenceOnlyCases": 11,
+      "answered": 33,
+      "answerCoverage": 0.825,
+      "reviewedCases": 40,
+      "reviewCoverage": 1,
+      "taskSuccesses": 22,
+      "taskSuccessRate": 0.55,
+      "abstentions": 15,
+      "factualAnswerCases": 18,
+      "claims": {
+        "supported": 29,
+        "unsupported": 0,
+        "unverifiable": 0,
+        "inference": 0,
+        "factual": 29,
+        "precision": 1
+      },
+      "claimSupportGate": "EXECUTION_LIMITED",
+      "resources": {
+        "reportedInputTokens": 10894,
+        "reportedOutputTokens": 1201,
+        "casesWithReportedModelUsage": 9,
+        "casesWithoutReportedModelUsage": 31,
+        "searchAttemptsIncludingCache": 16,
+        "searchAdapterDispatches": 0,
+        "casesWithReportedDispatchCount": 0,
+        "cachedSearchQueries": 0,
+        "reportedSearchQueries": 16,
+        "usageScopes": [
+          "legacy or unspecified response usage"
+        ]
+      },
+      "latency": {
+        "medianAnswerCompletionMs": 5.275916499987943,
+        "medianActiveCompletionMs": 5.275916499987943,
+        "medianFirstUsefulMs": 5.275916499987943,
+        "medianQuotaMs": 0,
+        "medianTerminalMs": 910.3636664999915,
+        "answerSamples": 22,
+        "firstUsefulSamples": 22
+      }
+    },
+    {
+      "model": "openai/gpt-oss-120b",
+      "expectedCases": 40,
+      "recordedCases": 40,
+      "missingCaseIds": [],
+      "duplicateCaseIds": [],
+      "executionCompleted": 40,
+      "executionErrorCases": 0,
+      "evidenceOnlyCases": 0,
+      "answered": 40,
+      "answerCoverage": 1,
+      "reviewedCases": 40,
+      "reviewCoverage": 1,
+      "taskSuccesses": 30,
+      "taskSuccessRate": 0.75,
+      "abstentions": 9,
+      "factualAnswerCases": 32,
+      "claims": {
+        "supported": 55,
+        "unsupported": 4,
+        "unverifiable": 1,
+        "inference": 2,
+        "factual": 60,
+        "precision": 0.9166666666666666
+      },
+      "claimSupportGate": "PASSED",
+      "resources": {
+        "reportedInputTokens": 29136,
+        "reportedOutputTokens": 5581,
+        "casesWithReportedModelUsage": 24,
+        "casesWithoutReportedModelUsage": 16,
+        "searchAttemptsIncludingCache": 21,
+        "searchAdapterDispatches": 0,
+        "casesWithReportedDispatchCount": 0,
+        "cachedSearchQueries": 0,
+        "reportedSearchQueries": 21,
+        "usageScopes": [
+          "legacy or unspecified response usage"
+        ]
+      },
+      "latency": {
+        "medianAnswerCompletionMs": 976.7790419999849,
+        "medianActiveCompletionMs": 976.7790419999849,
+        "medianFirstUsefulMs": 976.7790419999849,
+        "medianQuotaMs": 0,
+        "medianTerminalMs": 976.7790419999849,
+        "answerSamples": 40,
+        "firstUsefulSamples": 40
+      }
+    }
+  ]
+}

@@ -1,12 +1,16 @@
-# Evaluation evidence
+# Current evaluation entry point
+
+See [the versioned release review](release-review.md) and [current status](../STATUS.md) first. They supersede the historical snapshots below. Retrieval, grounded factual precision, full task success and provider failures are separate measurements.
+
+## Historical evaluation evidence
 
 The [attachment audit](../ATTACHMENT_AUDIT.md) adds 13 scoped default-model live checks and a separate CSV comparison, including the mechanically-passing recommendation later rejected by manual review. It is distinct from the controlled 40-case support evaluation below. Source-only recovery is reported separately from full answers.
 
-## Latest review and platform proof
+### Earlier review and platform proof
 
 The [13 November full-turn review](final-shared-evidence-review.md) covers 40 cases at `cb1368f`: 34 full tasks met and 60/61 factual propositions supported under a coding-agent review. This passes the numerical 90% threshold for that controlled shared-evidence set only, not independent or production certification. The complete sanitized synthetic/public-source ledger and metrics are committed alongside the report. Follow-up clarity fixes are identified separately; frozen results are not retroactively changed.
 
-Current runtime CI passed Windows/Linux/macOS install/tests/build and Chromium/Firefox/WebKit journeys: https://github.com/somuai/katha/actions/runs/43402177845 . The remaining sections record earlier runs and their limits.
+The runtime at that earlier snapshot passed Windows/Linux/macOS install/tests/build and Chromium/Firefox/WebKit journeys: https://github.com/somuai/katha/actions/runs/43402177845 . The remaining sections record earlier runs and their limits.
 
 ## Offline retrieval ablation
 
@@ -22,7 +26,7 @@ Both configured credentials worked; Groq's model catalog confirmed the configure
 
 Several forced-live Tavily searches returned zero pages. A normal advanced search returned three results. Tavily documents that `max_age_hours: 0` excludes pages that cannot be fetched live, and free-plan live fetching is best effort: https://docs.tavily.com/documentation/api-reference/endpoint/search . An empty result establishes missing evidence, never stability. Provider observation time is distinct from a source's publication or effective date.
 
-**At the time of this earlier provider smoke run, the 90% supported-claim gate had not passed.** These raw provider runs are not a hand-labelled end-to-end grounding benchmark. One raw answer mixed unrelated commercial evidence; the application's price validation now rejects incomplete or mismatched terms. A positive-and-negative, claim-level end-to-end review is still required before claiming that gate. No comparative model winner is declared.
+**At the time of this earlier provider smoke run, the 90% supported-claim gate had not passed.** These raw provider runs are not a hand-labelled end-to-end grounding benchmark. One raw answer mixed unrelated commercial evidence; the application's price validation now rejects incomplete or mismatched terms. At that earlier smoke-test stage, a positive-and-negative, claim-level end-to-end review was still required. No comparative model winner is declared.
 
 Live image and scanned-PDF checks both read a generated document fixture containing “Katha”, “Five seats” and “USD 20 per month”. Scanned text was explicitly labelled model interpretation. The owner independently tested a physical microphone and confirmed that the editable transcript worked.
 
