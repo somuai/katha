@@ -1,0 +1,63 @@
+{
+  "target": 0.9,
+  "expectedCaseSetDeclared": true,
+  "scope": "All reviewed usable answers in the supplied end-to-end run. No production accuracy or model-only accuracy is inferred.",
+  "definitions": {
+    "resources": "Reported response tokens only, not a billing total; absent usage is unknown, not zero. Search attempts include cache/budget checks; adapter dispatches are separate and are not invoice credits. Attachment preparation and unreported failed responses are outside turn usage.",
+    "claimPrecision": "supported / (supported + unsupported + unverifiable), reviewed usable answers only; inference excluded",
+    "taskSuccess": "Explicit reviewed taskSuccess labels; not inferred from terminal status or keyword checks",
+    "latency": "Useful-answer medians exclude failed, cancelled, empty and evidence-only fallback responses; quota waits are reported separately"
+  },
+  "models": [
+    {
+      "model": "openai/gpt-oss-120b",
+      "expectedCases": 2,
+      "recordedCases": 2,
+      "missingCaseIds": [],
+      "duplicateCaseIds": [],
+      "executionCompleted": 2,
+      "executionErrorCases": 0,
+      "evidenceOnlyCases": 0,
+      "answered": 2,
+      "answerCoverage": 1,
+      "reviewedCases": 2,
+      "reviewCoverage": 1,
+      "taskSuccesses": 0,
+      "taskSuccessRate": 0,
+      "abstentions": 1,
+      "factualAnswerCases": 1,
+      "claims": {
+        "supported": 6,
+        "unsupported": 0,
+        "unverifiable": 1,
+        "inference": 0,
+        "factual": 7,
+        "precision": 0.8571428571428571
+      },
+      "claimSupportGate": "BELOW_TARGET",
+      "resources": {
+        "reportedInputTokens": 2299,
+        "reportedOutputTokens": 441,
+        "casesWithReportedModelUsage": 2,
+        "casesWithoutReportedModelUsage": 0,
+        "searchAttemptsIncludingCache": 2,
+        "searchAdapterDispatches": 2,
+        "casesWithReportedDispatchCount": 2,
+        "cachedSearchQueries": 0,
+        "reportedSearchQueries": 2,
+        "usageScopes": [
+          "reported completed planning and generation responses; excludes unreported failed attempts"
+        ]
+      },
+      "latency": {
+        "medianAnswerCompletionMs": 1614.7537085000001,
+        "medianActiveCompletionMs": 1614.7537085000001,
+        "medianFirstUsefulMs": 1614.7537085000001,
+        "medianQuotaMs": 0,
+        "medianTerminalMs": 1614.7537085000001,
+        "answerSamples": 2,
+        "firstUsefulSamples": 2
+      }
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 These are versioned controlled evaluations, not production accuracy or a competitor benchmark. The coding agent reviewed every captured answer and the retained evidence in the ledgers. The owner's earlier independent review applies to earlier captures, not automatically to these newer runs. Original captures and failures remain preserved; annotations do not rewrite them.
 
-Latest: answer engine `936da48` delivered 50/52 supported claims and 30/40 complete tasks, with eight quota failures. Its gate is EXECUTION_LIMITED. The final section links the current ledger and preserves intervening failed runs.
+Latest full default capture: answer engine `936da48` delivered 50/52 supported claims and 30/40 complete tasks, with eight quota failures. Its gate is EXECUTION_LIMITED. The final section links the current ledger and preserves intervening failed runs.
 
 ## Full-turn results
 
@@ -52,3 +52,7 @@ Read [the current-default claim ledger](current-default-reviewed.json) and [comp
 A preceding `4b893a4` run encountered **22 transport failures** and completed 18/40 tasks. Its [reviewed capture](transport-failure-reviewed.json) and [metrics](transport-failure-metrics.json) remain public, even though all twenty delivered propositions were supported. Transport recovery was then normalized to capability-unavailable errors without masking cancellation. The [three-case qualification replay](qualification-replay-reviewed.json) separately passed only 1/3 tasks and supported 10/12 propositions; [its metrics](qualification-replay-metrics.json) are BELOW_TARGET. Prompt changes alone did not establish a complete fix.
 
 A current full-run pass must not be manufactured by combining successful cases from these separate attempts, omitting failures, replacing the default model silently, or counting source-only excerpts as generated answers. No further full default-model rerun is justified until provider capacity changes.
+
+## Subsequent source-qualification work
+
+See [the current targeted follow-up](qualified-prose-review.md). Runtime `caa68c2` adds a bounded qualification review, restores the host answer-path decision and separates ordinary prompts. Six new public-turn regressions pass, but Qwen live checks remain quota-blocked and the current candidate subset is BELOW_TARGET. Earlier full-run metrics are not migrated to this new engine.

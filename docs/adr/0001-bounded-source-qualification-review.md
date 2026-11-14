@@ -1,6 +1,6 @@
 # Bounded source-qualification review
 
-Status: implemented; live validation pending.
+Status: implemented with deterministic public-turn proof and limited text-candidate observations; default and full release validation remain pending.
 
 The fixed-set review exposed prose that repeated old parameter restrictions or merged browser-specific errors into a universal rule. Exact citation IDs and verbatim quotes did not catch this. Stronger generation instructions alone still failed a targeted replay.
 
