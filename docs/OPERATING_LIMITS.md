@@ -57,3 +57,7 @@ A workspace has one lifetime SQLite owner connection. Exclusive locking is acqui
 A deliberate retry creates a fresh turn with a retained `retryOf` link, current acceptance cutoff and a new request identity. The UI restores eligible original attachments for review before sending. Active/foreign parents and removed original questions are rejected. Replaying the same accepted request remains idempotent, even if its parent's availability later changes. Reopening an active conversation reattaches its observer; it does not restart execution.
 
 Model transport failures preserve a safe capability-unavailable message and original cause rather than exposing low-level diagnostics. They can produce labelled retained-evidence-only recovery. Explicit cancellation is not reclassified as an outage. An unknown/failed request may have consumed provider resources; reported completed-response usage is not a billing total.
+
+## Selected web-prose review
+
+Ordinary web prose with explicit version-risk markers receives a same-model qualification review before publication. The review uses the existing 20 RPM/7,000 estimated tokens-per-minute limiter and turn deadlines. It shares the single scoped quotation/citation repair budget, then fails visibly if still unsupported. Pending unpublished drafts are bounded to 32 entries/five minutes across quota retries; crashes do not resume them. Completed usage includes review/repair. This heuristic adds requests and latency, can miss risks, and is not independent certification. See docs/adr/0001-bounded-source-qualification-review.md.

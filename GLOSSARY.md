@@ -12,3 +12,5 @@
 - **Routing**: choosing retained evidence, current external evidence, or both for a question.
 
 - **Document reference**: a contributor name resolved from a literal user mention and a retained document, linked to that message and document version; not an inferred identity or an assistant assertion.
+
+- **Qualification review**: a bounded same-model check of provisional web prose against source version/environment caveats. It is distinct from a temporal verification and is not independent proof of semantic correctness.
