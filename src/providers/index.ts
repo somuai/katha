@@ -233,26 +233,32 @@ export function createProviders(options: ProviderOptions = {}) {
           }
           const retryHeader = response.headers.get("retry-after");
           const bodyDelay = providerMessage.match(
-            /try again in\s+(\d+(?:\.\d+)?)\s*(ms|s|m)\b/i,
+            /try again in\s+((?:\d+(?:\.\d+)?\s*(?:ms|s|m|h|d)\s*)+)/i,
           );
+          const unitSeconds: Record<string, number> = {
+            ms: 0.001,
+            s: 1,
+            m: 60,
+            h: 3600,
+            d: 86400,
+          };
+          const bodySeconds = bodyDelay
+            ? [
+                ...bodyDelay[1].matchAll(/(\d+(?:\.\d+)?)\s*(ms|s|m|h|d)/gi),
+              ].reduce(
+                (total, part) =>
+                  total +
+                  Number(part[1]) * (unitSeconds[part[2].toLowerCase()] || 0),
+                0,
+              )
+            : undefined;
           const headerDelay =
             retryHeader && /^\d+(?:\.\d+)?$/.test(retryHeader)
               ? Number(retryHeader)
               : retryHeader && Number.isFinite(Date.parse(retryHeader))
                 ? (Date.parse(retryHeader) - now()) / 1000
                 : undefined;
-          const seconds = Math.max(
-            1,
-            headerDelay ??
-              (bodyDelay
-                ? Number(bodyDelay[1]) *
-                  (bodyDelay[2].toLowerCase() === "ms"
-                    ? 0.001
-                    : bodyDelay[2].toLowerCase() === "m"
-                      ? 60
-                      : 1)
-                : 60),
-          );
+          const seconds = Math.max(1, headerDelay ?? bodySeconds ?? 60);
           const retryAt =
             now() + (Number.isFinite(seconds) ? seconds : 60) * 1000;
           options.onWait?.(retryAt);

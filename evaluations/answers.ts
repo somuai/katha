@@ -169,6 +169,27 @@ for (const model of models) {
               }
             : undefined;
           record.finishReason = body.choices?.[0]?.finish_reason;
+          if (response.status === 429) {
+            const message = String(body.error?.message || "");
+            // Retain only rate-limit classification/numeric guidance, never raw
+            // provider errors, account identifiers, authorization or reasoning.
+            record.quotaScope = /tokens per day|\bTPD\b/i.test(message)
+              ? "daily_tokens"
+              : /tokens per minute|\bTPM\b/i.test(message)
+                ? "minute_tokens"
+                : /requests per day|\bRPD\b/i.test(message)
+                  ? "daily_requests"
+                  : /requests per minute|\bRPM\b/i.test(message)
+                    ? "minute_requests"
+                    : "unspecified";
+            const delay = message.match(
+              /try again in\s+((?:\d+(?:\.\d+)?\s*(?:ms|s|m|h|d)\s*)+)/i,
+            )?.[1];
+            if (delay) record.providerWaitDuration = delay.trim();
+            const retry = response.headers.get("retry-after");
+            if (retry && /^\d+(?:\.\d+)?$/.test(retry))
+              record.retryAfterSeconds = Number(retry);
+          }
           if (record.phase === "generation" && response.ok) {
             try {
               const visible = String(body.choices?.[0]?.message?.content || "")
