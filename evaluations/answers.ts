@@ -157,7 +157,13 @@ for (const model of models) {
             .clone()
             .json()
             .catch(() => ({}));
-          record.usage = body.usage;
+          record.usage = body.usage
+            ? {
+                inputTokens: body.usage.prompt_tokens,
+                outputTokens: body.usage.completion_tokens,
+                totalTokens: body.usage.total_tokens,
+              }
+            : undefined;
           record.finishReason = body.choices?.[0]?.finish_reason;
           if (record.phase === "qualification_review")
             record.visibleReview = String(
