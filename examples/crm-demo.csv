@@ -1,0 +1,11 @@
+record_id,company,industry,city,deal_stage,deal_value_inr,owner,last_activity_date,next_step
+CRM001,Northstar Learning,Education,Pune,Qualified,180000,Aarav,2026-11-09,Schedule product demo
+CRM002,Blue Mango Retail,Retail,Jaipur,Proposal,240000,Meera,2026-11-10,Review proposal
+CRM003,Riverbend Logistics,Logistics,Indore,Contacted,120000,Aarav,2026-11-07,Confirm discovery call
+CRM004,Silverline Health,Healthcare,Kolkata,Negotiation,360000,Meera,2026-11-11,Discuss contract terms
+CRM005,Greenfield Foods,Food and beverage,Coimbatore,Qualified,150000,Kabir,2026-11-09,Schedule product demo
+CRM006,Atlas Services,Professional services,Hyderabad,Closed Won,300000,Aarav,2026-11-04,Begin onboarding
+CRM007,Lantern Studios,Media,Bengaluru,Contacted,90000,Kabir,2026-11-06,Send follow-up email
+CRM008,Harbor Manufacturing,Manufacturing,Ahmedabad,Proposal,280000,Meera,2026-11-08,Review proposal
+CRM009,Maple Campus,Education,Bhubaneswar,Closed Lost,110000,Kabir,2026-10-30,Record loss reason
+CRM010,Orchid Traders,Wholesale,Guwahati,Qualified,170000,Aarav,2026-11-12,Confirm decision makers

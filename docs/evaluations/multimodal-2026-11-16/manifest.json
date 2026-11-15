@@ -1,0 +1,34 @@
+{
+  "label": "Local working tree audit; synthetic data only; coding-agent reviewed, not independent certification",
+  "baseCommit": "9b5fe42c4a021d96a3f8255aee35637e9b3827ca",
+  "runtimeSha256": {
+    "src/core/csv-summary.ts": "5f06e4e7ff54c77d560f82d5349feaaa997cd6210913a11eb03634adaa841500",
+    "src/core/index.ts": "de4cf0b513e173faa1d77e54c09cbaddbcdab1a40ce476e4fec23e380af74e39",
+    "src/providers/index.ts": "f3baf49faeb8eefcdd20e81af2af5a437e7662c5d8435e28a2c9b778d58e52d8",
+    "tests/attachment-context.test.ts": "fbf30b64152e63598ce8a10b3d735c09cfea748a9bab1c7bb106d0adccf62ed1",
+    "tests/routing.test.ts": "2965274a473ee644b8a70d9d58e934abb52d3f93dba0cde28f77445a5e2bf25f"
+  },
+  "evidenceSha256": {
+    "pdf-before.json": "4d994278dfad309fed66fa163d9654056fdd6d4104cfb5429ef44223bab9f7eb",
+    "browser-chart.jpg": "97782450aec7cfd8c7259a55f32c88ac5650eabf8171683306e5f2d9a3341dba",
+    "csv-after.json": "994511da5367ef12b4b82f0dbfded0b9e0dae337433420fc117e846a8c9b5186",
+    "scan-after.json": "72d255d5ef88916d0fb7ceedcfd2616cf725898ed26b8be2d9e4af66027aa542",
+    "pdf-after.json": "6f114096317f4cc986a6616ec7a0b8c7102a95e575c10999fc83674f65d029b7",
+    "synthetic-chart.png": "77083546dd0624392d82da538457c23aac03f4b44a5b61ff8e94053f7dd605bc",
+    "synthetic-contributors.pdf": "513daa82e234a5c274c2d2d3a70ae8e1e0f1140ada7e5cdc06ae198a66da8112",
+    "attachments-initial.json": "0f55b62e65ddef03d0362ded553e6929a70354151c50c7c1d9ead41307595df8"
+  },
+  "retainedFailures": [
+    "Initial PDF findings follow-up answered about Alia instead of Bo",
+    "Initial CSV Tuesday answer had incomplete provider output",
+    "Initial scanned-PDF attempt hit RATE_LIMIT; later quota-clear retry succeeded"
+  ],
+  "validation": {
+    "tests": 275,
+    "failed": 0,
+    "typecheck": "pass",
+    "lint": "pass",
+    "build": "pass"
+  },
+  "scope": "Fresh synthetic PDF/CSV/image checks and browser chart lifecycle. Existing release accuracy benchmark was not rerun."
+}

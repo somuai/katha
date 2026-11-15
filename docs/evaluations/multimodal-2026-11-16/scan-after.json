@@ -1,0 +1,12 @@
+{
+  "runAt": "2026-11-15T19:13:24.097Z",
+  "syntheticDocument": true,
+  "passed": true,
+  "content": "[Page 1]\n[Model interpretation of scanned page] Katha scanned document check\nFive seats. USD 20 per month.",
+  "mimeType": "application/pdf",
+  "method": "pdf-text-and-vision",
+  "pages": 1,
+  "warnings": [
+    "1 page(s) were visually interpreted by the model. Check uncertain text against the original."
+  ]
+}

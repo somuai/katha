@@ -397,3 +397,35 @@ test("a short genuine planner question remains a clarification", async () => {
   assert.equal(turn.answer, "Which product do you mean?");
   assert.equal(turn.trace.clarification, true);
 });
+
+test("an explicit public web request is not blocked by unrelated retained attachments", async () => {
+  let searched = false;
+  const result = await run(
+    "Using the web, who is the current CEO of Microsoft? Cite your sources.",
+    {
+      model: {
+        generate: async (c: any) => ({
+          answer: "Source-backed public answer",
+          citations: [
+            { sourceId: c.evidence.find((s: any) => s.kind === "web")?.id },
+          ].filter((c) => c.sourceId),
+        }),
+      },
+      search: {
+        search: async () => {
+          searched = true;
+          return [
+            {
+              title: "Official leadership",
+              url: "https://example.com/leadership",
+              content: "Public leadership record",
+            },
+          ];
+        },
+      },
+    },
+    { name: "unrelated.pdf", text: "Unrelated private project.", attach: true },
+  );
+  assert.equal(searched, true);
+  assert.equal(result.status, "COMPLETED");
+});

@@ -1191,11 +1191,21 @@ export function createKatha(options: KathaOptions) {
         /\bwhat (?:did|have) (?:i|we) (?:ask|say|tell|decide|record|discuss|shortlist|upload|attach)\b|\bwhat (?:was|were) (?:my|our) (?:questions?|decisions?)\b/i.test(
           input.text,
         );
+      const priorAttachmentForActivity =
+        /\b(?:deals?|activity|pipeline)\b/i.test(input.text) &&
+        !/\b(?:web|internet|online|pricing|releases?)\b/i.test(input.text) &&
+        (!!input.attachmentIds?.length ||
+          !!db
+            .prepare(
+              "SELECT 1 FROM turns t JOIN json_each(json_extract(t.input_json,'$.attachmentIds')) j JOIN sources s ON s.id=j.value WHERE t.conversation_id=? AND t.seq<? AND s.kind='attachment' AND s.ordinal<=? AND s.deleted_at IS NULL AND s.invalidated=0 LIMIT 1",
+            )
+            .get(input.conversationId, row.seq, row.cutoff));
       const fileContentDate =
         !explicitChatRecall &&
-        /\b(attendance|rows?|columns?|csv|spreadsheet|pdf|document|attached|uploaded)\b/i.test(
-          input.text,
-        );
+        (priorAttachmentForActivity ||
+          /\b(attendance|rows?|columns?|csv|spreadsheet|pdf|document|attached|uploaded)\b/i.test(
+            input.text,
+          ));
       const historical =
         !fileContentDate &&
         !!window &&
@@ -1214,6 +1224,32 @@ export function createKatha(options: KathaOptions) {
           "SELECT id FROM sources WHERE turn_id=? AND role='user' LIMIT 1",
         )
         .get(id) as any;
+      if (
+        !input.attachmentIds?.length &&
+        /^remember:\s+\S/i.test(input.text) &&
+        !input.text.includes("?")
+      ) {
+        // Acceptance already committed this original user record. A new note
+        // needs an acknowledgement, not a model search for an older copy.
+        valid();
+        const answer =
+          "Saved as your note:\n\n> " + input.text.replaceAll("\n", "\n> ");
+        update(id, {
+          answer,
+          citations: [{ sourceId: own.id }],
+          sourceIds: [own.id],
+          trace: {
+            recordView: "original",
+            noteAcknowledged: true,
+            searches: [],
+            searchAttempts: 0,
+          },
+        });
+        saveAnswer(id, answer, [own.id]);
+        setStatus(id, "COMPLETED");
+        event(id, "complete", getTurn(id));
+        return;
+      }
       const scope =
         input.memoryScope === "conversation" ? input.conversationId : undefined;
       const query: RecallQuery = {
@@ -1347,7 +1383,7 @@ export function createKatha(options: KathaOptions) {
       if (
         !historical &&
         !input.attachmentIds?.length &&
-        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet|pages?|contributions?|role|he|she|his|her|they|their|them)\b/i.test(
+        /\b(this|that|these|those|it|file|document|csv|pdf|data|spreadsheet|pages?|contributions?|role|deals?|activity|pipeline|he|she|his|her|they|their|them)\b/i.test(
           input.text,
         )
       ) {
@@ -1598,6 +1634,23 @@ export function createKatha(options: KathaOptions) {
           }
         }
         trace.documentReferences = references;
+        // A resolved contributor question is grounded in the original file.
+        // Earlier generated answers can describe another contributor and must
+        // not compete with that file as if they were independent evidence.
+        if (
+          references.some(
+            (ref) =>
+              activeSourceIds.has(ref.sourceId) && ref.names.length === 1,
+          )
+        ) {
+          local = local.filter(
+            (s) => !(s.kind === "message" && s.role === "assistant"),
+          );
+          trace.baselineSourceIds = local.flatMap((s) => [
+            s.id,
+            ...(s.interpretationSourceIds || []),
+          ]);
+        }
       }
       recoveryContext = {
         sources: local.filter((s) => s.id !== own.id),
@@ -1630,7 +1683,7 @@ export function createKatha(options: KathaOptions) {
           input.text,
         );
       const privateRecordQuestion =
-        /\b(?:attendance|accounts?|account balances?|customers?|leads?|invoices?|payroll|employees?|students?|rows?|columns?|register|spreadsheet)\b/i.test(
+        /\b(?:attendance|deals?|activity|pipeline|accounts?|account balances?|customers?|leads?|invoices?|payroll|employees?|students?|rows?|columns?|register|spreadsheet)\b/i.test(
           input.text,
         );
       const hasPrivateSources =
@@ -1641,12 +1694,55 @@ export function createKatha(options: KathaOptions) {
         /\b(?:selected|selection|decided|decision|chose|chosen)\b/i.test(
           input.text,
         );
+      const explicitWebRequest =
+        /\b(?:use|using|search|check|browse)\s+(?:on\s+)?(?:the\s+)?(?:web|internet|online)\b/i.test(
+          input.text,
+        );
+      // A standalone explicit public lookup has no historical baseline. Do not
+      // send unrelated workspace documents or old assistant answers as evidence.
+      if (
+        explicitWebRequest &&
+        !privateRecordQuestion &&
+        !personalMemory &&
+        !historical
+      ) {
+        local = [];
+        trace.baselineSourceIds = [];
+      }
       const privateFileTask =
+        (!explicitWebRequest || privateRecordQuestion) &&
         !publicFactQuestion &&
         (retainedDecisionQuestion ||
           (hasPrivateSources && (!verification || privateRecordQuestion)) ||
           (personalMemory && privateRecordQuestion));
       if (privateFileTask || sourcesOnly) verification = false;
+      if (
+        privateFileTask &&
+        activeSourceIds.size &&
+        !historical &&
+        !/\b(?:compare|across)\b.*\b(?:files|documents|sources|CSVs)\b/i.test(
+          input.text,
+        )
+      ) {
+        // Selected-file analysis should not disclose unrelated workspace files
+        // or let similarly named records from other chats compete with it.
+        // Retain this conversation and explicit user identity for follow-ups.
+        local = local.filter(
+          (s) =>
+            activeSourceIds.has(s.id) ||
+            (s.kind === "message" &&
+              (s.conversationId === input.conversationId ||
+                (s.role === "user" &&
+                  /\bmy name is\b/i.test(s.interpretation || s.content)))) ||
+            (s.kind === "correction" &&
+              activeSourceIds.has(String(s.metadata.targetId))),
+        );
+        trace.baselineSourceIds = local.flatMap((s) => [
+          s.id,
+          ...(s.interpretationSourceIds || []),
+        ]);
+        if (recoveryContext) recoveryContext.sources = local;
+      }
       if (recoveryContext) recoveryContext.verification = verification;
       let currentQuestion =
         !sourcesOnly &&
@@ -1656,10 +1752,6 @@ export function createKatha(options: KathaOptions) {
             input.text,
           ) &&
             !personalMemory));
-      const explicitWebRequest =
-        /\b(?:use|using|search|check|browse)\s+(?:on\s+)?(?:the\s+)?(?:web|internet|online)\b/i.test(
-          input.text,
-        );
       let queries: string[] = [];
       // Explicitly labelled decisions are stronger evidence than a guessed
       // search target. This deliberately covers labels, not inferred topics.

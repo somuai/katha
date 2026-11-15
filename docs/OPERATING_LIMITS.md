@@ -48,7 +48,7 @@ Turn traces retain reported planning and generation tokens separately and togeth
 - Latency: first-useful-answer and completion timings; quota waiting reported separately; failed/empty answers excluded from useful-answer latency.
 - Reliability and cost: terminal failures, abstentions, evidence coverage, token usage, search attempts and cache reuse.
 
-The historical fixed-set review passed its scoped 90% threshold, but the current-default run reports 50/52 supported delivered claims and 30/40 complete tasks, with eight inference quota failures. Its full-run gate is EXECUTION_LIMITED. See docs/evaluations/release-review.md for versioned failures and scope; none is independent or production certification.
+The historical `936da48` default run reported 50/52 supported delivered claims and 30/40 complete tasks, with eight inference quota failures; its full-run gate remains EXECUTION_LIMITED. A later fixed-evidence run recorded 59/63 supported factual claims and 37/40 completed tasks without execution errors; see docs/evaluations/default-fd37213-evening-review.md. Neither score is reassigned to subsequent runtime changes. See docs/evaluations/release-review.md for earlier failures and scope; none is independent or production certification.
 
 ## Workspace ownership and retries
 

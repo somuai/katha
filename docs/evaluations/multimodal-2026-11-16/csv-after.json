@@ -1,0 +1,358 @@
+{
+  "label": "Synthetic HTTP acceptance checks; regex checks are not supported-claim precision. Manually inspect answers.",
+  "revision": "9b5fe42c4a021d96a3f8255aee35637e9b3827ca",
+  "startedAt": "2026-11-15T19:11:07.260Z",
+  "model": "qwen/qwen3.8-27b",
+  "mode": "CSV text comparison",
+  "uploads": [
+    {
+      "name": "crm.csv",
+      "sha256": "03edda38a0063ee61e930394f55e2b372b3251f28af2e7fca7f282d120fd12c3",
+      "method": "utf8-text",
+      "warnings": []
+    }
+  ],
+  "passed": 5,
+  "total": 5,
+  "expectedCaseIds": [
+    "csv-decimal-total",
+    "csv-late-row",
+    "csv-monday",
+    "csv-tuesday",
+    "csv-recommendation"
+  ],
+  "recordedCases": 5,
+  "missingCaseIds": [],
+  "evidenceOnlyResponses": 0,
+  "results": [
+    {
+      "id": "csv-decimal-total",
+      "question": "What is the exact sum of amount across all 120 rows in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "Total amount: 132.10, computed from all 120 numeric values in the selected CSV.",
+      "citations": [
+        {
+          "sourceId": "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "132\\.1(?:0)?\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:11:07.862Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        }
+      }
+    },
+    {
+      "id": "csv-late-row",
+      "question": "What amount is listed for Customer120 in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "The amount listed for Customer120 in the CSV is 120.20.",
+      "citations": [
+        {
+          "sourceId": "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "120\\.2(?:0)?\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:11:07.891Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869",
+          "eccdebce-d0c9-4e67-a8ef-683e60cd4605",
+          "daa7353a-ac58-462a-80ff-12257d9e886b"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1132,
+            "outputTokens": 88
+          }
+        },
+        "usage": {
+          "inputTokens": 1132,
+          "outputTokens": 88
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "csv-monday",
+      "question": "What was Monday attendance: how many were present and absent in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "For Monday, 40 were present and 20 were absent.",
+      "citations": [
+        {
+          "sourceId": "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "\\b40\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b40\\b",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "\\b20\\b[^.\\n]{0,35}\\babsent\\b|\\babsent\\b[^.\\n]{0,35}\\b20\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        ],
+        "recordView": "effective",
+        "resolvedDate": {
+          "from": "2026-11-15T18:30:00Z",
+          "to": "2026-11-16T18:30:00Z",
+          "date": "2026-11-16",
+          "timezone": "Asia/Kolkata",
+          "label": "2026-11-16 (Asia/Kolkata)"
+        },
+        "referenceClock": "2026-11-15T19:11:08.544Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869",
+          "deabbf3d-fd02-48e7-9ef8-6ebc4649b6d9",
+          "62d34418-a01b-4eae-ab81-285e9c0739b9",
+          "eccdebce-d0c9-4e67-a8ef-683e60cd4605",
+          "daa7353a-ac58-462a-80ff-12257d9e886b"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1625,
+            "outputTokens": 78
+          }
+        },
+        "usage": {
+          "inputTokens": 1625,
+          "outputTokens": 78
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "csv-tuesday",
+      "question": "How many were present and absent on Tuesday in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "On Tuesday, 60 were present and 0 were absent.",
+      "citations": [
+        {
+          "sourceId": "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "\\b60\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b60\\b",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "\\b(?:0|zero|no|none)\\b[^.\\n]{0,30}\\babsen(?:t|ce|ces)\\b|\\babsen(?:t|ce|ces)\\b[^.\\n]{0,30}\\b(?:0|zero|none)\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        ],
+        "recordView": "effective",
+        "resolvedDate": {
+          "from": "2026-11-09T18:30:00Z",
+          "to": "2026-11-10T18:30:00Z",
+          "date": "2026-11-10",
+          "timezone": "Asia/Kolkata",
+          "label": "2026-11-10 (Asia/Kolkata)"
+        },
+        "referenceClock": "2026-11-15T19:11:09.668Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869",
+          "332768fb-0815-4965-a87c-6413efc80b63",
+          "620ab64b-267d-4ef8-8711-b94ebfc69414",
+          "deabbf3d-fd02-48e7-9ef8-6ebc4649b6d9",
+          "62d34418-a01b-4eae-ab81-285e9c0739b9",
+          "eccdebce-d0c9-4e67-a8ef-683e60cd4605",
+          "daa7353a-ac58-462a-80ff-12257d9e886b"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1808,
+            "outputTokens": 77
+          }
+        },
+        "usage": {
+          "inputTokens": 1808,
+          "outputTokens": 77
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "csv-recommendation",
+      "question": "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "Based on the provided CRM CSV (120 rows), here are the observed facts and suggested next steps. Note: These are CRM contacts, not necessarily employees.\n\n**Observed Facts:**\n- **Total Amount:** The sum of the `amount` column across all 120 rows is 132.10.\n- **Status Distribution:** 100 records are marked \"present\" and 20 are marked \"absent\".\n- **Stage Distribution:** 90 records are in the \"qualified\" stage and 30 are in the \"new\" stage.\n- **Day Distribution:** 60 records are for \"Monday\" and 60 for \"Tuesday\".\n- **Data Integrity:** There are 0 blank cells across all data rows.\n\n**Suggested Next Steps (Inference):**\n1. **Follow up on \"New\" Stage:** Since 30 records are in the \"new\" stage, prioritize outreach to qualify these leads.\n2. **Review \"Absent\" Records:** Investigate the 20 \"absent\" records to determine if they require rescheduling or alternative contact methods.\n3. **Analyze Amount Variance:** The total amount is 132.10 across 120 rows (average ~1.10). Review high-value or outlier amounts to ensure accurate pricing or discount application.\n4. **Verify Data Context:** Confirm the meaning of \"present/absent\" in this CRM context (e.g., meeting attendance vs. lead status) to ensure appropriate follow-up actions.",
+      "citations": [
+        {
+          "sourceId": "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "suggest|recommend|could|consider|next step",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "your (?:sales )?team (?:of|has) 120|120 employees",
+          "expected": "absent",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:11:10.436Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "644ef5f7-ef0b-4ea2-afbd-44b76f173869",
+          "daa7353a-ac58-462a-80ff-12257d9e886b",
+          "deabbf3d-fd02-48e7-9ef8-6ebc4649b6d9",
+          "62d34418-a01b-4eae-ab81-285e9c0739b9",
+          "590056af-85ab-4c6e-ba0d-6b8e6166ca55",
+          "332768fb-0815-4965-a87c-6413efc80b63",
+          "eccdebce-d0c9-4e67-a8ef-683e60cd4605"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1529,
+            "outputTokens": 397
+          }
+        },
+        "usage": {
+          "inputTokens": 1529,
+          "outputTokens": 397
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    }
+  ]
+}

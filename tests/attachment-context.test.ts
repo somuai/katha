@@ -13,11 +13,18 @@ async function inspectPreparedContext(
   question: string | string[],
   options: {
     invalidFirstCitation?: boolean;
+    incompleteFirstAnswer?: boolean | "always";
+    echoAllSources?: boolean;
+    unrelatedAttachment?: boolean;
     deleteFirstMentionBeforeLast?: boolean;
+    now?: string;
+    assertNoWeb?: boolean;
+    wrongTotal?: boolean;
   } = {},
 ) {
   const directory = mkdtempSync(join(tmpdir(), "katha-attachment-contract-"));
   let returnedBadCitation = false;
+  let incompleteReturned = false;
   let fixtureClock = Date.now();
   const adapters = createKathaAdapters({
     groqKey: "fixture",
@@ -34,6 +41,10 @@ async function inspectPreparedContext(
           ? "invented-source"
           : evidence.id;
       returnedBadCitation = true;
+      const incomplete =
+        options.incompleteFirstAnswer === "always" ||
+        (options.incompleteFirstAnswer && !incompleteReturned);
+      incompleteReturned = true;
       return new Response(
         JSON.stringify({
           usage: {
@@ -45,11 +56,16 @@ async function inspectPreparedContext(
             {
               message: {
                 content: JSON.stringify({
-                  text: evidence.csvSummary
-                    ? evidence.csvSummary + "\n" + evidence.text
-                    : evidence.text,
-                  citations: [citation],
-                  comparisons: [],
+                  text: options.echoAllSources
+                    ? context.baseline.map((s: any) => s.text).join("\n")
+                    : options.wrongTotal
+                      ? "The total is 1200000."
+                      : evidence.csvSummary
+                        ? evidence.csvSummary + "\n" + evidence.text
+                        : evidence.text,
+                  ...(incomplete
+                    ? {}
+                    : { citations: [citation], comparisons: [] }),
                 }),
               },
             },
@@ -58,8 +74,25 @@ async function inspectPreparedContext(
       );
     }) as typeof fetch,
   });
-  const app = createKatha({ directory, model: adapters.model });
+  let searches = 0;
+  const app = createKatha({
+    directory,
+    model: adapters.model,
+    ...(options.now ? { clock: () => new Date(options.now!) } : {}),
+    search: {
+      async search() {
+        searches++;
+        return [];
+      },
+    },
+  });
   try {
+    const noise = options.unrelatedAttachment
+      ? await app.evidence.import({
+          name: "unrelated-customer-register.csv",
+          content: "customer,amount\nOtter,999999\n",
+        })
+      : undefined;
     const imported = await app.evidence.import({ name, content });
     const chat = await app.workspace.createConversation();
     let answer = "";
@@ -92,8 +125,19 @@ async function inspectPreparedContext(
       const result = await app.turns.get(receipt.turnId);
       assert.equal(result.status, "COMPLETED", result.error || "");
       assert.ok(result.citations.some((c) => c.sourceId === imported.sourceId));
+      if (noise)
+        assert.ok(
+          !result.sources.some((s) => s.id === noise.sourceId),
+          "Unrelated files must not appear as selected evidence for this attachment",
+        );
       answer = result.answer;
     }
+    if (options.assertNoWeb)
+      assert.equal(
+        searches,
+        0,
+        "Private CSV activity should not trigger web search",
+      );
     return answer;
   } finally {
     app.close();
@@ -107,7 +151,7 @@ test("decimal CSV totals remain exact and missing cells are disclosed through a 
     "customer,amount\nA,0.10\nB,0.20\nC,\nD,-0.05\n",
     "What is the sum of amount across all rows in this CSV?",
   );
-  assert.match(answer, /sum 0\.25\b/);
+  assert.match(answer, /(?:sum|Total amount:) 0\.25\b/);
   assert.match(answer, /1 (?:missing|blank)/);
   assert.doesNotMatch(answer, /0\.2500000|0\.3000000/);
 });
@@ -259,4 +303,81 @@ test("a late CSV row with a short alphanumeric identifier remains retrievable", 
   );
   assert.match(answer, /Z9/);
   assert.match(answer, /120\.20/);
+});
+
+test("a deal activity follow-up uses the retained CSV and filters all rows before the requested date", async () => {
+  const answer = await inspectPreparedContext(
+    "deals.csv",
+    "company,last_activity_date,deal_stage\nAlpha,2026-11-09,Qualified\nBeta,2026-11-07,Contacted\nGamma,2026-11-04,Closed Won\nDelta,2026-11-10,Proposal\nEpsilon,2026-11-08,Proposal\nZeta,2026-10-30,Closed Lost\nEta,2026-11-06,Contacted\n",
+    ["Summarize the CSV", "Which deals haven’t had activity since 9 November?"],
+    { now: "2026-11-15T12:00:00Z", assertNoWeb: true },
+  );
+  assert.match(answer, /before 2026-11-09/);
+  for (const name of ["Beta", "Gamma", "Epsilon", "Zeta", "Eta"])
+    assert.match(answer, new RegExp(name));
+  assert.doesNotMatch(answer, /Matching date row:.*Alpha/);
+  assert.doesNotMatch(answer, /Matching date row:.*Delta/);
+});
+
+test("a selected CSV whole-column total cannot be replaced by invented model arithmetic", async () => {
+  const answer = await inspectPreparedContext(
+    "deals.csv",
+    "company,deal_value_inr\nA,180000\nB,240000\nC,120000\nD,360000\nE,150000\nF,300000\nG,90000\nH,280000\nI,110000\nJ,170000\n",
+    "What is the total deal value in this CSV?",
+    { wrongTotal: true },
+  );
+  assert.match(answer, /2000000/);
+  assert.doesNotMatch(answer, /1200000/);
+});
+
+test("a CSV follow-up recovers one incomplete provider answer without losing the selected file", async () => {
+  const answer = await inspectPreparedContext(
+    "attendance.csv",
+    "person,day,status\nA,Tuesday,present\nB,Tuesday,present\nC,Monday,absent\n",
+    "How many were present and absent on Tuesday in this CSV?",
+    { incompleteFirstAnswer: true },
+  );
+  assert.match(answer, /For day="Tuesday".*2 rows/);
+  assert.match(answer, /"present": 2/);
+  assert.doesNotMatch(answer, /For day="Monday"/);
+});
+
+test("switching from my PDF section to another contributor does not recycle earlier assistant findings", async () => {
+  const answer = await inspectPreparedContext(
+    "team.pdf",
+    "[Page 44]\nStudent: Alia Das Roll number: 1 Contribution and findings: I led architecture. Only a synthetic workload was tested.\n\n[Page 45]\nStudent: Bo Sen Roll number: 2 Contribution and findings: I tested local models. Median latency was 240 ms on the local CPU, not production traffic.\n",
+    [
+      "My name is Alia Das. What was my contribution?",
+      "i think its there on page 44",
+      "what did Bo do",
+      "yes what he did in the project",
+      "what were his findings?",
+    ],
+    { echoAllSources: true },
+  );
+  assert.match(answer, /240 ms/);
+  assert.match(answer, /not production traffic/);
+  assert.doesNotMatch(answer, /I led architecture|Only a synthetic workload/);
+});
+
+test("persistent incomplete answers fail closed after the bounded repair", async () => {
+  await assert.rejects(
+    inspectPreparedContext(
+      "attendance.csv",
+      "person,day,status\nA,Tuesday,present\n",
+      "How many were present on Tuesday in this CSV?",
+      { incompleteFirstAnswer: "always" },
+    ),
+    /incomplete answer after one repair/,
+  );
+});
+
+test("a selected attachment excludes unrelated workspace files from its answer evidence", async () => {
+  const answer = await inspectPreparedContext(
+    "chosen.csv",
+    "customer,amount\nFalcon,700\nOtter,900\n",
+    "Which amount is listed for Otter in this CSV?",
+    { unrelatedAttachment: true },
+  );
+  assert.match(answer, /900/);
 });

@@ -1,9 +1,22 @@
 import { parse } from "csv-parse/sync";
+import { resolveDate } from "./temporal.js";
 // Derived locally from the complete retained CSV; malformed or unsafe values are not guessed.
 export function prepareCsvEvidence(
   text: string,
   question: string,
-): { summary: string; excerpt: string } | undefined {
+  options: { now?: string; timezone?: string } = {},
+):
+  | {
+      summary: string;
+      excerpt: string;
+      totals?: {
+        column: string;
+        sum: string;
+        count: number;
+        missing: number;
+      }[];
+    }
+  | undefined {
   try {
     const rows: string[][] = parse(text, {
       skip_empty_lines: true,
@@ -41,6 +54,12 @@ export function prepareCsvEvidence(
           "for",
         ].includes(x),
     );
+    const totals: {
+      column: string;
+      sum: string;
+      count: number;
+      missing: number;
+    }[] = [];
     const stats = headers.flatMap((name, i) => {
       const cells = data.map((row) => row[i].trim());
       const values = cells.filter(Boolean);
@@ -67,6 +86,12 @@ export function prepareCsvEvidence(
       const sum =
         (total < 0n ? "-" : "") +
         (scale ? digits.slice(0, -scale) + "." + digits.slice(-scale) : digits);
+      totals.push({
+        column: name,
+        sum,
+        count: values.length,
+        missing: cells.length - values.length,
+      });
       return [
         `${name}: ${values.length} ${scale ? "decimal" : "integer"} values, sum ${sum}${values.length < cells.length ? `; ${cells.length - values.length} missing cells excluded (not assumed zero)` : ""}`,
       ];
@@ -157,7 +182,64 @@ export function prepareCsvEvidence(
         ),
       )
       .slice(0, 5);
+    const dateLines: string[] = [];
+    if (
+      /\b(?:haven['’]t|hasn['’]t|no|without|not)\b.{0,50}\bactiv(?:ity|e)\b.{0,20}\bsince\b/i.test(
+        question,
+      )
+    ) {
+      const dateColumns = normalizedHeaders.flatMap((name, i) =>
+        /^(?:last[ _-]*)?(?:activity|active)[ _-]*date$/.test(name) ? [i] : [],
+      );
+      let cutoff: string | undefined;
+      try {
+        cutoff = resolveDate(
+          question,
+          new Date(options.now || Date.now()),
+          options.timezone || "UTC",
+        )?.date;
+      } catch {
+        /* A malformed date cannot be used as a filter. */
+      }
+      if (dateColumns.length === 1 && cutoff) {
+        const column = dateColumns[0];
+        const valid = (value: string) =>
+          /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+          !Number.isNaN(Date.parse(value + "T00:00:00Z")) &&
+          new Date(value + "T00:00:00Z").toISOString().slice(0, 10) === value;
+        const invalid = data.filter((row) => !valid(row[column].trim())).length;
+        const matching = data.filter(
+          (row) => valid(row[column].trim()) && row[column].trim() < cutoff!,
+        );
+        dateLines.push(
+          `No activity since ${cutoff}: ${headers[column]} before ${cutoff}; ${matching.length} matching rows; ${invalid} missing or invalid dates excluded. Closed deals are included unless the user asks otherwise.`,
+        );
+        const visible = headers.flatMap((name, i) =>
+          /^(?:record[ _-]*id|company|deal[ _-]*stage|last[ _-]*activity[ _-]*date)$/i.test(
+            name.trim(),
+          )
+            ? [i]
+            : [],
+        );
+        for (const row of matching.slice(0, 10))
+          dateLines.push(
+            "Matching date row: " +
+              (visible.length ? visible : [column])
+                .map((i) => `${headers[i]}=${JSON.stringify(row[i])}`)
+                .join(", "),
+          );
+        if (matching.length > 10)
+          dateLines.push(
+            `Only the first 10 of ${matching.length} matching rows are listed; do not claim the list is complete.`,
+          );
+      } else {
+        dateLines.push(
+          "Date filtering requires one unambiguous last-activity date column and a valid cutoff; ask for clarification.",
+        );
+      }
+    }
     const lines = [
+      ...dateLines,
       `Complete CSV: ${data.length} data rows. Exact numeric sums and low-cardinality counts below are computed across all rows; other analyses may require more evidence.`,
       `CSV structure parsed successfully: ${data.reduce((count, row) => count + row.filter((cell) => !cell.trim()).length, 0)} blank cells across all data rows. Excerpt omission is not an incomplete source row.`,
       ...scoped,
@@ -165,8 +247,8 @@ export function prepareCsvEvidence(
         (row) =>
           "Matching row: " + headers.map((h, i) => `${h}=${row[i]}`).join(", "),
       ),
-      ...categories,
       ...stats,
+      ...categories,
     ];
     const included: string[] = [];
     let used = 0;
@@ -192,8 +274,34 @@ export function prepareCsvEvidence(
       const line = `\nRow: ${JSON.stringify(row)}`;
       if (excerpt.length + line.length <= 650) excerpt += line;
     }
-    return { summary: included.join("\n"), excerpt };
+    return { summary: included.join("\n"), excerpt, totals };
   } catch {
     return undefined;
   }
+}
+
+/** Only unfiltered, explicitly named column totals are answered deterministically. */
+export function exactCsvTotal(
+  text: string,
+  question: string,
+): string | undefined {
+  if (
+    !/\b(?:total|sum)\b/i.test(question) ||
+    /\b(?:for|by|where|since|before|after|only|open|closed|stage|owner|excluding|except|without|each|per|average|mean|difference)\b/i.test(
+      question,
+    )
+  )
+    return;
+  const prepared = prepareCsvEvidence(text, question);
+  const words = new Set(question.toLowerCase().match(/[a-z0-9]+/g) || []);
+  const matches = prepared?.totals?.filter((t) => {
+    const terms = t.column
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((w) => !["inr", "usd", "eur", "gbp"].includes(w));
+    return terms.length > 0 && terms.every((w) => words.has(w));
+  });
+  if (matches?.length !== 1) return;
+  const t = matches[0];
+  return `Total ${t.column}: ${t.sum}, computed from all ${t.count} numeric values in the selected CSV.${t.missing ? ` ${t.missing} missing cells were excluded, not treated as zero.` : ""}`;
 }

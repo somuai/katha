@@ -1,0 +1,684 @@
+{
+  "label": "Synthetic HTTP acceptance checks; regex checks are not supported-claim precision. Manually inspect answers.",
+  "revision": "9b5fe42c4a021d96a3f8255aee35637e9b3827ca",
+  "startedAt": "2026-11-15T19:05:27.276Z",
+  "model": "qwen/qwen3.8-27b",
+  "mode": "image and CSV acceptance",
+  "uploads": [
+    {
+      "name": "crm-card.png",
+      "sha256": "c297a5127d8bb05b8d92e4e614f3ba190f23ffe8524be22392df9397447c0e27",
+      "method": "model-image-description",
+      "warnings": [
+        "Description is derived from the image. Review uncertain text against the original."
+      ]
+    },
+    {
+      "name": "crm.csv",
+      "sha256": "03edda38a0063ee61e930394f55e2b372b3251f28af2e7fca7f282d120fd12c3",
+      "method": "utf8-text",
+      "warnings": []
+    }
+  ],
+  "passed": 9,
+  "total": 10,
+  "expectedCaseIds": [
+    "image-initial",
+    "image-followup",
+    "image-after-restart",
+    "csv-decimal-total",
+    "csv-late-row",
+    "csv-monday",
+    "csv-tuesday",
+    "csv-recommendation",
+    "image-deleted",
+    "image-restored"
+  ],
+  "recordedCases": 10,
+  "missingCaseIds": [],
+  "evidenceOnlyResponses": 0,
+  "results": [
+    {
+      "id": "image-initial",
+      "question": "Which customer and budget are shown in this image?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "The image shows the customer as Falcon and the budget as USD 700.",
+      "citations": [
+        {
+          "sourceId": "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "Falcon",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "700",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:05:29.513Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 716,
+            "outputTokens": 81
+          }
+        },
+        "usage": {
+          "inputTokens": 716,
+          "outputTokens": 81
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "image-followup",
+      "question": "What was that budget again?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "The budget is USD 700.",
+      "citations": [
+        {
+          "sourceId": "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "700",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:05:30.221Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "6ea5826b-4a32-49cf-85f3-b08e7e8fb369",
+          "d0210f33-5b60-4f5b-a335-062894a439c4",
+          "33c52e9d-d800-4bb1-b9e1-b3e3397f2f4c"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 894,
+            "outputTokens": 73
+          }
+        },
+        "usage": {
+          "inputTokens": 894,
+          "outputTokens": 73
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "image-after-restart",
+      "question": "What customer and budget were shown in crm-card.png?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "The image crm-card.png shows the customer as Falcon and the budget as USD 700.",
+      "citations": [
+        {
+          "sourceId": "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "Falcon",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "700",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:05:31.324Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "d0210f33-5b60-4f5b-a335-062894a439c4",
+          "6ea5826b-4a32-49cf-85f3-b08e7e8fb369",
+          "33c52e9d-d800-4bb1-b9e1-b3e3397f2f4c",
+          "d2d68783-1fb1-46c9-bedb-970ee42e2bc6",
+          "0ba33f86-6d33-433e-83fa-6f1195278a0d"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1031,
+            "outputTokens": 85
+          }
+        },
+        "usage": {
+          "inputTokens": 1031,
+          "outputTokens": 85
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "csv-decimal-total",
+      "question": "What is the exact sum of amount across all 120 rows in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "Total amount: 132.10, computed from all 120 numeric values in the selected CSV.",
+      "citations": [
+        {
+          "sourceId": "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "132\\.1(?:0)?\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:05:31.978Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        }
+      }
+    },
+    {
+      "id": "csv-late-row",
+      "question": "What amount is listed for Customer120 in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "The amount listed for Customer120 in the CSV is 120.20.",
+      "citations": [
+        {
+          "sourceId": "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "120\\.2(?:0)?\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:05:32.002Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c",
+          "067d7b09-1763-4c04-8951-8421b39de8b0",
+          "e9974712-56a5-44b0-816b-ffd234c2aff6"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1138,
+            "outputTokens": 87
+          }
+        },
+        "usage": {
+          "inputTokens": 1138,
+          "outputTokens": 87
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "csv-monday",
+      "question": "What was Monday attendance: how many were present and absent in this CSV?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "For Monday, 40 were present and 20 were absent.",
+      "citations": [
+        {
+          "sourceId": "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "\\b40\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b40\\b",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "\\b20\\b[^.\\n]{0,35}\\babsent\\b|\\babsent\\b[^.\\n]{0,35}\\b20\\b",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "recordView": "effective",
+        "resolvedDate": {
+          "from": "2026-11-15T18:30:00Z",
+          "to": "2026-11-16T18:30:00Z",
+          "date": "2026-11-16",
+          "timezone": "Asia/Kolkata",
+          "label": "2026-11-16 (Asia/Kolkata)"
+        },
+        "referenceClock": "2026-11-15T19:05:32.976Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c",
+          "ecdc2736-e486-4760-b43d-dd4e9f6778d1",
+          "517db10f-476c-419f-b7ca-fde33b2a4284",
+          "067d7b09-1763-4c04-8951-8421b39de8b0",
+          "e9974712-56a5-44b0-816b-ffd234c2aff6"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1630,
+            "outputTokens": 77
+          }
+        },
+        "usage": {
+          "inputTokens": 1630,
+          "outputTokens": 77
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "csv-tuesday",
+      "question": "How many were present and absent on Tuesday in this CSV?",
+      "status": "FAILED",
+      "error": "The model returned an incomplete answer.",
+      "answer": "",
+      "citations": [],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "\\b60\\b[^.\\n]{0,35}\\bpresent\\b|\\bpresent\\b[^.\\n]{0,35}\\b60\\b",
+          "expected": "present",
+          "pass": false
+        },
+        {
+          "pattern": "\\b(?:0|zero|no|none)\\b[^.\\n]{0,30}\\babsen(?:t|ce|ces)\\b|\\babsen(?:t|ce|ces)\\b[^.\\n]{0,30}\\b(?:0|zero|none)\\b",
+          "expected": "present",
+          "pass": false
+        }
+      ],
+      "passed": false,
+      "trace": {
+        "activeSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "recordView": "effective",
+        "resolvedDate": {
+          "from": "2026-11-09T18:30:00Z",
+          "to": "2026-11-10T18:30:00Z",
+          "date": "2026-11-10",
+          "timezone": "Asia/Kolkata",
+          "label": "2026-11-10 (Asia/Kolkata)"
+        },
+        "referenceClock": "2026-11-15T19:05:45.350Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c",
+          "ee240060-dd50-464b-9d36-b1d395afcf9e",
+          "ce9894eb-774a-4db5-841a-e7fd568cf7a0",
+          "ecdc2736-e486-4760-b43d-dd4e9f6778d1",
+          "517db10f-476c-419f-b7ca-fde33b2a4284",
+          "067d7b09-1763-4c04-8951-8421b39de8b0",
+          "e9974712-56a5-44b0-816b-ffd234c2aff6"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null
+      }
+    },
+    {
+      "id": "csv-recommendation",
+      "question": "Recommend next steps based only on this CRM CSV. Separate observed facts from suggestions; don't assume these customers are employees.",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "Based on the provided CRM CSV (120 rows), here are the observed facts and suggested next steps. Note: The data contains columns for 'day', 'status' (present/absent), and 'stage' (qualified/new), which resemble attendance or pipeline tracking rather than standard customer demographics. These entries are treated as CRM contacts, not employees.\n\n**Observed Facts:**\n- Total records: 120.\n- Total amount: 132.10.\n- Status distribution: 100 'present', 20 'absent'.\n- Stage distribution: 90 'qualified', 30 'new'.\n- Day distribution: 60 'Monday', 60 'Tuesday'.\n- Sample rows show 'Customer1', 'Customer2', and 'Customer3' with amounts of 0.10, status 'present', and stage 'qualified'.\n- 'Customer120' has an amount of 120.20.\n\n**Suggested Next Steps:**\n1. **Clarify Data Semantics:** The 'status' values ('present'/'absent') and 'day' values ('Monday'/'Tuesday') are unusual for a standard CRM. Verify if this dataset is actually an attendance log, a meeting schedule, or if these fields are mislabeled. If it is a sales pipeline, 'present'/'absent' may need to be mapped to 'active'/'inactive' or similar.\n2. **Investigate High-Value Outlier:** 'Customer120' has an amount of 120.20, which is significantly higher than the sample rows (0.10) and accounts for the majority of the total sum (132.10). Verify the accuracy of this entry and the customer's identity.\n3. **Review 'New' Stage Contacts:** There are 30 contacts in the 'new' stage. Prioritize outreach or qualification activities for these records to move them to 'qualified'.\n4. **Analyze 'Absent' Records:** Identify the 20 records marked 'absent'. If this indicates missed meetings or inactive status, determine if follow-up is required.\n5. **Data Quality Check:** Ensure that 'Customer1' through 'Customer120' are unique and correctly linked to the corresponding amounts and stages, as the sample rows show identical low amounts for the first few entries.",
+      "citations": [
+        {
+          "sourceId": "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        },
+        {
+          "sourceId": "e9974712-56a5-44b0-816b-ffd234c2aff6"
+        },
+        {
+          "sourceId": "517db10f-476c-419f-b7ca-fde33b2a4284"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "suggest|recommend|could|consider|next step",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "your (?:sales )?team (?:of|has) 120|120 employees",
+          "expected": "absent",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:06:42.179Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c",
+          "e9974712-56a5-44b0-816b-ffd234c2aff6",
+          "34b6eeb0-9899-4772-b58d-08783b3a86f6",
+          "0045f15a-3412-4d77-99bb-9157f3651517",
+          "ecdc2736-e486-4760-b43d-dd4e9f6778d1",
+          "517db10f-476c-419f-b7ca-fde33b2a4284",
+          "ff0cfba2-802e-4190-bec7-904387d4fa12",
+          "ee240060-dd50-464b-9d36-b1d395afcf9e",
+          "067d7b09-1763-4c04-8951-8421b39de8b0"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1612,
+            "outputTokens": 649
+          }
+        },
+        "usage": {
+          "inputTokens": 1612,
+          "outputTokens": 649
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "image-deleted",
+      "question": "What customer and budget were shown in crm-card.png? Use retained sources only.",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "I do not have access to the file 'crm-card.png' or any retained sources containing its contents. The provided records include a CSV file ('crm.csv') and previous questions, but no image data or descriptions of a CRM card image. Therefore, I cannot determine the customer and budget shown in that specific image.",
+      "citations": [],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "no |not |cannot|can't|missing|unavailable",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "Falcon",
+          "expected": "absent",
+          "pass": true
+        },
+        {
+          "pattern": "\\b700\\b",
+          "expected": "absent",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:06:57.452Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "34b6eeb0-9899-4772-b58d-08783b3a86f6",
+          "3e587178-e5d8-4dc6-8bf3-68ae7ebaf937",
+          "d0210f33-5b60-4f5b-a335-062894a439c4",
+          "d2d68783-1fb1-46c9-bedb-970ee42e2bc6",
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": true,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1287,
+            "outputTokens": 88
+          }
+        },
+        "usage": {
+          "inputTokens": 1287,
+          "outputTokens": 88
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    },
+    {
+      "id": "image-restored",
+      "question": "What customer and budget were shown in crm-card.png?",
+      "status": "COMPLETED",
+      "error": null,
+      "answer": "The image crm-card.png showed Customer Falcon with a budget of USD 700.",
+      "citations": [
+        {
+          "sourceId": "6ea5826b-4a32-49cf-85f3-b08e7e8fb369"
+        }
+      ],
+      "evidenceOnly": false,
+      "assertions": [
+        {
+          "pattern": "Falcon",
+          "expected": "present",
+          "pass": true
+        },
+        {
+          "pattern": "700",
+          "expected": "present",
+          "pass": true
+        }
+      ],
+      "passed": true,
+      "trace": {
+        "activeSourceIds": [],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-15T19:07:07.249Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "34b6eeb0-9899-4772-b58d-08783b3a86f6",
+          "551f3a1a-2526-4fd9-9838-bf2afac52d40",
+          "17c34614-ebc7-4c5e-9485-7549e7c00fae",
+          "d0210f33-5b60-4f5b-a335-062894a439c4",
+          "3e587178-e5d8-4dc6-8bf3-68ae7ebaf937",
+          "6ea5826b-4a32-49cf-85f3-b08e7e8fb369",
+          "d2d68783-1fb1-46c9-bedb-970ee42e2bc6",
+          "4ee1afd1-9541-4050-bfa2-7dd80988863c"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 1613,
+            "outputTokens": 83
+          }
+        },
+        "usage": {
+          "inputTokens": 1613,
+          "outputTokens": 83
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts"
+      }
+    }
+  ]
+}

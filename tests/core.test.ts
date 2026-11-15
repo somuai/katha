@@ -2327,3 +2327,48 @@ test("failed search leaves an explicit unverified result for every shortlisted v
     cleanup();
   }
 });
+
+test("an explicit new remember note is acknowledged from the saved original, not denied as missing history", async () => {
+  const { app, cleanup } = setup({
+    model: {
+      async generate() {
+        return { answer: "I do not have any record of that shortlist." };
+      },
+    },
+  });
+  try {
+    const chat = await app.workspace.createConversation();
+    const text =
+      "Remember: we shortlisted HubSpot, Pipedrive and Zoho for a 20-person sales team.";
+    const receipt = await app.turns.start({
+      conversationId: chat.id,
+      clientRequestId: "new-note",
+      expectedTailId: null,
+      text,
+    });
+    const turn = await wait(app, receipt.turnId);
+    assert.equal(turn.status, "COMPLETED");
+    assert.match(turn.answer, /saved as your note/i);
+    assert.doesNotMatch(turn.answer, /do not have any record/i);
+    assert.ok(
+      turn.sources.some((s: any) => s.role === "user" && s.content === text),
+    );
+    assert.ok(
+      turn.citations.some((c: any) =>
+        turn.sources.some((s: any) => s.id === c.sourceId && s.role === "user"),
+      ),
+    );
+    const recalled = await app.evidence.recall({
+      text: "HubSpot Pipedrive Zoho",
+      limit: 5,
+      original: true,
+    });
+    assert.ok(
+      recalled.sources.some(
+        (s: any) => s.role === "user" && s.content === text,
+      ),
+    );
+  } finally {
+    cleanup();
+  }
+});

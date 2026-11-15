@@ -1,63 +1,138 @@
 # Ask Katha
 
-A local-first chat agent that remembers dated conversations and checks what changed through one web-search tool.
+**Remember the record. Verify the change.**
 
-Current release proof: [complete default-model evaluation](docs/evaluations/default-fd37213-evening-review.md) records **59/63 supported factual claims (93.7%), 37/40 successful tasks and no execution errors**. This passes the agreed 90% fixed-evidence gate under coding-agent review; it is not production accuracy. Three failed web explanations and all earlier quota failures remain visible.
+Katha is a local-first chat agent built for the **MiniMi hiring challenge**. It tackles questions that need both memory and fresh evidence:
 
-## Run
+> “On Monday we shortlisted five CRMs. Has anything changed since?”
 
-Use Node 24 LTS (`nvm use`). Run `npm install`, copy `.env.example` to `.env`, set `GROQ_API_KEY` and `TAVILY_API_KEY`, then `npm run dev`. Open http://localhost:3000. Without keys, the app still retains sources and supports deterministic historical recall; live answers/search/transcription require provider access. Never put keys in client code.
+The hard part is choosing the right Monday, recovering the original shortlist, and separating a documented change from a current difference whose timing is unknown. Katha makes those steps inspectable.
 
-Models: configurable Groq Qwen reasoning/vision, Whisper transcription, local MiniLM semantic recall. Providers have limited free quotas; no unlimited-free claim. First embeddings download weights to the workspace data directory. Set `KATHA_EMBEDDINGS=off` for lexical-only mode. Katha stores private local history in `data/` (ignored by git). The original files and extracted descriptions remain distinguishable.
+![Katha: type a shortlist, then recall it](docs/demo/katha.gif)
 
-## Check
+*Recorded from the running app with a real model and synthetic chat content. Typing and pauses are edited for readability; this is not a latency benchmark.*
 
-`npm test` runs deterministic public-interface tests with real temporary SQLite databases and external-provider fixtures. `npm run check` checks TypeScript; `npm run build` builds the interface. See DESIGN.md for architecture and docs/STATUS.md for honest implementation limits. All runtime data starts empty; tests do not seed your history.
+**Start here:** [one-page DESIGN.md](DESIGN.md) · [core interfaces](src/core/types.ts) · [judge-style tests](tests/judge-conversations.test.ts) · [latest attachment audit](docs/evaluations/multimodal-2026-11-16.md).
 
-## Try
+## Quickstart
 
-Upload dated Markdown notes, then ask “What did we shortlist on 3 November?” Ask whether it changed today. Inspect sources and the answer audit. Dates inferred from conversation references are resolved in your selected timezone; confirm imported historical dates explicitly. Voice requires microphone permission and sends a short clip to Groq; review the transcript before Send. Uploaded image/scanned-page descriptions are model-derived evidence.
+Use **Node.js 24 LTS** and a normal local clone. No external SSD, Docker, or hosted database is required.
 
-## Local development storage
+```sh
+git clone https://github.com/somuai/katha.git
+cd katha
+npm install
+cp .env.example .env
+```
 
-This copy lives on an APFS image on the owner's SSD to avoid filling the laptop. A normal clone uses a normal local folder; no disk-image setup is required for judges. The green mat and Instrument Serif assets are reused from the owner's portfolio with permission; no portfolio application code or private data is imported.
+On Windows, copy `.env.example` to `.env` in your editor or use `Copy-Item .env.example .env` in PowerShell.
 
-## Evidence and configuration
+Add your keys to the root `.env`:
 
-`npm run eval` reruns the forty-case retrieval ablation. `npm run eval:live` explicitly consumes configured Groq/Tavily quotas; it is never run by `npm test`. See [evaluation notes](docs/evaluations/README.md), including failures and the exact scope of each release gate. Live captures and raw history stay in ignored `data/`.
+```dotenv
+GROQ_API_KEY=your_groq_key
+TAVILY_API_KEY=your_tavily_key
+```
 
-Set keys in the root `.env` file, using the names in `.env.example`. The desktop copy's convenient path is `/Users/soumyajitghosh/Downloads/files/katha/.env`; a judge uses their own clone's `.env`. Do not paste keys in chat or add them to Git. Restart `npm run dev` after changing keys.
+```sh
+npm run dev
+```
 
-`npm run test:browser` uses a Playwright-installed Chromium (`npx playwright install chromium`). Optionally set `CHROME_PATH` to a local Chrome executable, or `BROWSER=webkit` after installing WebKit. Browser tests use isolated temporary history and blank provider credentials. `npm run lint` checks formatting. CI defines Node 24 checks for macOS, Windows and Linux; those jobs must actually run before declaring platform support verified.
+Open **http://localhost:3000**. Keep keys on the server; never commit `.env`.
 
-The [attachment audit](docs/ATTACHMENT_AUDIT.md) records PDF contributor/pronoun checks, exact CSV calculations and image restart/trash/restore checks. When inference is unavailable, eligible retained evidence can still be shown as an explicitly labelled partial response. That is evidence access, not a generated answer or completed verification.
+| Configuration | Purpose |
+| --- | --- |
+| `GROQ_API_KEY` | Model answers, image/scanned-page interpretation and voice transcription |
+| `TAVILY_API_KEY` | The agent's web-search tool |
+| `GROQ_MODEL` | Defaults to `qwen/qwen3.8-27b`; configurable because provider availability can change |
+| `KATHA_EMBEDDINGS=off` | Optional lexical-only startup without downloading local embedding weights |
+| `KATHA_DATA_DIR` | Optional workspace location; defaults to ignored `data/` |
 
-## External sources
+Semantic memory downloads MiniLM weights on first use. Original text and lexical recall are available before enrichment finishes. Without provider keys, Katha still saves records and supports deterministic dated recall, but model answers and live search are unavailable. Free provider plans have quotas; “free” does not mean unlimited. Gemini and account-connection credentials are optional, not required to evaluate the core agent.
 
-Use **Connections** in the sidebar, or type **@** → **Connect a source**. Notion and Canva use their official MCP servers with OAuth. Notion dynamically registers this client; Canva requires the owner's registered MCP application credentials. Gmail and HubSpot additionally offer read-only API adapters after OAuth app setup. Visitors authorize their own account and explicitly choose imports. Custom MCP resources are under Advanced. See [connection setup and permissions](docs/MCP.md). This remains a single local workspace, not a shared multi-user service. HubSpot and Salesforce official MCP imports require registered provider apps and live account verification; Salesforce currently imports recently viewed IDs and names and may incur Flex Credit charges. Gmail/HubSpot API adapters are explicitly distinguished from official MCP integrations. The agent itself still exposes only web search.
+## Three things to try
 
-Katha chooses retained evidence versus web search automatically. Explicit sources-only requests stay local; current public information can search without a special keyword. The answer audit shows the routing decision. Private-source freshness questions are not a reason to export their content into web queries.
+1. **Remember, then verify.** Type a CRM shortlist, then ask “What did we shortlist?” and “Has any pricing changed since?” A shortlist without historical prices cannot prove a price change; Katha should expose that gap. For a dated import, use [this synthetic note](examples/crm-shortlist.md), set its attachment date to **9 November 2026** before upload, then ask “What did we shortlist on 9 November?” Relative dates use your selected timezone.
+2. **Read a file, then follow up.** Upload [the synthetic CRM CSV](examples/crm-demo.csv). Ask “What is the total deal value in this CSV?” (**2,000,000 INR**) and “Which deals haven't had activity since 9 November 2026?” Ask another question without reattaching it. PDFs support physical-page and named-contributor follow-ups; images retain a labelled model interpretation.
+3. **Inspect the answer.** Open a source and **Why this answer?** to see original passages, selected records, interpreted dates, searches and failures. This is an execution audit, not hidden model reasoning. Try a correction or move a source to Deleted files; an old generated answer must not silently reintroduce deleted evidence.
 
-`npx tsx evaluations/metrics.ts INPUT.json OUTPUT.json evaluations/answer-cases.json` reports factual support, complete tasks, review coverage, execution limitations, latency and reported usage separately. The [versioned release review](docs/evaluations/release-review.md) includes a two-model comparison and the frozen `936da48` default run (50/52 supported delivered claims, 30/40 complete tasks, eight quota failures). The latter gate is **EXECUTION_LIMITED**, not passed. The latest focused five-vendor mixed-price/release fixture passes all ten outcomes; that is not live market research or production accuracy.
+The app starts with an empty workspace. It does not ship the author's private history, PDFs, OAuth tokens or API keys. The GIF and example files use synthetic records.
 
-The [release evidence matrix](docs/RELEASE_READINESS.md) maps the agreed requirements to implementation, tests and explicit deferrals. Quota-limited runs, source-only recovery and model-generated task completion are reported separately.
+## Architecture: two deep modules, one agent tool
 
-The [historical source-qualification follow-up](docs/evaluations/qualified-prose-review.md) retains earlier failed candidate replays. The complete current-default result linked above supersedes its old release status without changing those captured failures.
+```mermaid
+flowchart LR
+    UI[Chat UI] --> T[Turns]
+    T <--> E[Evidence Library]
+    E <--> DB[(SQLite: originals, chronology, jobs)]
+    E --> R[Date filters + FTS5 + local MiniLM]
+    R --> T
+    T --> M[Model adapter]
+    T --> W[web_search / Tavily]
+    W --> V[Retained web observations]
+    V --> T
+    M --> C[Validate citations and comparisons]
+    C --> S[Durable answer + SSE events]
+    S --> UI
+```
 
-## Reproduce the complete answer evaluation
+| Decision | Why it matters |
+| --- | --- |
+| Durable turns, idempotent acceptance and ordered execution | A browser retry cannot duplicate an accepted question. Reconnecting observes existing work; Stop explicitly cancels it. Restarted work is marked interrupted rather than silently spending provider quota again. |
+| Original records with separate recorded/event/observation/effective times | A date filter finds history; it does not turn today's page into evidence of when a price changed. Corrections append to the record rather than overwrite it. |
+| Hybrid retrieval with immediate lexical indexing | Exact dates and original questions do not depend on embedding similarity. Semantic enrichment runs asynchronously. |
+| Validated comparisons and bounded search | Failed search cannot prove stability. Outcomes distinguish matching now, an undated difference, a dated change, conflict and insufficient evidence. |
+| Source versions, dependency links and deletion checks | Cancelled work or stale background jobs cannot restore deleted sources. Selected-file questions exclude unrelated workspace files. |
 
-With your own configured keys, `EVAL_MODELS=qwen/qwen3.8-27b npx tsx evaluations/answers.ts --run-live` captures fresh web observations and runs all forty cases. It consumes quota; new observations and model sampling can change the result.
+**Only `web_search` is model-controlled.** The model cannot execute SQL, arbitrary HTTP requests, files or code. Optional connections are user-selected imports into the Evidence Library, not extra agent tools. Typed input, uploaded files and editable voice transcripts feed the same turn interface.
 
-To replay the exact published observations instead, export them from the public reviewed ledger (no keys or network needed):
+See [DESIGN.md](DESIGN.md) for alternatives and trade-offs, [the glossary](GLOSSARY.md) for domain terms, and [operating limits](docs/OPERATING_LIMITS.md) for rate limiting, cache behavior and quotas. Examples: three concurrent searches, twelve attempts per turn, a fifteen-minute search cache and a persistent 800-call monthly application budget. These are local controls, not guarantees about provider billing.
+
+## Evidence, not a perfect-accuracy claim
+
+| Evidence | Result and scope |
+| --- | --- |
+| Latest local regression suite | **276 passing tests**, plus TypeScript, lint and production build. Real temporary SQLite/files; only external providers are substituted. |
+| Fresh targeted attachment audit | **6/6 PDF answers, 5/5 CSV checks, 5/5 image lifecycle checks**, plus browser chart comparison and scanned-PDF extraction. Small synthetic functional checks; original failures and repairs are retained. [Read the audit](docs/evaluations/multimodal-2026-11-16.md). |
+| Historical 40-case answer evaluation | **59/63 supported factual claims (93.7%), 37/40 completed tasks, zero execution errors.** Real model calls against frozen public evidence and synthetic history, coding-agent reviewed. Three failed explanations remain in the score. This result belongs to its pinned revision; it is not production accuracy or a new score for later fixes. [Review answers and sources](docs/evaluations/default-fd37213-evening-review.md). |
+
+```sh
+npm test
+npm run check
+npm run lint
+npm run build
+```
+
+For browser/accessibility regressions: `npx playwright install chromium`, then `npm run test:browser`. CI also defines macOS/Windows/Linux and Chromium/Firefox/WebKit jobs; check the actual run for the submitted commit rather than assuming an older green run covers new changes.
+
+`npm run eval` runs the forty-case **retrieval** comparison. It is not an answer-accuracy evaluation. Live answer and attachment evaluations consume provider quota. [Evaluation instructions](docs/evaluations/README.md) explain the datasets, review method and failures. To replay the published web evidence with your own model key:
 
 ```sh
 npx tsx evaluations/export-evidence.ts docs/evaluations/default-fd37213-evening-reviewed.json data/evaluations/published-evidence
 ```
 
-The command verifies the original capture hash and requires a new output directory. Then, with keys and sufficient quota:
+### Reproduce the complete answer evaluation
+
+After exporting the evidence, use a fresh output directory and your configured model key (POSIX shell):
 
 ```sh
 EVAL_MODELS=qwen/qwen3.8-27b EVAL_CAPTURE_DIR=data/evaluations/published-evidence EVAL_OUTPUT=data/evaluations/my-replay npx tsx evaluations/answers.ts --run-live
 ```
 
-Use fresh experiment directories. Review every answer before computing claim support; fixtures and status/keyword checks do not establish factual truth. The public ledger contains synthetic records and public documentation, not the owner's private PDFs or history.
+For a new capture instead, omit `EVAL_CAPTURE_DIR`; that path also needs the search key. Re-review the resulting answers before computing support. Fresh observations and sampling can change results. Task success, factual support, evidence coverage, latency and quota failures are reported separately.
+
+## Optional account connections
+
+Open **Connections**, or type **@** → **Connect a source**. Notion and Canva use official MCP servers with OAuth; Gmail has a read-only API adapter. Other listed providers need their own app registration and account testing. A connection in Codex does not automatically authorize Katha. Visitors authorize an account and choose which records to import.
+
+[Connection setup and permissions](docs/MCP.md) distinguishes implemented adapters, credential setup and deferred live verification. HubSpot/Salesforce activation and Shopify remain deferred. The judges can evaluate the challenge's one-tool agent without any of these connections.
+
+## Boundaries worth knowing
+
+- **Local workspace, not a public multi-user service.** History lives on disk; selected excerpts, audio/images and public queries go to configured providers. Public hosting needs authentication and per-user isolation first.
+- PDFs: **5 MB / 50 pages**. Images: **PNG/JPEG/WebP, 10 MB / 20 MP**. Voice: **60 seconds / 10 MB**, with editable transcript review. See the [attachment audit](docs/ATTACHMENT_AUDIT.md) for details.
+- CSV calculations are bounded. Exact supported aggregates do not imply arbitrary SQL, joins or unrestricted analytics. Scans and image descriptions can omit or misread details.
+- A valid citation ID does not prove semantic correctness. Same-model qualification review and one bounded repair improve recovery but can still miss mistakes.
+- Provider quotas and outages can leave a labelled **partial, evidence-only** response. It is not counted as a completed generated answer.
+
+Built by [Soumyajit Ghosh](https://github.com/somuai). The green desk texture and type assets are reused from my portfolio; Katha's application, memory model and agent execution are separate.

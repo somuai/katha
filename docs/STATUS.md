@@ -1,8 +1,16 @@
-# Katha implementation and release status — 14 November 2026
+# Katha implementation and release status — 16 November 2026
 
 Katha is the MiniMi chat agent, separate from the Wispr portfolio. Runtime `fd37213`; tested checkout `3960ef9`. The repository and source remain public at https://github.com/somuai/katha.
 
-## Current release evidence
+## Latest changes — 16 November
+
+- **276 deterministic tests**, TypeScript, lint and production build pass for the updated working tree.
+- CSV totals and date filters, explicit web routing, contributor/pronoun evidence selection, selected-file isolation, and bounded incomplete-answer repair have new regression coverage.
+- An explicit `Remember:` statement now acknowledges its committed original note rather than asking a model whether an older copy exists. The README GIF records a real saved shortlist and model-backed recall in an isolated workspace.
+- The [fresh multimodal audit](evaluations/multimodal-2026-11-16.md) retains both original failures and targeted reruns. Its captures belong to their stated working-tree fingerprints; they do not rescore the historical 40-case evaluation.
+- Check GitHub Actions for the submitted commit. Historical green jobs do not establish the status of a later push.
+
+## Historical release evidence
 
 - **268 deterministic tests**, TypeScript, lint and production build pass.
 - All six Windows/Linux/macOS and Chromium/Firefox/WebKit CI jobs pass for the runtime and tested checkout.
