@@ -75,7 +75,11 @@ const result = await extractAttachment(
 const passed =
   /Katha/i.test(result.content) &&
   /20/.test(result.content) &&
-  result.method === "pdf-text-and-vision";
+  [
+    "pdf-text-and-vision",
+    "pdf-text-and-local-ocr",
+    "pdf-text-ocr-and-vision",
+  ].includes(result.method);
 await mkdir("data/evaluations", { recursive: true });
 await writeFile(
   "data/evaluations/scanned-check.json",

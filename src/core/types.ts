@@ -133,6 +133,7 @@ export interface ModelContext {
 export interface ModelAdapter {
   generate(context: ModelContext): Promise<{
     answer: string;
+    csvAnalysis?: Record<string, unknown>;
     usage?: { inputTokens: number; outputTokens: number };
     citations?: Citation[];
     comparisons?: Comparison[];

@@ -2201,3 +2201,21 @@ body {
   outline: 2px solid #425d44;
   outline-offset: 2px;
 }
+
+.message-content table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.9em;
+}
+.message-content th,
+.message-content td {
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid rgba(35, 64, 44, 0.18);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.message-content th {
+  font-weight: 600;
+}

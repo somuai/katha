@@ -1,4 +1,5 @@
 import { parse } from "csv-parse/sync";
+import { readLocalText } from "./local-ocr.js";
 import { ProviderError, type Providers } from "../providers/index.ts";
 export type ExtractedAttachment = {
   content: string;
@@ -43,19 +44,47 @@ export async function extractAttachment(
       .flatten({ background: "#ffffff" })
       .jpeg({ quality: 85 })
       .toBuffer();
-    const content = await options.providers.describeImage(
-      normalized,
-      "image/jpeg",
-      options.signal,
-    );
-    return {
-      content,
-      mimeType: base,
-      method: "model-image-description",
-      warnings: [
-        "Description is derived from the image. Review uncertain text against the original.",
-      ],
-    };
+    const warnings = [
+      "Image interpretation and OCR are derived evidence. Verify important text and numbers against the original.",
+    ];
+    const ocr = await readLocalText(bytes, options.signal).catch((error) => {
+      options.signal?.throwIfAborted();
+      warnings.push(
+        "Local OCR was unavailable or timed out; image interpretation may omit small text.",
+      );
+      return undefined;
+    });
+    try {
+      const description = await options.providers.describeImage(
+        normalized,
+        "image/jpeg",
+        options.signal,
+      );
+      return {
+        content:
+          description +
+          (ocr?.text
+            ? `\n\n[Local English OCR${ocr.usable ? "" : "; low quality, uncertain"}]\n${ocr.text}`
+            : ""),
+        mimeType: base,
+        method: ocr?.text
+          ? "model-image-and-local-ocr"
+          : "model-image-description",
+        warnings,
+      };
+    } catch (error) {
+      options.signal?.throwIfAborted();
+      if (!ocr?.usable) throw error;
+      return {
+        content: `[Local English OCR only; visual interpretation unavailable]\n${ocr.text}`,
+        mimeType: base,
+        method: "local-ocr",
+        warnings: [
+          ...warnings,
+          "Hosted vision was unavailable. Text was read locally; non-text visual details were not interpreted.",
+        ],
+      };
+    }
   }
   if (base.startsWith("audio/")) {
     if (
@@ -107,6 +136,7 @@ export async function extractAttachment(
         );
       const pages: string[] = [];
       let interpreted = 0;
+      let ocrPages = 0;
       for (let n = 1; n <= document.numPages; n++) {
         options.signal?.throwIfAborted();
         const page = await document.getPage(n),
@@ -114,10 +144,20 @@ export async function extractAttachment(
         let content = text.items
           .map((item) => ("str" in item ? item.str : ""))
           .join(" ");
-        if (!content.trim()) {
+        const sparseRaster =
+          content.trim().length < 80 &&
+          (await page.getOperatorList()).fnArray.some((op) =>
+            [
+              pdfjs.OPS.paintImageXObject,
+              pdfjs.OPS.paintInlineImageXObject,
+              pdfjs.OPS.paintImageMaskXObject,
+            ].includes(op),
+          );
+        if (!content.trim() || sparseRaster) {
+          const nativeText = content.trim();
           const { createCanvas } = await import("@napi-rs/canvas");
           const natural = page.getViewport({ scale: 1 }),
-            scale = Math.min(2, 1536 / Math.max(natural.width, natural.height));
+            scale = Math.min(3, 2560 / Math.max(natural.width, natural.height));
           const viewport = page.getViewport({ scale }),
             canvas = createCanvas(
               Math.ceil(viewport.width),
@@ -128,14 +168,27 @@ export async function extractAttachment(
             canvasContext: canvas.getContext("2d") as never,
             viewport,
           }).promise;
-          content =
-            "[Model interpretation of scanned page] " +
-            (await options.providers.describeImage(
-              canvas.toBuffer("image/png"),
-              "image/png",
-              options.signal,
-            ));
-          interpreted++;
+          const pixels = canvas.toBuffer("image/png");
+          const ocr = await readLocalText(pixels, options.signal).catch(() => {
+            options.signal?.throwIfAborted();
+            return undefined;
+          });
+          if (ocr?.usable) {
+            content =
+              (nativeText ? `[Native text layer] ${nativeText}\n` : "") +
+              `[Local English OCR of scanned page; verify against original]\n${ocr.text}`;
+            ocrPages++;
+          } else {
+            content =
+              (nativeText ? `[Native text layer] ${nativeText}\n` : "") +
+              "[Model interpretation of scanned page] " +
+              (await options.providers.describeImage(
+                pixels,
+                "image/png",
+                options.signal,
+              ));
+            interpreted++;
+          }
         }
         pages.push(`[Page ${n}]\n${content}`);
         page.cleanup();
@@ -143,13 +196,26 @@ export async function extractAttachment(
       return {
         content: pages.join("\n\n"),
         mimeType: "application/pdf",
-        method: interpreted ? "pdf-text-and-vision" : "pdf-text-extraction",
+        method: ocrPages
+          ? interpreted
+            ? "pdf-text-ocr-and-vision"
+            : "pdf-text-and-local-ocr"
+          : interpreted
+            ? "pdf-text-and-vision"
+            : "pdf-text-extraction",
         pages: document.numPages,
-        warnings: interpreted
-          ? [
-              `${interpreted} page(s) were visually interpreted by the model. Check uncertain text against the original.`,
-            ]
-          : [],
+        warnings: [
+          ...(ocrPages
+            ? [
+                `${ocrPages} page(s) used local English OCR. OCR can misread text and numbers; verify against the original.`,
+              ]
+            : []),
+          ...(interpreted
+            ? [
+                `${interpreted} page(s) were visually interpreted by the model. Check uncertain text against the original.`,
+              ]
+            : []),
+        ],
       };
     } finally {
       await task.destroy();

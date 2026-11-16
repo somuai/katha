@@ -154,11 +154,11 @@ test("a qualification review cannot spend a second repair after citation repair"
 
 test("quota waiting resumes an unpublished draft's review without generating it again", async () => {
   const directory = mkdtempSync(join(tmpdir(), "katha-prose-quota-"));
-  let clock = 1000,
+  let clock = 0,
     step = 0;
   const adapter = createKathaAdapters({
     groqKey: "fixture",
-    clock: () => clock,
+    clock: () => Date.now() + clock,
     fetcher: (async (_url, init) => {
       clock += 2000;
       const context = JSON.parse(

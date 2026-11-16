@@ -2098,6 +2098,7 @@ export function createKatha(options: KathaOptions) {
       );
       valid();
       recordUsage("generation", result.usage);
+      if (result.csvAnalysis) trace.csvAnalysis = result.csvAnalysis;
       if (deltaBuffer) {
         streamed += deltaBuffer;
         update(id, { answer: streamed });

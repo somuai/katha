@@ -29,3 +29,15 @@ test("ordinary prose, code examples and safe web links remain readable", () => {
   assert.doesNotMatch(html, /href="javascript:/);
   assert.doesNotMatch(html, /View source/);
 });
+
+test("CSV calculation tables render as semantic tables rather than pipe-delimited prose", () => {
+  const html = renderToStaticMarkup(
+    React.createElement(AnswerText, {
+      text: "| owner | sum |\n| --- | --- |\n| Alia | 0.30 |",
+      onSource() {},
+    }),
+  );
+  assert.match(html, /<table>/);
+  assert.match(html, /<th>owner<\/th>/);
+  assert.match(html, /<td>0\.30<\/td>/);
+});

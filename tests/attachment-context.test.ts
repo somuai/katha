@@ -381,3 +381,22 @@ test("a selected attachment excludes unrelated workspace files from its answer e
   );
   assert.match(answer, /900/);
 });
+
+test("generic CSV evidence does not offer an unqualified mixed-currency sum", async () => {
+  const answer = await inspectPreparedContext(
+    "mixed.csv",
+    "amount,currency\n100,INR\n20,USD\n",
+    "Summarize the numeric values in this CSV.",
+  );
+  assert.match(answer, /multiple currencies/i);
+  assert.doesNotMatch(answer, /sum 120\b/);
+});
+
+test("mixed currencies do not block an ordinary total-row-count question", async () => {
+  const answer = await inspectPreparedContext(
+    "mixed.csv",
+    "amount,currency\n100,INR\n20,USD\n",
+    "What is the total number of rows in this CSV?",
+  );
+  assert.match(answer, /2 data rows/);
+});

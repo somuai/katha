@@ -65,3 +65,11 @@ Ordinary web prose receives a same-model factual-support and qualification revie
 ### Compound quota guidance
 
 Runtime `fd37213` respects compound provider waits such as `2m35.952s`, `1h2m3.5s` and `1d3h`, rather than defaulting to a minute. A numeric or HTTP-date Retry-After header takes precedence. A delay exceeding the turn's two-minute total quota-wait budget terminates promptly; accepted history remains retained. The [daily-token diagnostic](evaluations/quota-diagnostics.md) shows actual larger requests rejected while a tiny capacity probe succeeded. A small successful request is not evidence of enough quota for a full evaluation.
+
+## Data handling expansion — 16 November 2026
+
+Local English OCR uses bundled language data, at most one active worker and four admitted jobs, with a fifteen-second job deadline. It adds contrast enhancement and a fallback segmentation pass; readable OCR is available even if hosted vision is unavailable. It remains derived text, not guaranteed transcription. Scanned pages retain physical page markers and provenance warnings.
+
+CSV compound requests use strict validated plans: four AND filters, two grouping columns, up to 1,000 groups, twenty displayed rows and a 20,000-character result ceiling. Fixed-point arithmetic avoids floating-point money sums; mixed currencies, unrecognized columns and unsafe numeric formats require clarification. The natural-language-to-plan step still uses the configured model. No SQL/code tool is exposed.
+
+Provider Retry-After applies to subsequent questions in the same process. Successful identical image descriptions have a 32-entry, fifteen-minute process-local cache keyed by model, MIME and bytes. Failures/cancellation are not cached; this is not a general conversation/fresh-web-answer cache. Actual provider entitlements and the existing monthly search budget are unchanged.

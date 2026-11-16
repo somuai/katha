@@ -19,3 +19,6 @@
 - **Assertion:** a source-linked subject/predicate/value statement used for recall, correction and comparison.
 - **Correction operation:** `CORRECT_PAST_RECORD` clarifies a past assertion; `CHANGE_FROM_NOW` appends a change with its effective date. Neither overwrites the original.
 - **Recorded time:** when Katha learned material; distinct from its event time, web observation time, publication time and effective-change time.
+
+- **Analysis plan:** a bounded description of the filters, grouping, ordering and calculation requested for a retained dataset; distinct from the resulting computed values.
+- **Derived interpretation:** machine-read or model-described material linked to an original source; it can be incomplete or incorrect and does not replace that original.

@@ -1,0 +1,518 @@
+{
+  "label": "Synthetic functional checks with live model planning; regex assertions are not supported-claim precision.",
+  "model": "qwen/qwen3.8-27b",
+  "passed": 5,
+  "total": 5,
+  "results": [
+    {
+      "caseId": "filtered-groups",
+      "question": "Sum amount by owner for Open deals with last_activity_date before 9 November 2026, largest first.",
+      "fixture": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\n",
+      "sha256": "f23bc01740fc5d629fb298d4cef57f136a2a8bcd153dc1527f75e57cb843a916",
+      "passed": true,
+      "id": "8b1bfb14-21ef-4e84-aff5-6ee8a50aea1c",
+      "conversationId": "f85b684e-7893-4c52-9ab4-bf7348c1e10b",
+      "status": "COMPLETED",
+      "text": "Sum amount by owner for Open deals with last_activity_date before 9 November 2026, largest first.",
+      "originalInputAvailable": true,
+      "attachmentIds": [
+        "e82ce46b-2b27-40ff-bcee-5ec30202c5f8"
+      ],
+      "memoryScope": "workspace",
+      "timezone": "Asia/Kolkata",
+      "answer": "Computed from the complete CSV: 3 matching rows out of 5.\n\nApplied filters (AND): stage eq \"Open\"; last_activity_date lt \"2026-11-09\".\n\nOperation: sum(amount); grouped by owner.\n\n| owner | sum | numeric values / rows |\n| --- | --- | --- |\n| Bo | 100.50 | 1 |\n| Alia | 0.30 | 2 |",
+      "error": null,
+      "createdAt": "2026-11-16T00:27:32.095Z",
+      "updatedAt": "2026-11-16T00:27:33.311Z",
+      "citations": [
+        {
+          "sourceId": "e82ce46b-2b27-40ff-bcee-5ec30202c5f8"
+        }
+      ],
+      "comparisons": [],
+      "sources": [
+        {
+          "id": "e82ce46b-2b27-40ff-bcee-5ec30202c5f8",
+          "kind": "attachment",
+          "role": "document",
+          "conversationId": null,
+          "turnId": null,
+          "title": "filtered-groups.csv",
+          "content": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\n",
+          "recordedAt": "2026-11-16T00:27:32.088Z",
+          "occurredAt": null,
+          "occurredEnd": null,
+          "dateProvenance": "unknown",
+          "version": 1,
+          "deletedAt": null,
+          "invalidated": false,
+          "metadata": {
+            "mimeType": "text/plain"
+          }
+        }
+      ],
+      "trace": {
+        "activeSourceIds": [
+          "e82ce46b-2b27-40ff-bcee-5ec30202c5f8"
+        ],
+        "recordView": "effective",
+        "resolvedDate": {
+          "from": "2026-11-08T18:30:00Z",
+          "to": "2026-11-09T18:30:00Z",
+          "date": "2026-11-09",
+          "timezone": "Asia/Kolkata",
+          "label": "2026-11-09 (Asia/Kolkata)"
+        },
+        "referenceClock": "2026-11-16T00:27:32.095Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "e82ce46b-2b27-40ff-bcee-5ec30202c5f8"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 458,
+            "outputTokens": 130
+          }
+        },
+        "usage": {
+          "inputTokens": 458,
+          "outputTokens": 130
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+        "csvAnalysis": {
+          "matchedRows": 3,
+          "totalRows": 5,
+          "plan": {
+            "operation": "sum",
+            "column": "amount",
+            "groupBy": [
+              "owner"
+            ],
+            "filters": [
+              {
+                "column": "stage",
+                "op": "eq",
+                "value": "Open"
+              },
+              {
+                "column": "last_activity_date",
+                "op": "lt",
+                "value": "2026-11-09"
+              }
+            ],
+            "sort": "desc",
+            "limit": 20
+          },
+          "sourceId": "e82ce46b-2b27-40ff-bcee-5ec30202c5f8",
+          "version": 1
+        }
+      }
+    },
+    {
+      "caseId": "average",
+      "question": "What is the average amount in this CSV?",
+      "fixture": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\nChen,Open,2026-11-01,,INR\n",
+      "sha256": "3c5dd5d6d62769d967e1a453a7c81a6463fdc16e5300ba9633b8e3e5c5d470ea",
+      "passed": true,
+      "id": "52daa1b1-0e03-4ba4-89ab-5be755eaee1f",
+      "conversationId": "18ff98e0-0199-4e33-a2be-3aa51cea8d10",
+      "status": "COMPLETED",
+      "text": "What is the average amount in this CSV?",
+      "originalInputAvailable": true,
+      "attachmentIds": [
+        "ca074aba-f1e5-4eb7-ac63-857c3d01cb33"
+      ],
+      "memoryScope": "workspace",
+      "timezone": "Asia/Kolkata",
+      "answer": "Computed from the complete CSV: 6 matching rows out of 6.\n\nApplied filters (AND): none.\n\nOperation: average(amount).\n\n| average | numeric values / rows |\n| --- | --- |\n| 221.960000 | 5 |\n\n1 missing numeric cells excluded, not assumed zero.\n\nAverages rounded to six decimal places using decimal arithmetic.",
+      "error": null,
+      "createdAt": "2026-11-16T00:27:33.313Z",
+      "updatedAt": "2026-11-16T00:27:33.909Z",
+      "citations": [
+        {
+          "sourceId": "ca074aba-f1e5-4eb7-ac63-857c3d01cb33"
+        }
+      ],
+      "comparisons": [],
+      "sources": [
+        {
+          "id": "ca074aba-f1e5-4eb7-ac63-857c3d01cb33",
+          "kind": "attachment",
+          "role": "document",
+          "conversationId": null,
+          "turnId": null,
+          "title": "average.csv",
+          "content": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\nChen,Open,2026-11-01,,INR\n",
+          "recordedAt": "2026-11-16T00:27:33.312Z",
+          "occurredAt": null,
+          "occurredEnd": null,
+          "dateProvenance": "unknown",
+          "version": 1,
+          "deletedAt": null,
+          "invalidated": false,
+          "metadata": {
+            "mimeType": "text/plain"
+          }
+        }
+      ],
+      "trace": {
+        "activeSourceIds": [
+          "ca074aba-f1e5-4eb7-ac63-857c3d01cb33"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-16T00:27:33.313Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "ca074aba-f1e5-4eb7-ac63-857c3d01cb33"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 447,
+            "outputTokens": 20
+          }
+        },
+        "usage": {
+          "inputTokens": 447,
+          "outputTokens": 20
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+        "csvAnalysis": {
+          "matchedRows": 6,
+          "totalRows": 6,
+          "plan": {
+            "operation": "average",
+            "column": "amount",
+            "groupBy": [],
+            "filters": [],
+            "sort": "desc",
+            "limit": 10
+          },
+          "sourceId": "ca074aba-f1e5-4eb7-ac63-857c3d01cb33",
+          "version": 1
+        }
+      }
+    },
+    {
+      "caseId": "top-two",
+      "question": "Show the top 2 rows sorted by amount, descending.",
+      "fixture": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\n",
+      "sha256": "f23bc01740fc5d629fb298d4cef57f136a2a8bcd153dc1527f75e57cb843a916",
+      "passed": true,
+      "id": "8518c0fb-56fe-488c-a76e-06b3659ce37d",
+      "conversationId": "26dc23c9-3863-437d-8c5d-c1067341baa1",
+      "status": "COMPLETED",
+      "text": "Show the top 2 rows sorted by amount, descending.",
+      "originalInputAvailable": true,
+      "attachmentIds": [
+        "72bf0cd3-175c-400c-abae-faba413c3efd"
+      ],
+      "memoryScope": "workspace",
+      "timezone": "Asia/Kolkata",
+      "answer": "Computed from the complete CSV: 5 matching rows out of 5.\n\nApplied filters (AND): none.\n\nOperation: rows(amount).\n\n| owner | stage | last_activity_date | amount | currency |\n| --- | --- | --- | --- | --- |\n| Bo | Won | 2026-11-02 | 1000.00 | INR |\n| Bo | Open | 2026-11-03 | 100.50 | INR |\n\nShowing 2 of 5 matching rows; this is not the complete list.",
+      "error": null,
+      "createdAt": "2026-11-16T00:27:33.911Z",
+      "updatedAt": "2026-11-16T00:27:34.823Z",
+      "citations": [
+        {
+          "sourceId": "72bf0cd3-175c-400c-abae-faba413c3efd"
+        }
+      ],
+      "comparisons": [],
+      "sources": [
+        {
+          "id": "72bf0cd3-175c-400c-abae-faba413c3efd",
+          "kind": "attachment",
+          "role": "document",
+          "conversationId": null,
+          "turnId": null,
+          "title": "top-two.csv",
+          "content": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\n",
+          "recordedAt": "2026-11-16T00:27:33.910Z",
+          "occurredAt": null,
+          "occurredEnd": null,
+          "dateProvenance": "unknown",
+          "version": 1,
+          "deletedAt": null,
+          "invalidated": false,
+          "metadata": {
+            "mimeType": "text/plain"
+          }
+        }
+      ],
+      "trace": {
+        "activeSourceIds": [
+          "72bf0cd3-175c-400c-abae-faba413c3efd"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-16T00:27:33.911Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "72bf0cd3-175c-400c-abae-faba413c3efd"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 446,
+            "outputTokens": 35
+          }
+        },
+        "usage": {
+          "inputTokens": 446,
+          "outputTokens": 35
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+        "csvAnalysis": {
+          "matchedRows": 5,
+          "totalRows": 5,
+          "plan": {
+            "operation": "rows",
+            "column": "amount",
+            "groupBy": [],
+            "filters": [],
+            "sort": "desc",
+            "limit": 2
+          },
+          "sourceId": "72bf0cd3-175c-400c-abae-faba413c3efd",
+          "version": 1
+        }
+      }
+    },
+    {
+      "caseId": "count-filtered",
+      "question": "Count Open rows with last_activity_date before 9 November 2026.",
+      "fixture": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\n",
+      "sha256": "f23bc01740fc5d629fb298d4cef57f136a2a8bcd153dc1527f75e57cb843a916",
+      "passed": true,
+      "id": "f9b0a2a8-b31e-4143-9907-09321ca03b48",
+      "conversationId": "2ff1cf1a-3410-4454-99f3-ae57ba14a6bb",
+      "status": "COMPLETED",
+      "text": "Count Open rows with last_activity_date before 9 November 2026.",
+      "originalInputAvailable": true,
+      "attachmentIds": [
+        "656ce28f-a3f1-45ef-a7c3-838c0ae60cfb"
+      ],
+      "memoryScope": "workspace",
+      "timezone": "Asia/Kolkata",
+      "answer": "Computed from the complete CSV: 3 matching rows out of 5.\n\nApplied filters (AND): stage eq \"Open\"; last_activity_date lt \"2026-11-09\".\n\nOperation: count.\n\n| count | numeric values / rows |\n| --- | --- |\n| 3 | 3 |",
+      "error": null,
+      "createdAt": "2026-11-16T00:27:34.825Z",
+      "updatedAt": "2026-11-16T00:27:35.768Z",
+      "citations": [
+        {
+          "sourceId": "656ce28f-a3f1-45ef-a7c3-838c0ae60cfb"
+        }
+      ],
+      "comparisons": [],
+      "sources": [
+        {
+          "id": "656ce28f-a3f1-45ef-a7c3-838c0ae60cfb",
+          "kind": "attachment",
+          "role": "document",
+          "conversationId": null,
+          "turnId": null,
+          "title": "count-filtered.csv",
+          "content": "owner,stage,last_activity_date,amount,currency\nAlia,Open,2026-11-01,0.10,INR\nAlia,Open,2026-11-06,0.20,INR\nBo,Open,2026-11-03,100.50,INR\nBo,Won,2026-11-02,1000.00,INR\nAlia,Open,2026-11-11,9.00,INR\n",
+          "recordedAt": "2026-11-16T00:27:34.824Z",
+          "occurredAt": null,
+          "occurredEnd": null,
+          "dateProvenance": "unknown",
+          "version": 1,
+          "deletedAt": null,
+          "invalidated": false,
+          "metadata": {
+            "mimeType": "text/plain"
+          }
+        }
+      ],
+      "trace": {
+        "activeSourceIds": [
+          "656ce28f-a3f1-45ef-a7c3-838c0ae60cfb"
+        ],
+        "recordView": "effective",
+        "resolvedDate": {
+          "from": "2026-11-08T18:30:00Z",
+          "to": "2026-11-09T18:30:00Z",
+          "date": "2026-11-09",
+          "timezone": "Asia/Kolkata",
+          "label": "2026-11-09 (Asia/Kolkata)"
+        },
+        "referenceClock": "2026-11-16T00:27:34.825Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "656ce28f-a3f1-45ef-a7c3-838c0ae60cfb"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        },
+        "usageBreakdown": {
+          "generation": {
+            "inputTokens": 451,
+            "outputTokens": 92
+          }
+        },
+        "usage": {
+          "inputTokens": 451,
+          "outputTokens": 92
+        },
+        "usageScope": "reported completed planning and generation responses; excludes unreported failed attempts",
+        "csvAnalysis": {
+          "matchedRows": 3,
+          "totalRows": 5,
+          "plan": {
+            "operation": "count",
+            "groupBy": [],
+            "filters": [
+              {
+                "column": "stage",
+                "op": "eq",
+                "value": "Open"
+              },
+              {
+                "column": "last_activity_date",
+                "op": "lt",
+                "value": "2026-11-09"
+              }
+            ],
+            "sort": "desc",
+            "limit": 10
+          },
+          "sourceId": "656ce28f-a3f1-45ef-a7c3-838c0ae60cfb",
+          "version": 1
+        }
+      }
+    },
+    {
+      "caseId": "mixed-currency",
+      "question": "What is the total amount in this CSV?",
+      "fixture": "owner,amount,currency\nAlia,100,INR\nBo,20,USD\n",
+      "sha256": "3e3f33ef7c3692b7b04d79793d366acaa437cd6397af18165dda41b4212393e9",
+      "passed": true,
+      "id": "be0c200f-763e-4e47-8e29-2cb5e42630c0",
+      "conversationId": "c0f49677-15dc-4d6b-a2c9-55511e249631",
+      "status": "COMPLETED",
+      "text": "What is the total amount in this CSV?",
+      "originalInputAvailable": true,
+      "attachmentIds": [
+        "eb4783b4-a40b-44af-8d3c-91012b4a8c3d"
+      ],
+      "memoryScope": "workspace",
+      "timezone": "Asia/Kolkata",
+      "answer": "I cannot combine multiple currencies into one total. Filter one currency or group by currency; no conversion rate was assumed.",
+      "error": null,
+      "createdAt": "2026-11-16T00:27:35.770Z",
+      "updatedAt": "2026-11-16T00:27:35.775Z",
+      "citations": [
+        {
+          "sourceId": "eb4783b4-a40b-44af-8d3c-91012b4a8c3d"
+        }
+      ],
+      "comparisons": [],
+      "sources": [
+        {
+          "id": "eb4783b4-a40b-44af-8d3c-91012b4a8c3d",
+          "kind": "attachment",
+          "role": "document",
+          "conversationId": null,
+          "turnId": null,
+          "title": "mixed-currency.csv",
+          "content": "owner,amount,currency\nAlia,100,INR\nBo,20,USD\n",
+          "recordedAt": "2026-11-16T00:27:35.769Z",
+          "occurredAt": null,
+          "occurredEnd": null,
+          "dateProvenance": "unknown",
+          "version": 1,
+          "deletedAt": null,
+          "invalidated": false,
+          "metadata": {
+            "mimeType": "text/plain"
+          }
+        }
+      ],
+      "trace": {
+        "activeSourceIds": [
+          "eb4783b4-a40b-44af-8d3c-91012b4a8c3d"
+        ],
+        "recordView": "effective",
+        "resolvedDate": null,
+        "referenceClock": "2026-11-16T00:27:35.770Z",
+        "timezone": "Asia/Kolkata",
+        "retrievalMethods": [
+          "lexical"
+        ],
+        "baselineSourceIds": [
+          "eb4783b4-a40b-44af-8d3c-91012b4a8c3d"
+        ],
+        "previousObservationIds": [],
+        "searches": [],
+        "searchAttempts": 0,
+        "searchAdapterDispatches": 0,
+        "coverage": null,
+        "documentReferences": [],
+        "routing": {
+          "sourcesOnly": false,
+          "privateFileTask": true,
+          "explicitWebRequest": false,
+          "usesWeb": false
+        }
+      }
+    }
+  ]
+}

@@ -12,7 +12,7 @@ The hard part is choosing the right Monday, recovering the original shortlist, a
 
 *Recorded from the running app with a real model and synthetic chat content. Typing and pauses are edited for readability; this is not a latency benchmark.*
 
-**Start here:** [one-page DESIGN.md](DESIGN.md) · [core interfaces](src/core/types.ts) · [judge-style tests](tests/judge-conversations.test.ts) · [latest attachment audit](docs/evaluations/multimodal-2026-11-16.md).
+**Start here:** [one-page DESIGN.md](DESIGN.md) · [core interfaces](src/core/types.ts) · [judge-style tests](tests/judge-conversations.test.ts) · [latest data-handling audit](docs/evaluations/data-hardening-2026-11-16.md).
 
 ## Quickstart
 
@@ -92,8 +92,9 @@ See [DESIGN.md](DESIGN.md) for alternatives and trade-offs, [the glossary](GLOSS
 
 | Evidence | Result and scope |
 | --- | --- |
-| Latest local regression suite | **276 passing tests**, plus TypeScript, lint and production build. Real temporary SQLite/files; only external providers are substituted. |
-| Fresh targeted attachment audit | **6/6 PDF answers, 5/5 CSV checks, 5/5 image lifecycle checks**, plus browser chart comparison and scanned-PDF extraction. Small synthetic functional checks; original failures and repairs are retained. [Read the audit](docs/evaluations/multimodal-2026-11-16.md). |
+| Latest local regression suite | **291 passing tests**, plus TypeScript, lint and production build. Real temporary SQLite/files; only external providers are substituted. |
+| Prior targeted attachment audit | **6/6 PDF answers, 5/5 CSV checks, 5/5 image lifecycle checks**, plus browser chart comparison and scanned-PDF extraction. Small synthetic functional checks; original failures and repairs are retained. [Read the audit](docs/evaluations/multimodal-2026-11-16.md). |
+| New data-handling hardening | **5/5 live CSV planning checks**, real local-OCR regression fixtures, shared cooldown/cache tests, semantic tables and a 375px browser audit. [Scope and evidence](docs/evaluations/data-hardening-2026-11-16.md). |
 | Historical 40-case answer evaluation | **59/63 supported factual claims (93.7%), 37/40 completed tasks, zero execution errors.** Real model calls against frozen public evidence and synthetic history, coding-agent reviewed. Three failed explanations remain in the score. This result belongs to its pinned revision; it is not production accuracy or a new score for later fixes. [Review answers and sources](docs/evaluations/default-fd37213-evening-review.md). |
 
 ```sh
@@ -131,7 +132,9 @@ Open **Connections**, or type **@** → **Connect a source**. Notion and Canva u
 
 - **Local workspace, not a public multi-user service.** History lives on disk; selected excerpts, audio/images and public queries go to configured providers. Public hosting needs authentication and per-user isolation first.
 - PDFs: **5 MB / 50 pages**. Images: **PNG/JPEG/WebP, 10 MB / 20 MP**. Voice: **60 seconds / 10 MB**, with editable transcript review. See the [attachment audit](docs/ATTACHMENT_AUDIT.md) for details.
-- CSV calculations are bounded. Exact supported aggregates do not imply arbitrary SQL, joins or unrestricted analytics. Scans and image descriptions can omit or misread details.
+- CSV analysis now supports validated filters, grouping, sorting, counts and decimal aggregates over the full file; the applied plan is visible in **Why this answer?** It is not arbitrary SQL: joins, OR/nested conditions and forecasts remain unsupported. Try [the compound CRM fixture](examples/complex-crm.csv).
+- Dense images and scanned PDFs have bundled local English OCR, with contrast enhancement and hosted-vision fallback. Interpretations can still omit or misread details. [New tests and live checks](docs/evaluations/data-hardening-2026-11-16.md).
+- Repeated successful image interpretations are cached for fifteen minutes; provider cooldowns apply across questions. These reduce unnecessary calls but cannot remove provider quotas.
 - A valid citation ID does not prove semantic correctness. Same-model qualification review and one bounded repair improve recovery but can still miss mistakes.
 - Provider quotas and outages can leave a labelled **partial, evidence-only** response. It is not counted as a completed generated answer.
 

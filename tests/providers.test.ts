@@ -1691,3 +1691,68 @@ test("model transport failure is an unavailable capability with a safe message, 
     (error: any) => error.name === "AbortError",
   );
 });
+
+test("successful identical image interpretation is reused without spending another provider request", async () => {
+  let calls = 0;
+  const p = createProviders({
+    groqKey: "fixture",
+    fetcher: (async () => {
+      calls++;
+      return Response.json({
+        choices: [
+          {
+            message: { content: JSON.stringify({ text: "A labelled chart." }) },
+          },
+        ],
+      });
+    }) as typeof fetch,
+  });
+  const bytes = Buffer.from("synthetic-image-payload");
+  assert.equal(await p.describeImage(bytes, "image/png"), "A labelled chart.");
+  assert.equal(await p.describeImage(bytes, "image/png"), "A labelled chart.");
+  assert.equal(calls, 1, "same pixels and model must not spend quota again");
+});
+
+test("a provider cooldown applies across different questions and resumes only after Retry-After", async () => {
+  let time = 1000,
+    calls = 0;
+  const p = createProviders({
+    groqKey: "fixture",
+    clock: () => time,
+    fetcher: (async () => {
+      calls++;
+      return calls === 1
+        ? Response.json(
+            { error: { message: "Rate limited" } },
+            { status: 429, headers: { "Retry-After": "30" } },
+          )
+        : Response.json({
+            choices: [
+              {
+                message: {
+                  content: JSON.stringify({
+                    text: "Recovered.",
+                    citations: [],
+                    comparisons: [],
+                  }),
+                },
+              },
+            ],
+          });
+    }) as typeof fetch,
+  });
+  await assert.rejects(p.answer({ question: "First" }), {
+    code: "RATE_LIMIT",
+    retryAt: 31000,
+  });
+  await assert.rejects(p.answer({ question: "Different question" }), {
+    code: "RATE_LIMIT",
+    retryAt: 31000,
+  });
+  assert.equal(calls, 1, "new questions must not bypass provider cooldown");
+  time = 32000;
+  assert.equal(
+    (await p.answer({ question: "Try after cooldown" })).text,
+    "Recovered.",
+  );
+});

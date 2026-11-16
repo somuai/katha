@@ -24,6 +24,7 @@
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@napi-rs/canvas": "^1.1.0",
     "@phosphor-icons/react": "^2.1.10",
+    "@tesseract.js-data/eng": "1.0.0",
     "better-sqlite3": "latest",
     "csv-parse": "^7.0.3",
     "dotenv": "latest",
@@ -33,7 +34,9 @@
     "react": "latest",
     "react-dom": "latest",
     "react-markdown": "latest",
+    "remark-gfm": "4.0.1",
     "sharp": "latest",
+    "tesseract.js": "7.0.0",
     "vite": "latest",
     "zod": "^4.6.7"
   },

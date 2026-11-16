@@ -1,4 +1,5 @@
 import React from "react";
+import remarkGfm from "remark-gfm";
 import Markdown, { defaultUrlTransform } from "react-markdown";
 
 import {
@@ -64,7 +65,7 @@ export function AnswerText({
   };
   return (
     <Markdown
-      remarkPlugins={[references]}
+      remarkPlugins={[remarkGfm, references]}
       urlTransform={(url) =>
         url.startsWith("katha-source:") && identifier.test(url.slice(13))
           ? url

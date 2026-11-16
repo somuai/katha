@@ -1,0 +1,37 @@
+{
+  "label": "Synthetic working-tree functional audit; historical answer benchmark was not rerun.",
+  "baseCommit": "bc817f00b45f1f4b59cec0c4b9618dd5729fd8f5",
+  "runtimeSha256": {
+    "client/src/AnswerText.tsx": "25410b1dfc5831c62ab1fecd1b96aea40c282a6394407247efc1871686c5eaa9",
+    "client/src/App.tsx": "d857e5a82aec7cd285c96749391eb9f67bb8fe7c1e61883ebb91f8f956597879",
+    "client/src/styles.css": "eae0a75e51b32bde5ea4df25a8f5e2052ba94984d53e007adcf6fc1a75e1a5f3",
+    "package-lock.json": "87eb7e301221177ed7b7e525285d2151d0f7df181ce30e1a5953efab31510f7f",
+    "package.json": "f4d3ded90ac02a0de0d46a5acb2042df6f0803b20847dc77c1dbef6519a3ed7b",
+    "src/core/csv-summary.ts": "2aa41dc9c15b7203b958d89150e8b31954701c477622942f3a3cd8e4e02b253a",
+    "src/core/index.ts": "37ad3a58c8aa22e43e0adb5c346fb80e717ac882d1c09e71e308d6b24de6ceae",
+    "src/core/types.ts": "0622d9005e17b491233a420089e2529d67616968a83ec04b171891ae7e98bc00",
+    "src/ingestion/index.ts": "81deb0baf13c674a5430293f84523c591fe540bb7132f40ac704dd54d84770ea",
+    "src/providers/index.ts": "30bbfd098f7073474dfbe760ae465330584fbd81abfa387709c884d70f59ce73",
+    "tests/answer-view.test.ts": "dd9caf4316fee07277cc91852d828566d6b29271e6610ed5a6b58b464a0c3db0",
+    "tests/attachment-context.test.ts": "547c5f36c359eadc5b927303e73db66825c4f5ad108b47d39e3b44a06569d01c",
+    "tests/live-ingestion.ts": "b3114ff0272197b959580cb590f3fd7922c28420f7321aa94f7a45f3358e13d2",
+    "tests/providers.test.ts": "d36f2ab6bbbc4463d64cf8a56d72c6bbc504c4ea23725d5b29406d4cbad557f9",
+    "tests/qualified-prose.test.ts": "3c147b50577e4b978a50e2f823c20ef11f8b9e24570061b96598c6669c3abfe5",
+    "src/core/csv-analysis.ts": "5736b5cf48703452900af96f4a09da259aaa2c50d3e3c1fcc6508e8d7e93dd94",
+    "src/ingestion/local-ocr.ts": "6441e78f308d94b8a0cb69ce5682f3a879a9b01c1afaf29c591911854bf430cf",
+    "tests/csv-analysis.test.ts": "97b83b609064bc08f300783366284b13b830f2e463831529b046edc3d0a348f4",
+    "tests/ocr-ingestion.test.ts": "8bf1d6a9f2dcaf4376b449cc32e10e6048ed448121f6a00866cd57c1ac874cdf"
+  },
+  "tests": 291,
+  "liveCsvCases": 5,
+  "reviewer": "coding agent",
+  "imageOcrTests": "real bundled English OCR; external vision response simulated as HTTP429",
+  "scanTest": "real low-contrast raster PDF with sparse native header; no model key",
+  "browser": "manual desktop and 375px calculation/audit checks",
+  "checks": {
+    "typecheck": "pass",
+    "lint": "pass",
+    "build": "pass",
+    "browserRegression": "pass (installed Google Chrome)"
+  }
+}

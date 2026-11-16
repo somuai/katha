@@ -1647,6 +1647,47 @@ function Audit({ data }: { data: any }) {
           </p>
         </section>
       )}
+      {data.csvAnalysis && (
+        <section>
+          <h3>CSV calculation</h3>
+          {data.csvAnalysis.error ? (
+            <p>
+              The calculation was rejected. Clarify the column, filters or units
+              before retrying.
+            </p>
+          ) : data.csvAnalysis.plan?.clarification ? (
+            <p>Clarification needed before calculation.</p>
+          ) : (
+            <>
+              <p>
+                Computed locally from {data.csvAnalysis.matchedRows} matching
+                rows out of {data.csvAnalysis.totalRows}.
+              </p>
+              <p>
+                Operation: {data.csvAnalysis.plan?.operation}
+                {data.csvAnalysis.plan?.column
+                  ? ` (${data.csvAnalysis.plan.column})`
+                  : ""}
+              </p>
+              <p>
+                Grouping: {data.csvAnalysis.plan?.groupBy?.join(", ") || "none"}
+              </p>
+              <h4>Applied filters (AND)</h4>
+              {data.csvAnalysis.plan?.filters?.length ? (
+                <ul>
+                  {data.csvAnalysis.plan.filters.map((f: any, i: number) => (
+                    <li key={i}>
+                      {f.column} {f.op} {String(f.value ?? "")}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No filters.</p>
+              )}
+            </>
+          )}
+        </section>
+      )}
       {data.coverage && (
         <section>
           <h3>Coverage</h3>

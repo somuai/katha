@@ -60,7 +60,14 @@ export function prepareCsvEvidence(
       count: number;
       missing: number;
     }[] = [];
+    const currencyColumn = normalizedHeaders.findIndex((h) =>
+      /^(?:currency|currency_code)$/.test(h),
+    );
+    const mixedCurrencies =
+      currencyColumn >= 0 &&
+      new Set(data.map((row) => row[currencyColumn].trim())).size > 1;
     const stats = headers.flatMap((name, i) => {
+      if (mixedCurrencies) return [];
       const cells = data.map((row) => row[i].trim());
       const values = cells.filter(Boolean);
       // No currency, thousands-separator or locale assumptions. Fixed-point
@@ -240,7 +247,12 @@ export function prepareCsvEvidence(
     }
     const lines = [
       ...dateLines,
-      `Complete CSV: ${data.length} data rows. Exact numeric sums and low-cardinality counts below are computed across all rows; other analyses may require more evidence.`,
+      ...(mixedCurrencies
+        ? [
+            "Multiple currencies are present. Whole-file numeric sums are omitted; filter one currency or group by currency before aggregating.",
+          ]
+        : []),
+      `Complete CSV: ${data.length} data rows. Any numeric sums and low-cardinality counts below are computed across all rows; other analyses may require more evidence.`,
       `CSV structure parsed successfully: ${data.reduce((count, row) => count + row.filter((cell) => !cell.trim()).length, 0)} blank cells across all data rows. Excerpt omission is not an incomplete source row.`,
       ...scoped,
       ...matched.map(
@@ -292,15 +304,45 @@ export function exactCsvTotal(
     )
   )
     return;
-  const prepared = prepareCsvEvidence(text, question);
+  let rows: string[][];
+  try {
+    rows = parse(text, {
+      skip_empty_lines: true,
+      relax_column_count: false,
+      bom: true,
+    });
+  } catch {
+    return undefined;
+  }
   const words = new Set(question.toLowerCase().match(/[a-z0-9]+/g) || []);
-  const matches = prepared?.totals?.filter((t) => {
-    const terms = t.column
+  const namesColumn = (column: string) => {
+    const terms = column
       .toLowerCase()
       .split(/[^a-z0-9]+/)
       .filter((w) => !["inr", "usd", "eur", "gbp"].includes(w));
     return terms.length > 0 && terms.every((w) => words.has(w));
-  });
+  };
+  const currency =
+    rows[0]?.findIndex((h) => /^(?:currency|currency_code)$/i.test(h.trim())) ??
+    -1;
+  if (
+    currency >= 0 &&
+    new Set(rows.slice(1).map((r) => r[currency].trim())).size > 1 &&
+    rows[0].some(
+      (name, i) =>
+        namesColumn(name) &&
+        rows.slice(1).some((r) => r[i].trim()) &&
+        rows
+          .slice(1)
+          .every(
+            (r) =>
+              !r[i].trim() || /^[+-]?\d{1,18}(?:\.\d{1,6})?$/.test(r[i].trim()),
+          ),
+    )
+  )
+    return "I cannot combine multiple currencies into one total. Filter one currency or group by currency; no conversion rate was assumed.";
+  const prepared = prepareCsvEvidence(text, question);
+  const matches = prepared?.totals?.filter((t) => namesColumn(t.column));
   if (matches?.length !== 1) return;
   const t = matches[0];
   return `Total ${t.column}: ${t.sum}, computed from all ${t.count} numeric values in the selected CSV.${t.missing ? ` ${t.missing} missing cells were excluded, not treated as zero.` : ""}`;
