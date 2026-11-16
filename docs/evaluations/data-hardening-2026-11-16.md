@@ -44,3 +44,7 @@ Provider limits remain external constraints. Cooldowns and caches are process-lo
 Design trade-offs and primary references are in [ADR 0002](../adr/0002-bounded-data-analysis-and-local-ocr.md). The prior multimodal audit and original failures remain unchanged.
 
 ![Calculation and audit](data-hardening-2026-11-16/desktop.jpg)
+
+## Cross-platform follow-up
+
+The first GitHub run for `9c4520f` passed Windows, macOS and all three browser jobs, but failed the dense-image OCR assertion on Linux: the AUTO segmentation split uniform rows into vertical columns and separated `COBALT731`. The failing result is retained in [run 43781479569](https://github.com/somuai/katha/actions/runs/43781479569). A structural fragmentation check now triggers a SINGLE_BLOCK retry and selects a sufficiently complete, less-fragmented reading. The original complete-code assertion is unchanged. Local tests/build/lint/type checks pass after the repair; the follow-up CI run must be checked separately.

@@ -59,14 +59,34 @@ export async function readLocalText(bytes: Uint8Array, signal?: AbortSignal) {
         .sharpen()
         .png()
         .toBuffer();
+      const fragmentation = (text: string) => {
+        const lines = text
+          .split(/\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        return lines.length < 8
+          ? 0
+          : lines.filter((s) => s.length < 12).length / lines.length;
+      };
       let { data } = await worker.recognize(prepared, { rotateAuto: true });
-      if (!data.text.trim() || data.confidence < 60) {
-        await worker.setParameters({ tessedit_pageseg_mode: PSM.SPARSE_TEXT });
+      const fragmented = fragmentation(data.text) > 0.35;
+      if (!data.text.trim() || data.confidence < 60 || fragmented) {
+        await worker.setParameters({
+          tessedit_pageseg_mode: fragmented
+            ? PSM.SINGLE_BLOCK
+            : PSM.SPARSE_TEXT,
+        });
         const retry = (await worker.recognize(prepared, { rotateAuto: true }))
           .data;
         if (
           retry.text.trim() &&
-          (!data.text.trim() || retry.confidence >= data.confidence)
+          (!data.text.trim() ||
+            retry.confidence >= data.confidence ||
+            (fragmented &&
+              retry.confidence >= 60 &&
+              retry.text.replace(/\s/g, "").length >=
+                data.text.replace(/\s/g, "").length * 0.7 &&
+              fragmentation(retry.text) < fragmentation(data.text)))
         )
           data = retry;
       }

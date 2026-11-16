@@ -18,7 +18,7 @@
     "tests/providers.test.ts": "d36f2ab6bbbc4463d64cf8a56d72c6bbc504c4ea23725d5b29406d4cbad557f9",
     "tests/qualified-prose.test.ts": "3c147b50577e4b978a50e2f823c20ef11f8b9e24570061b96598c6669c3abfe5",
     "src/core/csv-analysis.ts": "5736b5cf48703452900af96f4a09da259aaa2c50d3e3c1fcc6508e8d7e93dd94",
-    "src/ingestion/local-ocr.ts": "6441e78f308d94b8a0cb69ce5682f3a879a9b01c1afaf29c591911854bf430cf",
+    "src/ingestion/local-ocr.ts": "64d544bbbfe31fdc9c9f3ed0a9f3d90f9a95d60f45a099fcf05d9839ddac0e2f",
     "tests/csv-analysis.test.ts": "97b83b609064bc08f300783366284b13b830f2e463831529b046edc3d0a348f4",
     "tests/ocr-ingestion.test.ts": "8bf1d6a9f2dcaf4376b449cc32e10e6048ed448121f6a00866cd57c1ac874cdf"
   },
@@ -33,5 +33,11 @@
     "lint": "pass",
     "build": "pass",
     "browserRegression": "pass (installed Google Chrome)"
+  },
+  "crossPlatformFollowUp": {
+    "initialRun": "https://github.com/somuai/katha/actions/runs/43781479569",
+    "initialFailure": "Linux dense OCR split the complete approval code across columns",
+    "repair": "Detect structurally fragmented text and try SINGLE_BLOCK without changing the original assertion",
+    "localChecks": "291 tests, typecheck, lint and build pass"
   }
 }
